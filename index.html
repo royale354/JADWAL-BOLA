@@ -30,7 +30,19 @@
 
     .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-    input[type="date"], input[type="file"] { display: none; }
+    /* Perubahan: Date picker sekarang ditampilkan, tidak di-hide lagi */
+    input[type="date"] {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      color-scheme: dark;
+    }
+    
+    input[type="file"] { display: none; }
 
     button, .file-label {
       cursor: pointer;
@@ -50,6 +62,26 @@
     .btn-secondary { background: #3b82f6; color: #fff; }
     .btn-ghost { background: #334155; color: #e2e8f0; }
     .btn-warn { background: #d97706; color: #fff; }
+
+    /* Gaya Tombol Cari Logo jika logo kosong */
+    .btn-search-logo {
+      background: #334155;
+      color: #94a3b8;
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: normal;
+      margin-left: 6px;
+      border: 1px solid #475569;
+    }
+    .btn-search-logo:hover {
+      background: #475569;
+      color: #f1f5f9;
+    }
 
     .status {
       max-width: 1100px;
@@ -263,7 +295,7 @@
       <p>Logo klub &amp; liga · Siaran TV lokal &amp; berbayar</p>
     </div>
     <div class="controls">
-      <input type="date" id="date-picker" />
+      <input type="date" id="date-picker" title="Pilih Tanggal Jadwal" />
       <input type="file" id="file-import" accept=".html,.htm,text/html" />
       <button class="btn-ghost" id="btn-today">Hari Ini</button>
       <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
@@ -353,9 +385,10 @@
     }
 
     function formatDateID(iso) {
+      if(!iso) return "—";
       const [y, m, day] = iso.split("-").map(Number);
       const dt = new Date(y, m - 1, day);
-      return `${HARI_ID[dt.getDay()]}, ${day} ${BULAN_ID[m]} ${y}`;
+      return `${HARI_ID[dt.getDay() || 0]}, ${day} ${BULAN_ID[m]} ${y}`;
     }
 
     function parseIndoDate(text) {
@@ -416,10 +449,16 @@
 
     async function loadStaticLogos() {
       if (staticLogos) return staticLogos;
-      const res = await fetch("logos.json");
-      if (!res.ok) throw new Error("logos.json tidak ditemukan");
-      staticLogos = await res.json();
-      return staticLogos;
+      try {
+        const res = await fetch("logos.json");
+        if (!res.ok) throw new Error("logos.json tidak ditemukan");
+        staticLogos = await res.json();
+        return staticLogos;
+      } catch (e) {
+        console.error("Gagal memuat logos.json:", e);
+        staticLogos = { teams: {}, leagues: {} };
+        return staticLogos;
+      }
     }
 
     function findStaticBadge(map, name) {
@@ -472,15 +511,12 @@
 
     async function prefetchLogos(matches) {
       if (!matches.length) return;
-      if (USE_STATIC) {
-        await loadStaticLogos();
-        matches.forEach((m) => {
-          resolveTeamLogo(m.home);
-          resolveTeamLogo(m.away);
-          resolveLeagueLogo(m.competition);
-        });
-        return;
-      }
+      await loadStaticLogos();
+      matches.forEach((m) => {
+        resolveTeamLogo(m.home);
+        resolveTeamLogo(m.away);
+        resolveLeagueLogo(m.competition);
+      });
     }
 
     async function loadImage(url) {
@@ -512,12 +548,13 @@
     }
 
     async function renderMatches(iso) {
+      selectedDate = iso;
       const matches = allSchedules[iso] || [];
       displayDate.textContent = formatDateID(iso);
       matchCount.textContent = `${matches.length} pertandingan`;
 
       if (!matches.length) {
-        matchList.innerHTML = `<div class="empty-state">Tidak ada pertandingan untuk tanggal ini.</div>`;
+        matchList.innerHTML = `<div class="empty-state">Tidak ada pertandingan untuk tanggal ini. <br><small style="color:#64748b">Gunakan menu tanggal di atas untuk memeriksa hari lain.</small></div>`;
         btnDownload.disabled = true;
         return;
       }
@@ -528,15 +565,15 @@
           <div class="time-badge">${escapeHtml(m.kickoff)}</div>
           <div class="matchup-box" id="match-box-${i}">
             <div class="league-chip" id="league-${i}">
-              <span>${escapeHtml(m.competition)}</span>
+              <span class="ln-text">${escapeHtml(m.competition)}</span>
             </div>
             <div class="teams-row">
-              <div class="team-side home">
+              <div class="team-side home" id="side-home-${i}">
                 <img id="home-${i}" alt="" hidden />
                 <span class="team-name">${escapeHtml(m.home)}</span>
               </div>
               <span class="vs-badge">VS</span>
-              <div class="team-side away">
+              <div class="team-side away" id="side-away-${i}">
                 <img id="away-${i}" alt="" hidden />
                 <span class="team-name">${escapeHtml(m.away)}</span>
               </div>
@@ -547,13 +584,27 @@
         </div>`).join("");
 
       await prefetchLogos(matches);
+      
       matches.forEach((m, i) => {
         const homeLogo = resolveTeamLogo(m.home);
         const awayLogo = resolveTeamLogo(m.away);
         const leagueLogo = resolveLeagueLogo(m.competition);
 
-        if (homeLogo) { const el = $(`#home-${i}`); el.src = logoImgSrc(homeLogo); el.hidden = false; }
-        if (awayLogo) { const el = $(`#away-${i}`); el.src = logoImgSrc(awayLogo); el.hidden = false; }
+        // Pasang logo atau munculkan tombol "Cari Logo" jika link gambar kosong
+        if (homeLogo) { 
+          const el = $(`#home-${i}`); el.src = logoImgSrc(homeLogo); el.hidden = false; 
+        } else {
+          const sLink = `https://www.google.com/search?tbm=isch&q=logo+${encodeURIComponent(m.home)}+football+png`;
+          $(`#side-home-${i}`).insertAdjacentHTML('beforeend', `<a href="${sLink}" target="_blank" class="btn-search-logo" title="Cari logo klub ini">🔍 Cari Logo</a>`);
+        }
+
+        if (awayLogo) { 
+          const el = $(`#away-${i}`); el.src = logoImgSrc(awayLogo); el.hidden = false; 
+        } else {
+          const sLink = `https://www.google.com/search?tbm=isch&q=logo+${encodeURIComponent(m.away)}+football+png`;
+          $(`#side-away-${i}`).insertAdjacentHTML('afterbegin', `<a href="${sLink}" target="_blank" class="btn-search-logo" title="Cari logo klub ini">🔍 Cari Logo</a>`);
+        }
+
         if (leagueLogo) {
           const chip = $(`#league-${i}`);
           if (!chip.querySelector("img")) {
@@ -561,35 +612,17 @@
             img.src = logoImgSrc(leagueLogo);
             chip.prepend(img);
           }
+        } else {
+          const sLink = `https://www.google.com/search?tbm=isch&q=logo+${encodeURIComponent(m.competition)}+png`;
+          $(`#league-${i}`).insertAdjacentHTML('beforeend', `<a href="${sLink}" target="_blank" class="btn-search-logo" style="font-size:0.6rem; padding:1px 4px;" title="Cari logo kompetisi">🔍 Cari Logo</a>`);
         }
       });
     }
 
     function renderTV(m) {
-      const tvFree = m.tvFree.length ? `<div class="tv-free">📺 ${escapeHtml(m.tvFree.join(" · "))}</div>` : "";
-      const tvPaid = m.tvPaid.length ? `<div class="tv-paid">💳 ${escapeHtml(m.tvPaid.join(" · "))}</div>` : "";
-      return tvFree + tvPaid || `<div class="tv-paid">${escapeHtml(m.tv)}</div>`;
-    }
-
-    function parseSchedules(html) {
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const schedules = {};
-      let currentDate = null;
-
-      for (const el of doc.querySelectorAll("h3, table")) {
-        if (el.tagName === "H3") currentDate = parseIndoDate(el.textContent);
-        else if (el.tagName === "TABLE" && currentDate) {
-          for (const tr of el.querySelectorAll("tr")) {
-            const cells = [...tr.querySelectorAll("td")].map((c) => c.textContent.trim());
-            if (cells.length < 4 || /kick-off/i.test(cells[0])) continue;
-            const { home, away } = parseMatchup(cells[1]);
-            const { free, paid } = classifyTV(cells[3]);
-            if (!schedules[currentDate]) schedules[currentDate] = [];
-            schedules[currentDate].push({ kickoff: cells[0], matchup: cells[1], home, away, competition: cells[2], tv: cells[3], tvFree: free, tvPaid: paid });
-          }
-        }
-      }
-      return schedules;
+      const tvFree = m.tvFree && m.tvFree.length ? `<div class="tv-free">📺 ${escapeHtml(m.tvFree.join(" · "))}</div>` : "";
+      const tvPaid = m.tvPaid && m.tvPaid.length ? `<div class="tv-paid">💳 ${escapeHtml(m.tvPaid.join(" · "))}</div>` : "";
+      return tvFree + tvPaid || `<div class="tv-paid">${escapeHtml(m.tv || "-")}</div>`;
     }
 
     async function fetchStaticSchedule() {
@@ -698,9 +731,9 @@
 
           // TV Stations
           const tvX = W - 28 - 210; let tvY = y + 36; ctx.font = "12px Segoe UI";
-          if (m.tvFree.length) { ctx.fillStyle = "#4ade80"; ctx.fillText("📺 " + truncate(ctx, m.tvFree.join(" · "), 200), tvX, tvY); tvY += 18; }
-          if (m.tvPaid.length) { ctx.fillStyle = "#fbbf24"; ctx.fillText("💳 " + truncate(ctx, m.tvPaid.join(" · "), 200), tvX, tvY); }
-          if (!m.tvFree.length && !m.tvPaid.length) { ctx.fillStyle = "#94a3b8"; ctx.fillText(m.tv || "-", tvX, tvY); }
+          if (m.tvFree && m.tvFree.length) { ctx.fillStyle = "#4ade80"; ctx.fillText("📺 " + truncate(ctx, m.tvFree.join(" · "), 200), tvX, tvY); tvY += 18; }
+          if (m.tvPaid && m.tvPaid.length) { ctx.fillStyle = "#fbbf24"; ctx.fillText("💳 " + truncate(ctx, m.tvPaid.join(" · "), 200), tvX, tvY); }
+          if ((!m.tvFree || !m.tvFree.length) && (!m.tvPaid || !m.tvPaid.length)) { ctx.fillStyle = "#94a3b8"; ctx.fillText(m.tv || "-", tvX, tvY); }
 
           y += ROW_H;
         });
@@ -718,906 +751,9 @@
     $("#btn-refresh").addEventListener("click", fetchSchedule);
     $("#btn-download").addEventListener("click", downloadPNG);
     $("#btn-today").addEventListener("click", () => { selectedDate = todayISO(); datePicker.value = selectedDate; renderMatches(selectedDate); });
-    datePicker.addEventListener("change", (e) => { selectedDate = e.target.value; renderMatches(selectedDate); });
+    datePicker.addEventListener("change", (e) => { renderMatches(e.target.value); });
 
     fetchSchedule();
-  </script>
-</body>
-</html>
-    .match-count {
-      background: rgba(255,255,255,0.12);
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      white-space: nowrap;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 16px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-
-    .legend span.free { color: #4ade80; }
-    .legend span.paid { color: #fbbf24; }
-
-    .table-head, .match-row {
-      display: grid;
-      grid-template-columns: 72px 1fr 200px 220px;
-      gap: 12px;
-      align-items: center;
-      padding: 0 20px;
-    }
-
-    .table-head {
-      background: #1e293b;
-      padding-top: 12px;
-      padding-bottom: 12px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: #64748b;
-      text-transform: uppercase;
-    }
-
-    .match-row {
-      padding-top: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #1e293b;
-      font-size: 0.92rem;
-    }
-
-    .match-row:nth-child(even) { background: #111827; }
-
-    .time-badge {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 8px 4px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
-    }
-
-    .matchup-box { display: flex; flex-direction: column; gap: 8px; }
-
-    .league-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 999px;
-      padding: 3px 10px 3px 4px;
-      font-size: 0.72rem;
-      color: #94a3b8;
-      width: fit-content;
-    }
-
-    .league-chip img { width: 18px; height: 18px; object-fit: contain; }
-
-    .teams-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .team-side {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .team-side.away { flex-direction: row-reverse; text-align: right; }
-
-    .team-side img {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    }
-
-    .team-name {
-      font-weight: 600;
-      font-size: 0.88rem;
-      line-height: 1.25;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .vs-badge {
-      flex-shrink: 0;
-      font-size: 0.7rem;
-      font-weight: 800;
-      color: #64748b;
-      background: #1e293b;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-
-    .tv-list { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; }
-    .tv-free { color: #4ade80; }
-    .tv-paid { color: #fbbf24; }
-
-    .empty-state {
-      padding: 48px 32px;
-      text-align: center;
-      color: #64748b;
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-
-    .footer-note {
-      padding: 14px 24px;
-      font-size: 0.75rem;
-      color: #475569;
-      border-top: 1px solid #1e293b;
-    }
-
-    @media (max-width: 768px) {
-      .table-head { display: none; }
-      .match-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 16px;
-      }
-      .team-name { white-space: normal; }
-    }
-  </style>
-</head>
-<body>
-
-  <div class="toolbar">
-    <div>
-      <h1>⚽ Generator Jadwal Bola PNG</h1>
-      <p>Logo klub &amp; liga · Siaran TV lokal &amp; berbayar</p>
-    </div>
-    <div class="controls">
-      <input type="date" id="date-picker" />
-      <input type="file" id="file-import" accept=".html,.htm,text/html" />
-      <button class="btn-ghost" id="btn-today">Hari Ini</button>
-      <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
-      <label class="file-label btn-warn" for="file-import">📂 Import HTML</label>
-      <button class="btn-primary" id="btn-download" disabled>⬇ Download PNG</button>
-    </div>
-  </div>
-
-  <div class="status" id="status">Memuat jadwal...</div>
-  <div class="hint-box" id="hint-box" hidden></div>
-
-  <div id="export-area">
-    <div class="banner">
-      <div class="banner-top">
-        <div>
-          <h2>⚽ JADWAL BOLA HARI INI</h2>
-          <div class="date-label" id="display-date">—</div>
-        </div>
-        <div class="match-count" id="match-count">0 pertandingan</div>
-      </div>
-      <div class="legend">
-        <span class="free">📺 TV Lokal / Gratis</span>
-        <span class="paid">💳 TV Berbayar / Streaming</span>
-      </div>
-    </div>
-
-    <div class="table-head">
-      <span>WIB</span>
-      <span>Pertandingan</span>
-      <span>Siaran TV</span>
-      <span></span>
-    </div>
-
-    <div id="match-list">
-      <div class="empty-state">Memuat data...</div>
-    </div>
-
-    <div class="footer-note">
-      Waktu kick-off dalam WIB · Jadwal dapat berubah · Sumber: Goal.com Indonesia
-    </div>
-  </div>
-
-  <script>
-    const GOAL_URL =
-      "https://www.goal.com/id/berita/jadwal-tv-siaran-langsung-sepakbola-hari-ini/1qomojcjyge9n1nr2voxutdc1n";
-
-    const BULAN_ID = [
-      "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-    ];
-    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-
-    const FREE_TV = [
-      "rcti", "mnctv", "gtv", "sctv", "indosiar", "antv", "tvone",
-      "kompas tv", "inews", "inews tv", "tvri", "trans tv", "trans7", "metro tv"
-    ];
-    const PAID_KW = [
-      "vidio", "bein", "vision+", "vision plus", "mola", "spotv",
-      "apple tv", "disney", "netflix", "prime video", "hbo", "espn", "dazn"
-    ];
-
-    const IS_FILE = location.protocol === "file:";
-    const IS_LOCALHOST = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-    const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
-    const HAS_LOCAL_SERVER = IS_LOCALHOST && !IS_FILE;
-    const USE_STATIC = IS_GITHUB_PAGES || (!IS_FILE && !IS_LOCALHOST);
-
-    let allSchedules = {};
-    let selectedDate = todayISO();
-    let staticLogos = null;
-    const logoCache = { teams: {}, leagues: {}, images: {} };
-
-    const $ = (sel) => document.querySelector(sel);
-    const datePicker = $("#date-picker");
-    const statusEl = $("#status");
-    const hintBox = $("#hint-box");
-    const matchList = $("#match-list");
-    const displayDate = $("#display-date");
-    const matchCount = $("#match-count");
-    const btnDownload = $("#btn-download");
-    const btnRefresh = $("#btn-refresh");
-
-    datePicker.value = selectedDate;
-
-    function todayISO() {
-      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
-    }
-
-    function formatDateID(iso) {
-      const [y, m, day] = iso.split("-").map(Number);
-      const dt = new Date(y, m - 1, day);
-      return `${HARI_ID[dt.getDay()]}, ${day} ${BULAN_ID[m]} ${y}`;
-    }
-
-    function parseIndoDate(text) {
-      const re = /(\d{1,2})\s+(\w+)\s+(\d{4})/i;
-      const m = text.trim().match(re);
-      if (!m) return null;
-      const bulan = {
-        januari: 1, februari: 2, maret: 3, april: 4, mei: 5, juni: 6,
-        juli: 7, agustus: 8, september: 9, oktober: 10, november: 11, desember: 12
-      };
-      const month = bulan[m[2].toLowerCase()];
-      if (!month) return null;
-      const pad = (n) => String(n).padStart(2, "0");
-      return `${m[3]}-${pad(month)}-${pad(+m[1])}`;
-    }
-
-    function parseMatchup(text) {
-      for (const sep of [" vs ", " VS ", " v "]) {
-        const idx = text.toLowerCase().indexOf(sep.toLowerCase());
-        if (idx >= 0) {
-          return {
-            home: text.slice(0, idx).trim(),
-            away: text.slice(idx + sep.length).trim(),
-          };
-        }
-      }
-      return { home: text.trim(), away: "" };
-    }
-
-    function classifyTV(stations) {
-      if (!stations || stations === "-" || stations === "TBC") return { free: [], paid: [] };
-      const parts = stations.split(/\s*\/\s*/).map((s) => s.trim()).filter(Boolean);
-      const free = [], paid = [];
-      for (const part of parts) {
-        const lower = part.toLowerCase();
-        const isPaid = PAID_KW.some((k) => lower.includes(k));
-        const isFree = FREE_TV.some((t) => lower.includes(t));
-        if (isPaid) paid.push(part);
-        else if (isFree) free.push(part);
-        else if (/sport/i.test(part) || /\d/.test(part)) paid.push(part);
-        else free.push(part);
-      }
-      return { free, paid };
-    }
-
-    function escapeHtml(s) {
-      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-
-    function showHint(html) {
-      hintBox.innerHTML = html;
-      hintBox.hidden = !html;
-    }
-
-    function normalizeName(name) {
-      return name.toLowerCase().trim().replace(/\s+/g, " ");
-    }
-
-    async function loadStaticLogos() {
-      if (staticLogos) return staticLogos;
-      const res = await fetch("logos.json");
-      if (!res.ok) throw new Error("logos.json tidak ditemukan");
-      staticLogos = await res.json();
-      return staticLogos;
-    }
-
-    function findStaticBadge(map, name) {
-      if (!map || !name) return null;
-      if (map[name]) return map[name];
-      const norm = normalizeName(name);
-      let best = null;
-      let bestLen = 0;
-      for (const [key, url] of Object.entries(map)) {
-        const kNorm = normalizeName(key);
-        if (norm === kNorm) return url;
-        if (norm.includes(kNorm) || kNorm.includes(norm)) {
-          if (key.length > bestLen) {
-            best = url;
-            bestLen = key.length;
-          }
-        }
-      }
-      return best;
-    }
-
-    function resolveTeamLogo(name) {
-      if (!name) return null;
-      if (logoCache.teams[name] !== undefined) return logoCache.teams[name];
-      if (staticLogos) {
-        logoCache.teams[name] = findStaticBadge(staticLogos.teams, name);
-        return logoCache.teams[name];
-      }
-      return null;
-    }
-
-    function resolveLeagueLogo(competition) {
-      if (!competition) return null;
-      if (logoCache.leagues[competition] !== undefined) return logoCache.leagues[competition];
-      if (staticLogos) {
-        logoCache.leagues[competition] = findStaticBadge(staticLogos.leagues, competition);
-        return logoCache.leagues[competition];
-      }
-      return null;
-    }
-
-    function logoImgSrc(url) {
-      if (!url) return "";
-      return HAS_LOCAL_SERVER
-        ? `/api/img?url=${encodeURIComponent(url)}`
-        : url;
-    }
-
-    async function fetchTeamLogoFromServer(name) {
-      if (!name || !HAS_LOCAL_SERVER) return null;
-      if (logoCache.teams[name] !== undefined) return logoCache.teams[name];
-      try {
-        const res = await fetch(`/api/logo/team?name=${encodeURIComponent(name)}`);
-        const data = await res.json();
-        logoCache.teams[name] = data.badge || null;
-      } catch {
-        logoCache.teams[name] = null;
-      }
-      return logoCache.teams[name];
-    }
-
-    async function fetchLeagueLogoFromServer(competition) {
-      if (!competition || !HAS_LOCAL_SERVER) return null;
-      if (logoCache.leagues[competition] !== undefined) return logoCache.leagues[competition];
-      try {
-        const res = await fetch(`/api/logo/league?name=${encodeURIComponent(competition)}`);
-        const data = await res.json();
-        logoCache.leagues[competition] = data.badge || null;
-      } catch {
-        logoCache.leagues[competition] = null;
-      }
-      return logoCache.leagues[competition];
-    }
-
-    async function prefetchLogos(matches) {
-      if (!matches.length) return;
-
-      if (USE_STATIC) {
-        await loadStaticLogos();
-        matches.forEach((m) => {
-          resolveTeamLogo(m.home);
-          resolveTeamLogo(m.away);
-          resolveLeagueLogo(m.competition);
-        });
-        return;
-      }
-
-      if (!HAS_LOCAL_SERVER) return;
-
-      const teams = [...new Set(matches.flatMap((m) => [m.home, m.away].filter(Boolean)))];
-      const leagues = [...new Set(matches.map((m) => m.competition).filter(Boolean))];
-      try {
-        const res = await fetch(
-          `/api/logos/batch?teams=${encodeURIComponent(teams.join("|"))}&leagues=${encodeURIComponent(leagues.join("|"))}`
-        );
-        const data = await res.json();
-        Object.entries(data.teams || {}).forEach(([k, v]) => { logoCache.teams[k] = v; });
-        Object.entries(data.leagues || {}).forEach(([k, v]) => { logoCache.leagues[k] = v; });
-      } catch { /* ignore */ }
-    }
-
-    async function loadImage(url) {
-      if (!url) return null;
-      if (logoCache.images[url]) return logoCache.images[url];
-      try {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = logoImgSrc(url);
-        });
-        logoCache.images[url] = img;
-        return img;
-      } catch {
-        return null;
-      }
-    }
-
-    function applySchedulesData(schedules, sourceLabel, updated) {
-      allSchedules = schedules;
-      const total = Object.values(allSchedules).reduce((a, b) => a + b.length, 0);
-      if (!total) throw new Error("Tidak ada jadwal ditemukan dalam data.");
-      statusEl.className = "status";
-      const updateInfo = updated ? ` · update ${updated.slice(0, 10)}` : "";
-      statusEl.textContent = `Berhasil memuat ${total} pertandingan (${sourceLabel}${updateInfo}). Pilih tanggal lalu Download PNG.`;
-      renderMatches(selectedDate);
-    }
-
-    async function renderMatches(iso) {
-      const matches = allSchedules[iso] || [];
-      displayDate.textContent = formatDateID(iso);
-      matchCount.textContent = `${matches.length} pertandingan`;
-
-      if (!matches.length) {
-        matchList.innerHTML = `<div class="empty-state">Tidak ada pertandingan tercatat untuk tanggal ini.</div>`;
-        btnDownload.disabled = true;
-        return;
-      }
-
-      btnDownload.disabled = false;
-      matchList.innerHTML = matches.map((m, i) => `
-        <div class="match-row" data-idx="${i}">
-          <div class="time-badge">${escapeHtml(m.kickoff)}</div>
-          <div class="matchup-box" id="match-box-${i}">
-            <div class="league-chip" id="league-${i}">
-              <span>${escapeHtml(m.competition)}</span>
-            </div>
-            <div class="teams-row">
-              <div class="team-side home">
-                <img id="home-${i}" alt="" hidden />
-                <span class="team-name">${escapeHtml(m.home)}</span>
-              </div>
-              <span class="vs-badge">VS</span>
-              <div class="team-side away">
-                <img id="away-${i}" alt="" hidden />
-                <span class="team-name">${escapeHtml(m.away)}</span>
-              </div>
-            </div>
-          </div>
-          <div class="tv-list">${renderTV(m)}</div>
-          <span></span>
-        </div>`).join("");
-
-      if (HAS_LOCAL_SERVER || USE_STATIC) {
-        await prefetchLogos(matches);
-        matches.forEach((m, i) => {
-          const homeLogo = HAS_LOCAL_SERVER
-            ? logoCache.teams[m.home]
-            : resolveTeamLogo(m.home);
-          const awayLogo = HAS_LOCAL_SERVER
-            ? logoCache.teams[m.away]
-            : resolveTeamLogo(m.away);
-          const leagueLogo = HAS_LOCAL_SERVER
-            ? logoCache.leagues[m.competition]
-            : resolveLeagueLogo(m.competition);
-
-          if (homeLogo) {
-            const el = $(`#home-${i}`);
-            el.src = logoImgSrc(homeLogo);
-            el.hidden = false;
-            el.onerror = () => { el.hidden = true; };
-          }
-          if (awayLogo) {
-            const el = $(`#away-${i}`);
-            el.src = logoImgSrc(awayLogo);
-            el.hidden = false;
-            el.onerror = () => { el.hidden = true; };
-          }
-          if (leagueLogo) {
-            const chip = $(`#league-${i}`);
-            if (!chip.querySelector("img")) {
-              const img = document.createElement("img");
-              img.src = logoImgSrc(leagueLogo);
-              img.alt = "";
-              img.onerror = () => img.remove();
-              chip.prepend(img);
-            }
-          }
-        });
-      }
-    }
-
-    function renderTV(m) {
-      const tvFree = m.tvFree.length
-        ? `<div class="tv-free">📺 ${escapeHtml(m.tvFree.join(" · "))}</div>` : "";
-      const tvPaid = m.tvPaid.length
-        ? `<div class="tv-paid">💳 ${escapeHtml(m.tvPaid.join(" · "))}</div>` : "";
-      const tvFallback = !m.tvFree.length && !m.tvPaid.length
-        ? `<div class="tv-paid">${escapeHtml(m.tv)}</div>` : "";
-      return tvFree + tvPaid + tvFallback;
-    }
-
-    function parseSchedules(html) {
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const schedules = {};
-      let currentDate = null;
-
-      for (const el of doc.querySelectorAll("h3, table")) {
-        if (el.tagName === "H3") {
-          currentDate = parseIndoDate(el.textContent);
-        } else if (el.tagName === "TABLE" && currentDate) {
-          for (const tr of el.querySelectorAll("tr")) {
-            const cells = [...tr.querySelectorAll("td")].map((c) => c.textContent.trim());
-            if (cells.length < 4) continue;
-            if (/kick-off/i.test(cells[0])) continue;
-            const { home, away } = parseMatchup(cells[1]);
-            const { free, paid } = classifyTV(cells[3]);
-            if (!schedules[currentDate]) schedules[currentDate] = [];
-            schedules[currentDate].push({
-              kickoff: cells[0],
-              matchup: cells[1],
-              home,
-              away,
-              competition: cells[2],
-              tv: cells[3],
-              tvFree: free,
-              tvPaid: paid,
-            });
-          }
-        }
-      }
-      return schedules;
-    }
-
-    async function fetchViaLocalServer() {
-      const res = await fetch("/api/jadwal");
-      if (!res.ok) throw new Error(`Server lokal HTTP ${res.status}`);
-      return res.text();
-    }
-
-    async function fetchStaticSchedule() {
-      const res = await fetch("data/jadwal.json");
-      if (!res.ok) throw new Error("data/jadwal.json tidak ditemukan");
-      const data = await res.json();
-      await loadStaticLogos();
-      applySchedulesData(data.schedules, IS_GITHUB_PAGES ? "GitHub Pages" : "static", data.updated);
-    }
-
-    function applySchedules(html, sourceLabel) {
-      applySchedulesData(parseSchedules(html), sourceLabel, null);
-    }
-
-    async function fetchSchedule() {
-      statusEl.className = "status loading";
-      statusEl.textContent = "Memuat jadwal...";
-      btnDownload.disabled = true;
-
-      try {
-        if (IS_FILE) throw new Error("file-protocol");
-        if (USE_STATIC) {
-          await fetchStaticSchedule();
-          showHint(IS_GITHUB_PAGES
-            ? "Mode GitHub Pages — jadwal diperbarui otomatis setiap hari via GitHub Actions."
-            : "");
-          return;
-        }
-        const html = await fetchViaLocalServer();
-        applySchedules(html, "server lokal");
-        showHint("");
-      } catch (err) {
-        if (err.message === "file-protocol" || IS_FILE) {
-          statusEl.className = "status warn";
-          statusEl.textContent = "Mode file:// — gunakan GitHub Pages, start.bat, atau Import HTML.";
-          showHint(
-            `<strong>GitHub Pages:</strong> Upload ke GitHub → aktifkan Pages → buka link di HP<br>` +
-            `<strong>PC:</strong> Double-click <strong>start.bat</strong> → <strong>http://localhost:8788</strong><br>` +
-            `<strong>Manual:</strong> Simpan halaman Goal.com → <strong>Import HTML</strong>`
-          );
-          matchList.innerHTML = `<div class="empty-state">Buka via GitHub Pages, start.bat, atau import HTML.</div>`;
-        } else {
-          statusEl.className = "status error";
-          statusEl.textContent = `Gagal memuat: ${err.message}`;
-          if (IS_GITHUB_PAGES) {
-            showHint("Pastikan <strong>data/jadwal.json</strong> ada dan GitHub Actions sudah dijalankan.");
-          }
-          matchList.innerHTML = `<div class="empty-state">Gagal memuat jadwal.<br><br>${escapeHtml(err.message)}</div>`;
-        }
-      }
-    }
-
-    function importHtmlFile(file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          if (!staticLogos) {
-            try { await loadStaticLogos(); } catch { /* optional */ }
-          }
-          applySchedules(e.target.result, `file: ${file.name}`);
-          showHint("");
-        } catch (err) {
-          statusEl.className = "status error";
-          statusEl.textContent = err.message;
-        }
-      };
-      reader.readAsText(file, "UTF-8");
-    }
-
-    /* ── Canvas PNG dengan logo klub & liga ── */
-    function wrapText(ctx, text, maxWidth) {
-      const words = text.split(" ");
-      const lines = [];
-      let line = "";
-      for (const w of words) {
-        const test = line ? `${line} ${w}` : w;
-        if (ctx.measureText(test).width > maxWidth && line) {
-          lines.push(line);
-          line = w;
-        } else line = test;
-      }
-      if (line) lines.push(line);
-      return lines;
-    }
-
-    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
-      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
-    }
-
-    function drawLogoOrPlaceholder(ctx, img, x, y, size, label) {
-      drawRoundRect(ctx, x, y, size, size, size * 0.2, "#1e293b", "#334155");
-      if (img) {
-        const pad = size * 0.12;
-        ctx.drawImage(img, x + pad, y + pad, size - pad * 2, size - pad * 2);
-      } else {
-        ctx.fillStyle = "#64748b";
-        ctx.font = `bold ${size * 0.28}px Segoe UI, Arial`;
-        ctx.textAlign = "center";
-        ctx.fillText((label || "?").slice(0, 2).toUpperCase(), x + size / 2, y + size * 0.62);
-        ctx.textAlign = "left";
-      }
-    }
-
-    function truncate(ctx, text, maxW) {
-      if (ctx.measureText(text).width <= maxW) return text;
-      let t = text;
-      while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
-      return t + "…";
-    }
-
-    async function downloadPNG() {
-      const matches = allSchedules[selectedDate] || [];
-      if (!matches.length) return;
-
-      btnDownload.disabled = true;
-      statusEl.className = "status loading";
-      statusEl.textContent = "Mengunduh logo klub & liga...";
-
-      try {
-        await prefetchLogos(matches);
-
-        const logoData = matches.map((m) => ({
-          homeImg: null,
-          awayImg: null,
-          leagueImg: null,
-          homeUrl: HAS_LOCAL_SERVER ? logoCache.teams[m.home] : resolveTeamLogo(m.home),
-          awayUrl: HAS_LOCAL_SERVER ? logoCache.teams[m.away] : resolveTeamLogo(m.away),
-          leagueUrl: HAS_LOCAL_SERVER ? logoCache.leagues[m.competition] : resolveLeagueLogo(m.competition),
-        }));
-
-        const uniqueUrls = [...new Set(
-          logoData.flatMap((d) => [d.homeUrl, d.awayUrl, d.leagueUrl].filter(Boolean))
-        )];
-
-        statusEl.textContent = `Memuat ${uniqueUrls.length} logo...`;
-        await Promise.all(uniqueUrls.map((url) => loadImage(url)));
-
-        logoData.forEach((d) => {
-          d.homeImg = d.homeUrl ? logoCache.images[d.homeUrl] : null;
-          d.awayImg = d.awayUrl ? logoCache.images[d.awayUrl] : null;
-          d.leagueImg = d.leagueUrl ? logoCache.images[d.leagueUrl] : null;
-        });
-
-        const found = logoData.filter((d) => d.homeImg || d.awayImg || d.leagueImg).length;
-        statusEl.textContent = `Merender PNG (${found}/${matches.length} pertandingan dengan logo)...`;
-
-        const W = 1080;
-        const PAD = 28;
-        const ROW_H = 112;
-        const HEADER_H = 140;
-        const FOOTER_H = 44;
-        const H = HEADER_H + matches.length * ROW_H + FOOTER_H;
-
-        const canvas = document.createElement("canvas");
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext("2d");
-
-        // Background
-        ctx.fillStyle = "#0a0f1a";
-        ctx.fillRect(0, 0, W, H);
-
-        // Header gradient
-        const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
-        grad.addColorStop(0, "#14532d");
-        grad.addColorStop(0.5, "#1e3a5f");
-        grad.addColorStop(1, "#1e40af");
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, W, HEADER_H);
-
-        // Header accent line
-        ctx.fillStyle = "#22c55e";
-        ctx.fillRect(0, HEADER_H - 3, W, 3);
-
-        ctx.fillStyle = "#4ade80";
-        ctx.font = "bold 34px Segoe UI, Arial";
-        ctx.fillText("⚽  JADWAL BOLA HARI INI", PAD, 52);
-
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = "18px Segoe UI, Arial";
-        ctx.fillText(formatDateID(selectedDate), PAD, 84);
-
-        drawRoundRect(ctx, W - PAD - 150, 58, 150, 34, 17, "rgba(255,255,255,0.15)", null);
-        ctx.fillStyle = "#f1f5f9";
-        ctx.font = "600 14px Segoe UI, Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(`${matches.length} pertandingan`, W - PAD - 75, 80);
-        ctx.textAlign = "left";
-
-        ctx.font = "12px Segoe UI, Arial";
-        ctx.fillStyle = "#4ade80";
-        ctx.fillText("● TV Lokal/Gratis", PAD, 118);
-        ctx.fillStyle = "#fbbf24";
-        ctx.fillText("● TV Berbayar/Streaming", PAD + 160, 118);
-
-        let y = HEADER_H;
-
-        matches.forEach((m, i) => {
-          const logos = logoData[i];
-          const rowBg = i % 2 ? "#0f172a" : "#111827";
-          ctx.fillStyle = rowBg;
-          ctx.fillRect(0, y, W, ROW_H);
-          ctx.strokeStyle = "#1e293b";
-          ctx.beginPath();
-          ctx.moveTo(PAD, y + ROW_H);
-          ctx.lineTo(W - PAD, y + ROW_H);
-          ctx.stroke();
-
-          // Time badge
-          drawRoundRect(ctx, PAD, y + 34, 68, 36, 8, "#2563eb", null);
-          ctx.fillStyle = "#fff";
-          ctx.font = "bold 15px Segoe UI, Arial";
-          ctx.textAlign = "center";
-          ctx.fillText(m.kickoff, PAD + 34, y + 57);
-          ctx.textAlign = "left";
-
-          const cx = PAD + 88;
-
-          // League chip
-          const leagueSize = 22;
-          drawLogoOrPlaceholder(ctx, logos.leagueImg, cx, y + 14, leagueSize, m.competition);
-          ctx.fillStyle = "#64748b";
-          ctx.font = "11px Segoe UI, Arial";
-          ctx.fillText(truncate(ctx, m.competition, 200), cx + leagueSize + 8, y + 30);
-
-          // Team logos
-          const logoSize = 44;
-          const vsX = W / 2;
-          const homeX = vsX - 200;
-          const awayX = vsX + 30;
-
-          drawLogoOrPlaceholder(ctx, logos.homeImg, homeX, y + 48, logoSize, m.home);
-          drawLogoOrPlaceholder(ctx, logos.awayImg, awayX + 120, y + 48, logoSize, m.away);
-
-          // Team names
-          ctx.fillStyle = "#f1f5f9";
-          ctx.font = "600 14px Segoe UI, Arial";
-          ctx.textAlign = "right";
-          ctx.fillText(truncate(ctx, m.home, 130), homeX - 8, y + 76);
-          ctx.textAlign = "left";
-          ctx.fillText(truncate(ctx, m.away, 130), awayX + logoSize + 128, y + 76);
-
-          // VS
-          drawRoundRect(ctx, vsX - 22, y + 58, 44, 24, 6, "#334155", null);
-          ctx.fillStyle = "#94a3b8";
-          ctx.font = "bold 11px Segoe UI, Arial";
-          ctx.textAlign = "center";
-          ctx.fillText("VS", vsX, y + 74);
-          ctx.textAlign = "left";
-
-          // TV column
-          const tvX = W - PAD - 210;
-          let tvY = y + 36;
-          ctx.font = "12px Segoe UI, Arial";
-          ctx.textAlign = "left";
-          if (m.tvFree.length) {
-            ctx.fillStyle = "#4ade80";
-            ctx.fillText("📺 " + truncate(ctx, m.tvFree.join(" · "), 200), tvX, tvY);
-            tvY += 18;
-          }
-          if (m.tvPaid.length) {
-            ctx.fillStyle = "#fbbf24";
-            ctx.fillText("💳 " + truncate(ctx, m.tvPaid.join(" · "), 200), tvX, tvY);
-          }
-          if (!m.tvFree.length && !m.tvPaid.length) {
-            ctx.fillStyle = "#94a3b8";
-            ctx.fillText(m.tv || "-", tvX, tvY);
-          }
-
-          y += ROW_H;
-        });
-
-        ctx.fillStyle = "#475569";
-        ctx.font = "11px Segoe UI, Arial";
-        ctx.fillText("WIB · Jadwal dapat berubah · Sumber: Goal.com · Logo: TheSportsDB", PAD, H - 16);
-
-        const link = document.createElement("a");
-        link.download = `jadwal-bola-${selectedDate}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-        statusEl.className = "status";
-        statusEl.textContent = `PNG disimpan: jadwal-bola-${selectedDate}.png (dengan logo klub & liga)`;
-      } catch (err) {
-        statusEl.className = "status error";
-        statusEl.textContent = `Gagal membuat PNG: ${err.message}`;
-      } finally {
-        btnDownload.disabled = matches.length > 0;
-      }
-    }
-
-    $("#btn-refresh").addEventListener("click", fetchSchedule);
-    $("#btn-download").addEventListener("click", downloadPNG);
-    $("#btn-today").addEventListener("click", () => {
-      selectedDate = todayISO();
-      datePicker.value = selectedDate;
-      renderMatches(selectedDate);
-    });
-    datePicker.addEventListener("change", (e) => {
-      selectedDate = e.target.value;
-      renderMatches(selectedDate);
-    });
-    $("#file-import").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) importHtmlFile(file);
-      e.target.value = "";
-    });
-
-    if (IS_FILE) {
-      btnRefresh.disabled = true;
-      statusEl.className = "status warn";
-      statusEl.textContent = "Dibuka via file:// — gunakan GitHub Pages, start.bat, atau Import HTML.";
-      showHint(
-        `<strong>HP/online:</strong> Upload ke GitHub → aktifkan Pages → buka link di browser HP.<br>` +
-        `<strong>PC:</strong> Double-click <strong>start.bat</strong>.`
-      );
-      matchList.innerHTML = `<div class="empty-state">Buka via GitHub Pages atau start.bat.</div>`;
-    } else {
-      fetchSchedule();
-    }
   </script>
 </body>
 </html>
