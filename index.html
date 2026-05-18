@@ -425,6 +425,623 @@
     function findStaticBadge(map, name) {
       if (!map || !name) return null;
       if (map[name]) return map[name];
+      
+      const norm = normalizeName(name);
+      
+      // 1. Pencocokan standar
+      for (const [key, url] of Object.entries(map)) {
+        const kNorm = normalizeName(key);
+        if (norm === kNorm || norm.includes(kNorm) || kNorm.includes(norm)) return url;
+      }
+
+      // 2. Logika Fuzzy Matching kata kunci unik
+      const kataKunci = norm.split(" ").filter(w => w.length > 2);
+      if (kataKunci.length > 0) {
+        for (const [key, url] of Object.entries(map)) {
+          const kNorm = normalizeName(key);
+          if (kataKunci.every(kata => kNorm.includes(kata))) return url;
+        }
+      }
+      return null;
+    }
+
+    function resolveTeamLogo(name) {
+      if (!name) return null;
+      if (logoCache.teams[name] !== undefined) return logoCache.teams[name];
+      if (staticLogos) {
+        logoCache.teams[name] = findStaticBadge(staticLogos.teams, name);
+        return logoCache.teams[name];
+      }
+      return null;
+    }
+
+    function resolveLeagueLogo(competition) {
+      if (!competition) return null;
+      if (logoCache.leagues[competition] !== undefined) return logoCache.leagues[competition];
+      if (staticLogos) {
+        logoCache.leagues[competition] = findStaticBadge(staticLogos.leagues, competition);
+        return logoCache.leagues[competition];
+      }
+      return null;
+    }
+
+    function logoImgSrc(url) {
+      if (!url) return "";
+      return HAS_LOCAL_SERVER ? `/api/img?url=${encodeURIComponent(url)}` : url;
+    }
+
+    async function prefetchLogos(matches) {
+      if (!matches.length) return;
+      if (USE_STATIC) {
+        await loadStaticLogos();
+        matches.forEach((m) => {
+          resolveTeamLogo(m.home);
+          resolveTeamLogo(m.away);
+          resolveLeagueLogo(m.competition);
+        });
+        return;
+      }
+    }
+
+    async function loadImage(url) {
+      if (!url) return null;
+      if (logoCache.images[url]) return logoCache.images[url];
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = logoImgSrc(url);
+        });
+        logoCache.images[url] = img;
+        return img;
+      } catch {
+        return null;
+      }
+    }
+
+    function applySchedulesData(schedules, sourceLabel, updated) {
+      allSchedules = schedules;
+      const total = Object.values(allSchedules).reduce((a, b) => a + b.length, 0);
+      if (!total) throw new Error("Tidak ada jadwal ditemukan.");
+      statusEl.className = "status";
+      const updateInfo = updated ? ` · update ${updated.slice(0, 10)}` : "";
+      statusEl.textContent = `Berhasil memuat ${total} pertandingan (${sourceLabel}${updateInfo}).`;
+      renderMatches(selectedDate);
+    }
+
+    async function renderMatches(iso) {
+      const matches = allSchedules[iso] || [];
+      displayDate.textContent = formatDateID(iso);
+      matchCount.textContent = `${matches.length} pertandingan`;
+
+      if (!matches.length) {
+        matchList.innerHTML = `<div class="empty-state">Tidak ada pertandingan untuk tanggal ini.</div>`;
+        btnDownload.disabled = true;
+        return;
+      }
+
+      btnDownload.disabled = false;
+      matchList.innerHTML = matches.map((m, i) => `
+        <div class="match-row" data-idx="${i}">
+          <div class="time-badge">${escapeHtml(m.kickoff)}</div>
+          <div class="matchup-box" id="match-box-${i}">
+            <div class="league-chip" id="league-${i}">
+              <span>${escapeHtml(m.competition)}</span>
+            </div>
+            <div class="teams-row">
+              <div class="team-side home">
+                <img id="home-${i}" alt="" hidden />
+                <span class="team-name">${escapeHtml(m.home)}</span>
+              </div>
+              <span class="vs-badge">VS</span>
+              <div class="team-side away">
+                <img id="away-${i}" alt="" hidden />
+                <span class="team-name">${escapeHtml(m.away)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="tv-list">${renderTV(m)}</div>
+          <span></span>
+        </div>`).join("");
+
+      await prefetchLogos(matches);
+      matches.forEach((m, i) => {
+        const homeLogo = resolveTeamLogo(m.home);
+        const awayLogo = resolveTeamLogo(m.away);
+        const leagueLogo = resolveLeagueLogo(m.competition);
+
+        if (homeLogo) { const el = $(`#home-${i}`); el.src = logoImgSrc(homeLogo); el.hidden = false; }
+        if (awayLogo) { const el = $(`#away-${i}`); el.src = logoImgSrc(awayLogo); el.hidden = false; }
+        if (leagueLogo) {
+          const chip = $(`#league-${i}`);
+          if (!chip.querySelector("img")) {
+            const img = document.createElement("img");
+            img.src = logoImgSrc(leagueLogo);
+            chip.prepend(img);
+          }
+        }
+      });
+    }
+
+    function renderTV(m) {
+      const tvFree = m.tvFree.length ? `<div class="tv-free">📺 ${escapeHtml(m.tvFree.join(" · "))}</div>` : "";
+      const tvPaid = m.tvPaid.length ? `<div class="tv-paid">💳 ${escapeHtml(m.tvPaid.join(" · "))}</div>` : "";
+      return tvFree + tvPaid || `<div class="tv-paid">${escapeHtml(m.tv)}</div>`;
+    }
+
+    function parseSchedules(html) {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const schedules = {};
+      let currentDate = null;
+
+      for (const el of doc.querySelectorAll("h3, table")) {
+        if (el.tagName === "H3") currentDate = parseIndoDate(el.textContent);
+        else if (el.tagName === "TABLE" && currentDate) {
+          for (const tr of el.querySelectorAll("tr")) {
+            const cells = [...tr.querySelectorAll("td")].map((c) => c.textContent.trim());
+            if (cells.length < 4 || /kick-off/i.test(cells[0])) continue;
+            const { home, away } = parseMatchup(cells[1]);
+            const { free, paid } = classifyTV(cells[3]);
+            if (!schedules[currentDate]) schedules[currentDate] = [];
+            schedules[currentDate].push({ kickoff: cells[0], matchup: cells[1], home, away, competition: cells[2], tv: cells[3], tvFree: free, tvPaid: paid });
+          }
+        }
+      }
+      return schedules;
+    }
+
+    async function fetchStaticSchedule() {
+      const res = await fetch("data/jadwal.json");
+      if (!res.ok) throw new Error("data/jadwal.json tidak ditemukan");
+      const data = await res.json();
+      await loadStaticLogos();
+      applySchedulesData(data.schedules, "GitHub Pages", data.updated);
+    }
+
+    async function fetchSchedule() {
+      statusEl.className = "status loading";
+      statusEl.textContent = "Memuat jadwal...";
+      try {
+        await fetchStaticSchedule();
+      } catch (err) {
+        statusEl.className = "status error";
+        statusEl.textContent = `Gagal memuat: ${err.message}`;
+      }
+    }
+
+    function truncate(ctx, text, maxW) {
+      if (ctx.measureText(text).width <= maxW) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
+      return t + "…";
+    }
+
+    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+
+    function drawLogoOrPlaceholder(ctx, img, x, y, size, label) {
+      drawRoundRect(ctx, x, y, size, size, size * 0.2, "#1e293b", "#334155");
+      if (img) {
+        const pad = size * 0.12;
+        ctx.drawImage(img, x + pad, y + pad, size - pad * 2, size - pad * 2);
+      } else {
+        ctx.fillStyle = "#64748b"; ctx.font = `bold ${size * 0.28}px Segoe UI`; ctx.textAlign = "center";
+        ctx.fillText((label || "?").slice(0, 2).toUpperCase(), x + size / 2, y + size * 0.62);
+        ctx.textAlign = "left";
+      }
+    }
+
+    async function downloadPNG() {
+      const matches = allSchedules[selectedDate] || [];
+      if (!matches.length) return;
+
+      btnDownload.disabled = true;
+      statusEl.textContent = "Memuat logo...";
+
+      try {
+        const logoData = matches.map((m) => ({
+          homeUrl: resolveTeamLogo(m.home), awayUrl: resolveTeamLogo(m.away), leagueUrl: resolveLeagueLogo(m.competition)
+        }));
+
+        const uniqueUrls = [...new Set(logoData.flatMap(d => [d.homeUrl, d.awayUrl, d.leagueUrl].filter(Boolean)))];
+        await Promise.all(uniqueUrls.map(url => loadImage(url)));
+
+        const W = 1080; const ROW_H = 112; const HEADER_H = 140; const FOOTER_H = 44;
+        const H = HEADER_H + (matches.length * ROW_H) + FOOTER_H;
+
+        const canvas = document.createElement("canvas"); canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#0a0f1a"; ctx.fillRect(0, 0, W, H);
+        const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
+        grad.addColorStop(0, "#14532d"); grad.addColorStop(1, "#1e40af");
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, W, HEADER_H);
+
+        ctx.fillStyle = "#4ade80"; ctx.font = "bold 34px Segoe UI"; ctx.fillText("⚽ JADWAL BOLA HARI INI", 28, 52);
+        ctx.fillStyle = "#e2e8f0"; ctx.font = "18px Segoe UI"; ctx.fillText(formatDateID(selectedDate), 28, 84);
+
+        let y = HEADER_H;
+        matches.forEach((m, i) => {
+          ctx.fillStyle = i % 2 ? "#0f172a" : "#111827"; ctx.fillRect(0, y, W, ROW_H);
+
+          // Kickoff time
+          drawRoundRect(ctx, 28, y + 34, 68, 36, 8, "#2563eb");
+          ctx.fillStyle = "#fff"; ctx.font = "bold 15px Segoe UI"; ctx.textAlign = "center";
+          ctx.fillText(m.kickoff, 28 + 34, y + 57); ctx.textAlign = "left";
+
+          // League
+          const ld = logoData[i];
+          drawLogoOrPlaceholder(ctx, logoCache.images[ld.leagueUrl], 116, y + 14, 22, m.competition);
+          ctx.fillStyle = "#64748b"; ctx.font = "11px Segoe UI"; ctx.fillText(truncate(ctx, m.competition, 200), 146, y + 30);
+
+          // Grid Layout Simetris Utama
+          const logoSize = 44;
+          const vsX = W / 2 - 40; 
+          const homeX = vsX - 190;
+          const awayX = vsX + 70;
+
+          drawLogoOrPlaceholder(ctx, logoCache.images[ld.homeUrl], homeX, y + 48, logoSize, m.home);
+          drawLogoOrPlaceholder(ctx, logoCache.images[ld.awayUrl], awayX, y + 48, logoSize, m.away);
+
+          ctx.fillStyle = "#f1f5f9"; ctx.font = "600 14px Segoe UI"; 
+          ctx.textAlign = "right"; ctx.fillText(truncate(ctx, m.home, 160), homeX - 12, y + 76);
+          ctx.textAlign = "left"; ctx.fillText(truncate(ctx, m.away, 160), awayX + logoSize + 12, y + 76);
+
+          drawRoundRect(ctx, vsX + 12, y + 58, 44, 24, 6, "#334155");
+          ctx.fillStyle = "#94a3b8"; ctx.font = "bold 11px Segoe UI"; ctx.textAlign = "center";
+          ctx.fillText("VS", vsX + 12 + 22, y + 74); ctx.textAlign = "left";
+
+          // TV Stations
+          const tvX = W - 28 - 210; let tvY = y + 36; ctx.font = "12px Segoe UI";
+          if (m.tvFree.length) { ctx.fillStyle = "#4ade80"; ctx.fillText("📺 " + truncate(ctx, m.tvFree.join(" · "), 200), tvX, tvY); tvY += 18; }
+          if (m.tvPaid.length) { ctx.fillStyle = "#fbbf24"; ctx.fillText("💳 " + truncate(ctx, m.tvPaid.join(" · "), 200), tvX, tvY); }
+          if (!m.tvFree.length && !m.tvPaid.length) { ctx.fillStyle = "#94a3b8"; ctx.fillText(m.tv || "-", tvX, tvY); }
+
+          y += ROW_H;
+        });
+
+        const link = document.createElement("a");
+        link.download = `jadwal-${selectedDate}.png`; link.href = canvas.toDataURL("image/png"); link.click();
+        statusEl.textContent = "PNG berhasil disimpan.";
+      } catch (err) {
+        statusEl.textContent = `Gagal: ${err.message}`;
+      } finally {
+        btnDownload.disabled = false;
+      }
+    }
+
+    $("#btn-refresh").addEventListener("click", fetchSchedule);
+    $("#btn-download").addEventListener("click", downloadPNG);
+    $("#btn-today").addEventListener("click", () => { selectedDate = todayISO(); datePicker.value = selectedDate; renderMatches(selectedDate); });
+    datePicker.addEventListener("change", (e) => { selectedDate = e.target.value; renderMatches(selectedDate); });
+
+    fetchSchedule();
+  </script>
+</body>
+</html>
+    .match-count {
+      background: rgba(255,255,255,0.12);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .legend span.free { color: #4ade80; }
+    .legend span.paid { color: #fbbf24; }
+
+    .table-head, .match-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 200px 220px;
+      gap: 12px;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .table-head {
+      background: #1e293b;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .match-row {
+      padding-top: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+      font-size: 0.92rem;
+    }
+
+    .match-row:nth-child(even) { background: #111827; }
+
+    .time-badge {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+    }
+
+    .matchup-box { display: flex; flex-direction: column; gap: 8px; }
+
+    .league-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 999px;
+      padding: 3px 10px 3px 4px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      width: fit-content;
+    }
+
+    .league-chip img { width: 18px; height: 18px; object-fit: contain; }
+
+    .teams-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .team-side {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .team-side.away { flex-direction: row-reverse; text-align: right; }
+
+    .team-side img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .team-name {
+      font-weight: 600;
+      font-size: 0.88rem;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .vs-badge {
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #64748b;
+      background: #1e293b;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .tv-list { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; }
+    .tv-free { color: #4ade80; }
+    .tv-paid { color: #fbbf24; }
+
+    .empty-state {
+      padding: 48px 32px;
+      text-align: center;
+      color: #64748b;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .footer-note {
+      padding: 14px 24px;
+      font-size: 0.75rem;
+      color: #475569;
+      border-top: 1px solid #1e293b;
+    }
+
+    @media (max-width: 768px) {
+      .table-head { display: none; }
+      .match-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 16px;
+      }
+      .team-name { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div>
+      <h1>⚽ Generator Jadwal Bola PNG</h1>
+      <p>Logo klub &amp; liga · Siaran TV lokal &amp; berbayar</p>
+    </div>
+    <div class="controls">
+      <input type="date" id="date-picker" />
+      <input type="file" id="file-import" accept=".html,.htm,text/html" />
+      <button class="btn-ghost" id="btn-today">Hari Ini</button>
+      <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
+      <label class="file-label btn-warn" for="file-import">📂 Import HTML</label>
+      <button class="btn-primary" id="btn-download" disabled>⬇ Download PNG</button>
+    </div>
+  </div>
+
+  <div class="status" id="status">Memuat jadwal...</div>
+  <div class="hint-box" id="hint-box" hidden></div>
+
+  <div id="export-area">
+    <div class="banner">
+      <div class="banner-top">
+        <div>
+          <h2>⚽ JADWAL BOLA HARI INI</h2>
+          <div class="date-label" id="display-date">—</div>
+        </div>
+        <div class="match-count" id="match-count">0 pertandingan</div>
+      </div>
+      <div class="legend">
+        <span class="free">📺 TV Lokal / Gratis</span>
+        <span class="paid">💳 TV Berbayar / Streaming</span>
+      </div>
+    </div>
+
+    <div class="table-head">
+      <span>WIB</span>
+      <span>Pertandingan</span>
+      <span>Siaran TV</span>
+      <span></span>
+    </div>
+
+    <div id="match-list">
+      <div class="empty-state">Memuat data...</div>
+    </div>
+
+    <div class="footer-note">
+      Waktu kick-off dalam WIB · Jadwal dapat berubah · Sumber: Goal.com Indonesia
+    </div>
+  </div>
+
+  <script>
+    const GOAL_URL =
+      "https://www.goal.com/id/berita/jadwal-tv-siaran-langsung-sepakbola-hari-ini/1qomojcjyge9n1nr2voxutdc1n";
+
+    const BULAN_ID = [
+      "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+    const FREE_TV = [
+      "rcti", "mnctv", "gtv", "sctv", "indosiar", "antv", "tvone",
+      "kompas tv", "inews", "inews tv", "tvri", "trans tv", "trans7", "metro tv"
+    ];
+    const PAID_KW = [
+      "vidio", "bein", "vision+", "vision plus", "mola", "spotv",
+      "apple tv", "disney", "netflix", "prime video", "hbo", "espn", "dazn"
+    ];
+
+    const IS_FILE = location.protocol === "file:";
+    const IS_LOCALHOST = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    const IS_GITHUB_PAGES = location.hostname.endsWith("github.io");
+    const HAS_LOCAL_SERVER = IS_LOCALHOST && !IS_FILE;
+    const USE_STATIC = IS_GITHUB_PAGES || (!IS_FILE && !IS_LOCALHOST);
+
+    let allSchedules = {};
+    let selectedDate = todayISO();
+    let staticLogos = null;
+    const logoCache = { teams: {}, leagues: {}, images: {} };
+
+    const $ = (sel) => document.querySelector(sel);
+    const datePicker = $("#date-picker");
+    const statusEl = $("#status");
+    const hintBox = $("#hint-box");
+    const matchList = $("#match-list");
+    const displayDate = $("#display-date");
+    const matchCount = $("#match-count");
+    const btnDownload = $("#btn-download");
+    const btnRefresh = $("#btn-refresh");
+
+    datePicker.value = selectedDate;
+
+    function todayISO() {
+      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    }
+
+    function formatDateID(iso) {
+      const [y, m, day] = iso.split("-").map(Number);
+      const dt = new Date(y, m - 1, day);
+      return `${HARI_ID[dt.getDay()]}, ${day} ${BULAN_ID[m]} ${y}`;
+    }
+
+    function parseIndoDate(text) {
+      const re = /(\d{1,2})\s+(\w+)\s+(\d{4})/i;
+      const m = text.trim().match(re);
+      if (!m) return null;
+      const bulan = {
+        januari: 1, februari: 2, maret: 3, april: 4, mei: 5, juni: 6,
+        juli: 7, agustus: 8, september: 9, oktober: 10, november: 11, desember: 12
+      };
+      const month = bulan[m[2].toLowerCase()];
+      if (!month) return null;
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${m[3]}-${pad(month)}-${pad(+m[1])}`;
+    }
+
+    function parseMatchup(text) {
+      for (const sep of [" vs ", " VS ", " v "]) {
+        const idx = text.toLowerCase().indexOf(sep.toLowerCase());
+        if (idx >= 0) {
+          return {
+            home: text.slice(0, idx).trim(),
+            away: text.slice(idx + sep.length).trim(),
+          };
+        }
+      }
+      return { home: text.trim(), away: "" };
+    }
+
+    function classifyTV(stations) {
+      if (!stations || stations === "-" || stations === "TBC") return { free: [], paid: [] };
+      const parts = stations.split(/\s*\/\s*/).map((s) => s.trim()).filter(Boolean);
+      const free = [], paid = [];
+      for (const part of parts) {
+        const lower = part.toLowerCase();
+        const isPaid = PAID_KW.some((k) => lower.includes(k));
+        const isFree = FREE_TV.some((t) => lower.includes(t));
+        if (isPaid) paid.push(part);
+        else if (isFree) free.push(part);
+        else if (/sport/i.test(part) || /\d/.test(part)) paid.push(part);
+        else free.push(part);
+      }
+      return { free, paid };
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function showHint(html) {
+      hintBox.innerHTML = html;
+      hintBox.hidden = !html;
+    }
+
+    function normalizeName(name) {
+      return name.toLowerCase().trim().replace(/\s+/g, " ");
+    }
+
+    async function loadStaticLogos() {
+      if (staticLogos) return staticLogos;
+      const res = await fetch("logos.json");
+      if (!res.ok) throw new Error("logos.json tidak ditemukan");
+      staticLogos = await res.json();
+      return staticLogos;
+    }
+
+    function findStaticBadge(map, name) {
+      if (!map || !name) return null;
+      if (map[name]) return map[name];
       const norm = normalizeName(name);
       let best = null;
       let bestLen = 0;
