@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jadwal Bola Hari Ini — Generator PNG</title>
+  <title>Jadwal Bola Hari Ini — Generator PNG TikTok</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: #0b1120;
+      background: #070a13;
       color: #f1f5f9;
       min-height: 100vh;
       padding: 24px 16px 48px;
@@ -23,14 +23,17 @@
       gap: 12px;
       align-items: center;
       justify-content: space-between;
+      background: #111726;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #1e293b;
     }
 
-    .toolbar h1 { font-size: 1.35rem; font-weight: 700; color: #22c55e; }
-    .toolbar p { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+    .toolbar h1 { font-size: 1.35rem; font-weight: 800; color: #22c55e; letter-spacing: -0.01em; }
+    .toolbar p { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
 
     .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-    /* Perubahan: Date picker sekarang ditampilkan, tidak di-hide lagi */
     input[type="date"] {
       background: #1e293b;
       color: #fff;
@@ -51,89 +54,549 @@
       padding: 9px 18px;
       font-size: 0.9rem;
       font-weight: 600;
-      transition: opacity 0.15s;
+      transition: all 0.2s;
       display: inline-block;
     }
 
-    button:hover, .file-label:hover { opacity: 0.88; }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button:hover, .file-label:hover { opacity: 0.88; transform: translateY(-1px); }
+    button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-    .btn-primary { background: #22c55e; color: #052e16; }
+    .btn-primary { background: #22c55e; color: #052e16; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2); }
     .btn-secondary { background: #3b82f6; color: #fff; }
     .btn-ghost { background: #334155; color: #e2e8f0; }
     .btn-warn { background: #d97706; color: #fff; }
 
-    /* Gaya Tombol Cari Logo jika logo kosong */
     .btn-search-logo {
-      background: #334155;
+      background: #1e293b;
       color: #94a3b8;
       font-size: 0.68rem;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      font-weight: normal;
-      margin-left: 6px;
-      border: 1px solid #475569;
+      border: 1px solid #334155;
     }
-    .btn-search-logo:hover {
-      background: #475569;
-      color: #f1f5f9;
-    }
+    .btn-search-logo:hover { background: #334155; color: #f1f5f9; }
 
     .status {
       max-width: 1100px;
       margin: 0 auto 16px;
       font-size: 0.88rem;
       color: #94a3b8;
-      line-height: 1.5;
+      padding: 0 4px;
     }
-
+    .status.loading { color: #3b82f6; }
     .status.error { color: #f87171; }
-    .status.loading { color: #60a5fa; }
-    .status.warn { color: #fbbf24; }
 
-    .hint-box {
-      max-width: 1100px;
-      margin: 0 auto 16px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      line-height: 1.55;
-    }
-
-    .hint-box strong { color: #4ade80; }
-
+    /* Preview area di web tetap rapi */
     #export-area {
-      max-width: 1080px;
+      max-width: 500px; /* Dipersempit agar simulasi rasio hp di web */
       margin: 0 auto;
-      background: #0f172a;
-      border-radius: 16px;
+      background: #0d1222;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      border: 1px solid #1e2942;
     }
 
     .banner {
-      background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
-      padding: 28px 32px 24px;
-    }
-
-    .banner-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
+      background: linear-gradient(180deg, #111a30 0%, #0d1222 100%);
+      padding: 32px 24px 20px;
+      text-align: center;
+      border-bottom: 2px solid #1e2942;
     }
 
     .banner h2 {
-      font-size: 1.75rem;
-      font-weight: 800;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    }
+    
+    .banner h2 span { color: #22c55e; }
+
+    .banner .date-label {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      margin-top: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .match-count {
+      display: inline-block;
+      background: rgba(34, 197, 94, 0.15);
       color: #4ade80;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 12px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .match-container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .match-card {
+      background: #141c30;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid #202b47;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.72rem;
+      border-bottom: 1px solid #202b47;
+      padding-bottom: 8px;
+    }
+
+    .card-league {
+      color: #94a3b8;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-league img { width: 16px; height: 16px; object-fit: contain; }
+
+    .card-time {
+      background: #22c55e;
+      color: #052e16;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .card-body-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .grid-team {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .grid-team img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+
+    .grid-team-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f8fafc;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .grid-vs {
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #475569;
+      background: #0d1222;
+      padding: 6px 10px;
+      border-radius: 50%;
+      border: 1px solid #202b47;
+    }
+
+    .card-footer-tv {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(32, 43, 71, 0.5);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tv-live-label { color: #64748b; font-size: 0.65rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+    .tv-f { color: #22c55e; font-weight: 600; }
+    .tv-p { color: #fbbf24; font-weight: 600; }
+
+    .empty-state { padding: 48px; text-align: center; color: #64748b; font-size: 0.95rem; }
+    .watermark { text-align: center; padding: 16px; font-size: 0.7rem; color: #334155; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div>
+      <h1>⚽ Jadwal Bola PNG (Edisi TikTok)</h1>
+      <p>Rasio Vertikal Otomatis Premium</p>
+    </div>
+    <div class="controls">
+      <input type="date" id="date-picker" />
+      <input type="file" id="file-import" accept=".html,.htm,text/html" />
+      <button class="btn-ghost" id="btn-today">Hari Ini</button>
+      <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
+      <label class="file-label btn-warn" for="file-import">📂 Import HTML</label>
+      <button class="btn-primary" id="btn-download" disabled>⚡ Download PNG TikTok</button>
+    </div>
+  </div>
+
+  <div class="status" id="status">Memuat jadwal...</div>
+
+  <div id="export-area">
+    <div class="banner">
+      <h2>JADWAL <span>SIARAN BOLA</span></h2>
+      <div class="date-label" id="display-date">—</div>
+      <div class="match-count" id="match-count">0 Match</div>
+    </div>
+
+    <div id="match-list" class="match-container">
+      <div class="empty-state">Memuat data...</div>
+    </div>
+
+    <div class="watermark">⚡ Konten Creator Jadwal Bola ⚡</div>
+  </div>
+
+  <script>
+    const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const FREE_TV = ["rcti", "mnctv", "gtv", "sctv", "indosiar", "antv", "tvone", "kompas tv", "inews", "inews tv", "tvri", "trans tv", "trans7", "metro tv"];
+    const PAID_KW = ["vidio", "bein", "vision+", "vision plus", "mola", "spotv", "apple tv", "disney", "netflix", "prime video", "hbo", "espn", "dazn"];
+
+    const IS_FILE = location.protocol === "file:";
+    const HAS_LOCAL_SERVER = (location.hostname === "localhost" || location.hostname === "127.0.0.1") && !IS_FILE;
+
+    let allSchedules = {};
+    let selectedDate = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    let staticLogos = null;
+    const logoCache = { teams: {}, leagues: {}, images: {} };
+
+    const $ = (sel) => document.querySelector(sel);
+    const datePicker = $("#date-picker");
+    const statusEl = $("#status");
+    const matchList = $("#match-list");
+    const displayDate = $("#display-date");
+    const matchCount = $("#match-count");
+    const btnDownload = $("#btn-download");
+
+    datePicker.value = selectedDate;
+
+    function formatDateID(iso) {
+      if(!iso) return "—";
+      const [y, m, day] = iso.split("-").map(Number);
+      const dt = new Date(y, m - 1, day);
+      return `${HARI_ID[dt.getDay()]}, ${day} ${BULAN_ID[m]} ${y}`;
+    }
+
+    function escapeHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    function normalizeName(name) { return name.toLowerCase().trim().replace(/\s+/g, " "); }
+
+    async function loadStaticLogos() {
+      if (staticLogos) return staticLogos;
+      try {
+        const res = await fetch("logos.json");
+        if (!res.ok) throw new Error();
+        staticLogos = await res.json();
+      } catch {
+        staticLogos = { teams: {}, leagues: {} };
+      }
+      return staticLogos;
+    }
+
+    function findStaticBadge(map, name) {
+      if (!map || !name) return null;
+      if (map[name]) return map[name];
+      const norm = normalizeName(name);
+      for (const [key, url] of Object.entries(map)) {
+        const kNorm = normalizeName(key);
+        if (norm === kNorm || norm.includes(kNorm) || kNorm.includes(norm)) return url;
+      }
+      const kKunci = norm.split(" ").filter(w => w.length > 2);
+      if (kKunci.length > 0) {
+        for (const [key, url] of Object.entries(map)) {
+          const kNorm = normalizeName(key);
+          if (kKunci.every(k => kNorm.includes(k))) return url;
+        }
+      }
+      return null;
+    }
+
+    function resolveTeamLogo(name) { return staticLogos ? findStaticBadge(staticLogos.teams, name) : null; }
+    function resolveLeagueLogo(comp) { return staticLogos ? findStaticBadge(staticLogos.leagues, comp) : null; }
+    function logoImgSrc(url) { return HAS_LOCAL_SERVER ? `/api/img?url=${encodeURIComponent(url)}` : url; }
+
+    async function loadImage(url) {
+      if (!url) return null;
+      if (logoCache.images[url]) return logoCache.images[url];
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = logoImgSrc(url); });
+        logoCache.images[url] = img;
+        return img;
+      } catch { return null; }
+    }
+
+    async function renderMatches(iso) {
+      selectedDate = iso;
+      const matches = allSchedules[iso] || [];
+      displayDate.textContent = formatDateID(iso);
+      matchCount.textContent = `${matches.length} MATCH`;
+
+      if (!matches.length) {
+        matchList.innerHTML = `<div class="empty-state">Tidak ada jadwal bola untuk tanggal ini.<br><small style="color:#475569">Silakan pilih tanggal lain di menu atas.</small></div>`;
+        btnDownload.disabled = true;
+        return;
+      }
+
+      btnDownload.disabled = false;
+      await loadStaticLogos();
+
+      matchList.innerHTML = matches.map((m, i) => {
+        const hLogo = resolveTeamLogo(m.home);
+        const aLogo = resolveTeamLogo(m.away);
+        const lLogo = resolveLeagueLogo(m.competition);
+
+        const hSearch = `https://www.google.com/search?tbm=isch&q=logo+${encodeURIComponent(m.home)}+football+png`;
+        const aSearch = `https://www.google.com/search?tbm=isch&q=logo+${encodeURIComponent(m.away)}+football+png`;
+
+        return `
+          <div class="match-card">
+            <div class="card-header">
+              <div class="card-league" id="l-chip-${i}">
+                ${lLogo ? `<img src="${logoImgSrc(lLogo)}" />` : ""}
+                <span>${escapeHtml(m.competition)}</span>
+              </div>
+              <div class="card-time">⏰ ${escapeHtml(m.kickoff)} WIB</div>
+            </div>
+            <div class="card-body-grid">
+              <div class="grid-team">
+                ${hLogo ? `<img src="${logoImgSrc(hLogo)}" />` : `<a href="${hSearch}" target="_blank" class="btn-search-logo">🔍 Cari Logo</a>`}
+                <span class="grid-team-name">${escapeHtml(m.home)}</span>
+              </div>
+              <div class="grid-vs">VS</div>
+              <div class="grid-team">
+                ${aLogo ? `<img src="${logoImgSrc(aLogo)}" />` : `<a href="${aSearch}" target="_blank" class="btn-search-logo">🔍 Cari Logo</a>`}
+                <span class="grid-team-name">${escapeHtml(m.away)}</span>
+              </div>
+            </div>
+            <div class="card-footer-tv">
+              <div class="tv-live-label">LIVE SIARAN:</div>
+              ${m.tvFree.length ? `<div class="tv-f">📺 ${escapeHtml(m.tvFree.join(" · "))}</div>` : ""}
+              ${m.tvPaid.length ? `<div class="tv-p">💳 ${escapeHtml(m.tvPaid.join(" · "))}</div>` : ""}
+              ${(!m.tvFree.length && !m.tvPaid.length) ? `<div class="tv-p">📺 ${escapeHtml(m.tv || "-")}</div>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function fetchStaticSchedule() {
+      const res = await fetch("data/jadwal.json");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      allSchedules = data.schedules;
+      statusEl.textContent = "✓ Database jadwal online berhasil sinkron.";
+      renderMatches(selectedDate);
+    }
+
+    async function downloadPNG() {
+      const matches = allSchedules[selectedDate] || [];
+      if (!matches.length) return;
+
+      btnDownload.disabled = true;
+      statusEl.textContent = "⚡ Sedang me-render desain HD TikTok 9:16...";
+
+      try {
+        // Ambil list logo unik
+        const urls = [];
+        matches.forEach(m => {
+          urls.push(resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition));
+        });
+        await Promise.all([...new Set(urls.filter(Boolean))].map(u => loadImage(u)));
+
+        // SPESIFIKASI RASIO 1080 x 1920 (TIKTOK VERTICAL 9:16)
+        const W = 1080;
+        const H = 1920;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+
+        // 1. BACKGROUND UTAMA (Gelap Cyber)
+        ctx.fillStyle = "#070a13";
+        ctx.fillRect(0, 0, W, H);
+        
+        // Dekorasi Ambient Glow atas bawah
+        let radialGrad = ctx.createRadialGradient(W/2, 0, 50, W/2, 0, 600);
+        radialGrad.addColorStop(0, "rgba(34, 197, 94, 0.15)");
+        radialGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = radialGrad; ctx.fillRect(0, 0, W, 600);
+
+        // 2. BANNER ATAS (HEADER)
+        ctx.fillStyle = "#111726";
+        ctx.fillRect(40, 60, W - 80, 220);
+        ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 3; ctx.strokeRect(40, 60, W - 80, 220);
+
+        ctx.fillStyle = "#ffffff"; ctx.font = "black 54px Segoe UI, Arial"; ctx.textAlign = "center";
+        ctx.fillText("JADWAL SIARAN BOLA", W / 2, 135);
+        
+        ctx.fillStyle = "#22c55e"; ctx.font = "bold 34px Segoe UI";
+        ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 195);
+
+        ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "bold 20px Segoe UI"; ctx.letterSpacing = "2px";
+        ctx.fillText(`${matches.length} PERTANDINGAN HARI INI`, W / 2, 245);
+        ctx.letterSpacing = "0px"; // reset
+
+        // 3. GENERATE KARTU PERTANDINGAN (Ditata Vertikal Kebawah)
+        // Batasi jumlah maksimal agar tidak keluar dari area layar TikTok (Saran: Max 6-7 baris, jika lebih disarankan split halaman)
+        const maxCards = 7;
+        const listMatches = matches.slice(0, maxCards);
+
+        let startY = 320;
+        const cardW = W - 80;
+        const cardH = 200;
+        const gap = 24;
+
+        listMatches.forEach((m, i) => {
+          let y = startY + (i * (cardH + gap));
+          
+          // Background Card
+          ctx.fillStyle = "#141c30";
+          drawRoundRect(ctx, 40, y, cardW, cardH, 16, "#141c30", "#202b47");
+
+          // Header kartu (Nama Kompetisi & Kickoff)
+          const lImg = logoCache.images[resolveLeagueLogo(m.competition)];
+          if (lImg) {
+            ctx.drawImage(lImg, 65, y + 20, 24, 24);
+            ctx.fillStyle = "#94a3b8"; ctx.font = "bold 22px Segoe UI"; ctx.textAlign = "left";
+            ctx.fillText(truncate(ctx, m.competition, 300), 100, y + 38);
+          } else {
+            ctx.fillStyle = "#94a3b8"; ctx.font = "bold 22px Segoe UI"; ctx.textAlign = "left";
+            ctx.fillText(truncate(ctx, m.competition, 300), 65, y + 38);
+          }
+
+          // Badge Waktu Kick-Off
+          drawRoundRect(ctx, W - 220, y + 16, 180, 36, 8, "#22c55e");
+          ctx.fillStyle = "#052e16"; ctx.font = "black 20px Segoe UI"; ctx.textAlign = "center";
+          ctx.fillText(m.kickoff + " WIB", W - 220 + 90, y + 42);
+
+          // Pembatas garis horizontal tipis dalam kartu
+          ctx.strokeStyle = "rgba(32, 43, 71, 0.6)"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(60, y + 66); ctx.lineTo(W - 60, y + 66); ctx.stroke();
+
+          // KELOMPOK VISUAL TIM VS TIM (Layout Tengah Terpusat)
+          const centerVS = W / 2;
+          
+          // Lingkaran VS Tengah
+          ctx.beginPath(); ctx.arc(centerVS, y + 125, 26, 0, 2 * Math.PI);
+          ctx.fillStyle = "#070a13"; ctx.fill();
+          ctx.strokeStyle = "#202b47"; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = "#64748b"; ctx.font = "black 18px Segoe UI"; ctx.textAlign = "center";
+          ctx.fillText("VS", centerVS, y + 132);
+
+          // LOGO DAN NAMA HOME (Sisi Kiri)
+          const hImg = logoCache.images[resolveTeamLogo(m.home)];
+          const homeLogoX = centerVS - 120;
+          if(hImg) {
+            ctx.drawImage(hImg, homeLogoX - 30, y + 85, 60, 60);
+          } else {
+            drawPlaceholderLogo(ctx, homeLogoX - 30, y + 85, 60, m.home);
+          }
+          ctx.fillStyle = "#ffffff"; ctx.font = "bold 26px Segoe UI"; ctx.textAlign = "right";
+          ctx.fillText(truncate(ctx, m.home, 260), homeLogoX - 45, y + 122);
+
+          // LOGO DAN NAMA AWAY (Sisi Kanan)
+          const aImg = logoCache.images[resolveTeamLogo(m.away)];
+          const awayLogoX = centerVS + 120;
+          if(aImg) {
+            ctx.drawImage(aImg, awayLogoX - 30, y + 85, 60, 60);
+          } else {
+            drawPlaceholderLogo(ctx, awayLogoX - 30, y + 85, 60, m.away);
+          }
+          ctx.fillStyle = "#ffffff"; ctx.font = "bold 26px Segoe UI"; ctx.textAlign = "left";
+          ctx.fillText(truncate(ctx, m.away, 260), awayLogoX + 45, y + 122);
+
+          // PANEL ARUS LOGO TV LIVE (Di bawah Kartu)
+          let tvStrings = [];
+          if(m.tvFree.length) tvStrings.push("📺 " + m.tvFree.join(" · "));
+          if(m.tvPaid.length) tvStrings.push("💳 " + m.tvPaid.join(" · "));
+          if(!tvStrings.length) tvStrings.push("📺 " + (m.tv || "-"));
+          
+          ctx.fillStyle = "#fbbf24"; ctx.font = "600 18px Segoe UI"; ctx.textAlign = "center";
+          ctx.fillText(truncate(ctx, tvStrings.join(" | "), 900), W / 2, y + 182);
+        });
+
+        // 4. WATERMARK BOTTOM BRANDING UNTUK TIKTOK
+        ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.font = "bold 22px Segoe UI"; ctx.letterSpacing = "6px"; ctx.textAlign = "center";
+        ctx.fillText("⚡ FOLLOW UNTUK UPDATE JADWAL BOLA TERBARU ⚡", W / 2, H - 80);
+
+        // Download Aksi
+        const link = document.createElement("a");
+        link.download = `jadwal-tiktok-${selectedDate}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        statusEl.textContent = "✓ Foto HD Resolusi Vertikal 9:16 Berhasil Didownload! Siap di-upload ke TikTok.";
+      } catch (err) {
+        statusEl.textContent = `Gagal ekspor gambar: ${err.message}`;
+      } finally {
+        btnDownload.disabled = false;
+      }
+    }
+
+    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+    }
+
+    function drawPlaceholderLogo(ctx, x, y, size, label) {
+      drawRoundRect(ctx, x, y, size, size, 12, "#0d1222", "#202b47");
+      ctx.fillStyle = "#64748b"; ctx.font = "bold 18px Segoe UI"; ctx.textAlign = "center";
+      ctx.fillText((label || "?").slice(0, 2).toUpperCase(), x + size/2, y + size/2 + 7);
+    }
+
+    function truncate(ctx, text, maxW) {
+      if (ctx.measureText(text).width <= maxW) return text;
+      let t = text;
+      while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
+      return t + "…";
+    }
+
+    $("#btn-refresh").addEventListener("click", () => {
+      statusEl.textContent = "Sinkronisasi ulang...";
+      fetchStaticSchedule().catch(() => { statusEl.textContent = "Gagal memuat jadwal online."; });
+    });
+    $("#btn-download").addEventListener("click", downloadPNG);
+    $("#btn-today").addEventListener("click", () => { datePicker.value = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" }); renderMatches(datePicker.value); });
+    datePicker.addEventListener("change", (e) => { renderMatches(e.target.value); });
+
+    fetchStaticSchedule().catch(() => { statusEl.textContent = "Gagal memuat jadwal."; });
+  </script>
+</body>
+</html>
       letter-spacing: -0.02em;
     }
 
