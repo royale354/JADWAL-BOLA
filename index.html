@@ -25,7 +25,7 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
 
-    .toolbar h1 { font-size: 1.4rem; font-weight: 800; color: #38bdf8; letter-spacing: -0.01em; }
+    .toolbar h1 { font-size: 1.4rem; font-weight: 800; color: #22c55e; letter-spacing: -0.01em; }
     .toolbar p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 16px; }
 
     .branding-inputs {
@@ -86,23 +86,25 @@
     button:hover, .file-label:hover { opacity: 0.9; transform: translateY(-1px); }
     button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .btn-primary { background: linear-gradient(135deg, #eab308, #ca8a04); color: #fff; box-shadow: 0 4px 14px rgba(234, 179, 8, 0.3); width: 100%; margin-top: 6px; padding: 12px; font-size: 0.95rem; }
+    .btn-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3); width: 100%; margin-top: 6px; padding: 12px; font-size: 0.95rem; }
     .btn-secondary { background: #2563eb; color: #fff; }
     .btn-ghost { background: #334155; color: #e2e8f0; }
     .btn-warn { background: #475569; color: #fff; }
 
     .status {
-      max-width: 450px;
+      max-width: 430px;
       margin: 0 auto 12px;
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: #eab308;
       text-align: center;
+      font-weight: 600;
     }
+    .status.success { color: #22c55e; }
+    .status.error { color: #f87171; }
 
-    /* Live Preview Simulasi Rasio 9:16 di Web Browser */
     #export-area {
       max-width: 430px;
-      height: 764px; /* Aspek rasio simulasi 9:16 di layar monitor */
+      height: 764px;
       margin: 0 auto;
       background: #070a13;
       border-radius: 24px;
@@ -118,51 +120,48 @@
     .preview-msg {
       position: absolute;
       top: 50%; left: 50%; transform: translate(-50%, -50%);
-      color: rgba(255,255,255,0.06); font-size: 2.2rem; font-weight: 900;
+      color: rgba(255,255,255,0.03); font-size: 2.2rem; font-weight: 900;
       text-align: center; pointer-events: none; width: 90%; letter-spacing: 2px;
     }
 
     .banner { padding: 24px 20px 10px; text-align: center; }
     .banner h2 { font-size: 1.4rem; font-weight: 900; color: #fff; letter-spacing: 0.05em; text-transform: uppercase; }
-    .banner h2 span { color: #fdf006; }
     .banner .date-label { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; font-weight: 700; text-transform: uppercase; }
 
-    .match-container { padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow: hidden; }
+    .match-container { padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; }
     
-    /* Bar Kapsul Simulasi */
     .sim-card {
-      background: #111625; border-radius: 50px; border: 1px solid #22c55e;
-      padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem;
+      background: #111625; border-radius: 50px; border: 1px solid #1e2942;
+      padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem;
     }
-    .sim-time { font-weight: 800; color: #fff; background: #000; padding: 2px 8px; border-radius: 20px; }
-    .sim-teams { font-weight: 700; display: flex; gap: 6px; align-items: center; }
+    .sim-time { font-weight: 800; color: #22c55e; background: #070a13; padding: 2px 8px; border-radius: 20px; }
+    .sim-teams { font-weight: 700; display: flex; gap: 6px; align-items: center; color: #fff; }
     .sim-tv { color: #fbbf24; font-weight: 600; font-size: 0.7rem; }
 
     .watermark-footer {
-      background: #000; padding: 10px; text-align: center; font-size: 0.7rem;
+      background: #000; padding: 12px; text-align: center; font-size: 0.75rem;
       color: #94a3b8; font-weight: 700; border-top: 1px solid #111625;
-      display: flex; justify-content: center; gap: 12px;
     }
   </style>
 </head>
 <body>
 
   <div class="toolbar">
-    <h1>⚽ Generator Jadwal Bola (Edisi Keren TikTok)</h1>
-    <p>Desain Premium 9:16 Kapsul Glow &amp; Watermark Transparan</p>
+    <h1>⚽ Generator Jadwal Bola TikTok</h1>
+    <p>Desain Premium Kapsul Glow &amp; Watermark Transparan</p>
     
     <div class="branding-inputs">
       <label>
         JUDUL ATAS (HEADER)
-        <input type="text" id="input-header" value="KREATOR JADWAL BOLA" placeholder="Contoh: CORNER KICK" />
+        <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
       </label>
       <label>
         NAMA WATERMARK (ANTI-MALING)
-        <input type="text" id="input-wm" value="JADWAL BOLA TERBARU" placeholder="Teks tengah bayangan" />
+        <input type="text" id="input-wm" value="CORNERKIICK" />
       </label>
       <label style="grid-column: span 2">
         BAR SOSIAL MEDIA (FOOTER BAWAH GAMBAR)
-        <input type="text" id="input-footer" value="🎵 @cornerkiick  |  📸 @cornerkiick  |  📺 CORNER KICK" placeholder="Contoh: @akun_anda" />
+        <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
       </label>
     </div>
 
@@ -172,24 +171,23 @@
       <button class="btn-ghost" id="btn-today">Hari Ini</button>
       <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
       <label class="file-label btn-warn" for="file-import">📂 Import HTML</label>
-      <button class="btn-primary" id="btn-download" disabled>⚡ GENERATE &amp; DOWNLOAD PNG 9:16</button>
+      <button class="btn-primary" id="btn-download" disabled>⚡ DOWNLOAD PNG TIKTOK 9:16</button>
     </div>
   </div>
 
-  <div class="status" id="status">Memuat jadwal...</div>
+  <div class="status" id="status">Memuat data...</div>
 
   <div id="export-area">
-    <div class="preview-msg">PREVIEW LIVE<br><span style="font-size:10px; color:#64748b; display:block; margin-top:8px;">Bentuk asli yang di-download berupa gambar HD premium silindris sesuai contoh</span></div>
+    <div class="preview-msg">PREVIEW LIVE</div>
     <div class="banner">
       <h2 id="view-header">KREATOR JADWAL BOLA</h2>
       <div class="date-label" id="display-date">—</div>
     </div>
 
-    <div id="match-list" class="match-container">
-      </div>
+    <div id="match-list" class="match-container"></div>
 
     <div class="watermark-footer" id="view-footer">
-      🎵 @cornerkiick  |  📸 @cornerkiick
+      🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK
     </div>
   </div>
 
@@ -197,13 +195,10 @@
     const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
-    const IS_FILE = location.protocol === "file:";
-    const HAS_LOCAL_SERVER = (location.hostname === "localhost" || location.hostname === "127.0.0.1") && !IS_FILE;
-
     let allSchedules = {};
-    let selectedDate = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    let selectedDate = todayISO();
     let staticLogos = null;
-    const logoCache = { teams: {}, leagues: {}, images: {} };
+    const logoCache = { images: {} };
 
     const $ = (sel) => document.querySelector(sel);
     const datePicker = $("#date-picker");
@@ -212,16 +207,18 @@
     const displayDate = $("#display-date");
     const btnDownload = $("#btn-download");
 
-    // Elemen Input Live Update
     const inputHeader = $("#input-header");
     const inputWM = $("#input-wm");
     const inputFooter = $("#input-footer");
 
     datePicker.value = selectedDate;
 
-    // Sinkronisasi Ketikan Input ke Pratinjau Box
     inputHeader.addEventListener("input", () => { $("#view-header").textContent = inputHeader.value.toUpperCase(); });
     inputFooter.addEventListener("input", () => { $("#view-footer").textContent = inputFooter.value; });
+
+    function todayISO() {
+      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    }
 
     function formatDateID(iso) {
       if(!iso) return "—";
@@ -254,18 +251,31 @@
 
     function resolveTeamLogo(name) { return staticLogos ? findStaticBadge(staticLogos.teams, name) : null; }
     function resolveLeagueLogo(comp) { return staticLogos ? findStaticBadge(staticLogos.leagues, comp) : null; }
-    function logoImgSrc(url) { return HAS_LOCAL_SERVER ? `/api/img?url=${encodeURIComponent(url)}` : url; }
+    
+    // SISTEM BYPASS LOGO MENGGUNAKAN REVERSE PROXY CORS UNTUK GITHUB PAGES
+    function logoImgSrc(url) { 
+      if (!url) return "";
+      // Menggunakan proxy open-source allorigins untuk membongkar proteksi hotlinking gambar di GitHub Pages
+      return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    }
 
-    async function loadImage(url) {
-      if (!url) return null;
-      if (logoCache.images[url]) return logoCache.images[url];
-      try {
+    function loadImage(url) {
+      if (!url) return Promise.resolve(null);
+      if (logoCache.images[url]) return Promise.resolve(logoCache.images[url]);
+      
+      return new Promise((resolve) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
-        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = logoImgSrc(url); });
-        logoCache.images[url] = img;
-        return img;
-      } catch { return null; }
+        img.crossOrigin = "anonymous"; // Wajib meminta akses cross-origin setelah melewati proxy
+        
+        img.onload = () => {
+          logoCache.images[url] = img;
+          resolve(img);
+        };
+        img.onerror = () => {
+          resolve(null); // Jika link mati, abaikan agar baris tabel tidak ikut patah/blank
+        };
+        img.src = logoImgSrc(url);
+      });
     }
 
     async function renderMatches(iso) {
@@ -274,7 +284,7 @@
       displayDate.textContent = formatDateID(iso);
 
       if (!matches.length) {
-        matchList.innerHTML = `<div style="text-align:center; padding-top:40px; color:#475569; font-size:0.8rem;">Tidak ada jadwal hari ini.</div>`;
+        matchList.innerHTML = `<div style="text-align:center; padding-top:40px; color:#475569; font-size:0.85rem;">Tidak ada jadwal untuk tanggal ini.</div>`;
         btnDownload.disabled = true;
         return;
       }
@@ -282,44 +292,98 @@
       btnDownload.disabled = false;
       await loadStaticLogos();
 
-      // Buat Bar Simulasi Sederhana di Halaman Web
       matchList.innerHTML = matches.map((m) => {
         let tvStr = m.tvFree.concat(m.tvPaid).join(" · ") || m.tv || "-";
         return `
           <div class="sim-card">
             <span class="sim-time">${m.kickoff}</span>
             <span class="sim-teams">${m.home} vs ${m.away}</span>
-            <span class="sim-tv">${tvStr.slice(0, 12)}...</span>
+            <span class="sim-tv">${tvStr}</span>
           </div>
         `;
       }).join("");
     }
 
-    async function fetchStaticSchedule() {
-      const res = await fetch("data/jadwal.json");
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      allSchedules = data.schedules;
-      statusEl.textContent = "✓ Jadwal siap diekspor ke gambar premium.";
-      renderMatches(selectedDate);
+    async function fetchSchedule() {
+      statusEl.className = "status";
+      statusEl.textContent = "Sinkronisasi jadwal terbaru...";
+      try {
+        const res = await fetch("data/jadwal.json");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        allSchedules = data.schedules;
+        statusEl.className = "status success";
+        statusEl.textContent = "✓ Sinkronisasi database online berhasil.";
+        renderMatches(selectedDate);
+      } catch {
+        statusEl.className = "status error";
+        statusEl.textContent = "Gagal memuat jadwal. Silakan gunakan tombol Import HTML.";
+      }
     }
 
-    // ==========================================
-    // AKSI ENGINE DOWNLOAD PNG PREMIUM HD TIKTOK
-    // ==========================================
+    function importHtmlFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(e.target.result, "text/html");
+          const rows = doc.querySelectorAll("table tr");
+          if (!rows.length) throw new Error("Format tabel tidak ditemukan.");
+
+          let importedCount = 0;
+          let currentFileDate = selectedDate;
+
+          rows.forEach((tr) => {
+            const cells = Array.from(tr.querySelectorAll("td")).map(td => td.textContent.trim());
+            if (cells.length >= 4) {
+              const kickoff = cells[0];
+              const matchup = cells[1];
+              const competition = cells[2];
+              const tv = cells[3];
+
+              if (kickoff.toLowerCase().includes("kick-off") || !matchup.includes("vs")) return;
+
+              const parts = matchup.split(/\s+vs\s+/i);
+              const home = parts[0] || "Home";
+              const away = parts[1] || "Away";
+
+              if (!allSchedules[currentFileDate]) allSchedules[currentFileDate] = [];
+              allSchedules[currentFileDate].push({
+                kickoff, matchup, home, away, competition, tv,
+                tvFree: [], tvPaid: []
+              });
+              importedCount++;
+            }
+          });
+
+          statusEl.className = "status success";
+          statusEl.textContent = `✓ Berhasil mengimpor ${importedCount} pertandingan dari file HTML.`;
+          renderMatches(selectedDate);
+        } catch (err) {
+          statusEl.className = "status error";
+          statusEl.textContent = `Gagal membaca file: ${err.message}`;
+        }
+      };
+      reader.readAsText(file);
+    }
+
     async function downloadPNG() {
       const matches = allSchedules[selectedDate] || [];
       if (!matches.length) return;
 
       btnDownload.disabled = true;
-      statusEl.textContent = "⌛ Sedang merender gambar Kapsul Glow HD (1080x1920)...";
+      statusEl.className = "status";
+      statusEl.textContent = "⌛ Mengunduh & memproses logo aman (Bypass CORS Proxy)...";
 
       try {
-        const urls = [];
-        matches.forEach(m => { urls.push(resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)); });
-        await Promise.all([...new Set(urls.filter(Boolean))].map(u => loadImage(u)));
+        const iconUrls = [];
+        matches.forEach(m => {
+          iconUrls.push(resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition));
+        });
+        
+        // Memaksa browser menunggu seluruh antrean gambar selesai terunduh via proxy
+        await Promise.all([...new Set(iconUrls.filter(Boolean))].map(u => loadImage(u)));
 
-        // Tetapkan Ukuran Resmi Kanvas Komparasi Vertikal HP 9:16
         const W = 1080;
         const H = 1920;
 
@@ -327,13 +391,12 @@
         canvas.width = W; canvas.height = H;
         const ctx = canvas.getContext("2d");
 
-        // 1. LATAR BELAKANG PEKAT CYBER
+        // BACKGROUND Peletakan Warna Dasar Gelap
         ctx.fillStyle = "#070a13";
         ctx.fillRect(0, 0, W, H);
 
-        // Tambah Efek Ring Neon Neon Ambient Glow di Tepi Atas & Bawah
         let radialAtas = ctx.createRadialGradient(W/2, 0, 100, W/2, 0, 800);
-        radialAtas.addColorStop(0, "rgba(34, 197, 94, 0.16)");
+        radialAtas.addColorStop(0, "rgba(34, 197, 94, 0.18)");
         radialAtas.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = radialAtas; ctx.fillRect(0, 0, W, 800);
 
@@ -342,123 +405,129 @@
         radialBawah.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = radialBawah; ctx.fillRect(0, 0, W, H);
 
-        // 2. WATERMARK TRANSPARAN DI BELAKANG (ANTI-MALING)
+        // WATERMARK DIAGONSAL TRANSPARAN
         ctx.save();
         ctx.translate(W / 2, H / 2);
-        ctx.rotate(-Math.PI / 5); // Kemiringan diagonal 35 derajat
-        ctx.fillStyle = "rgba(255, 255, 255, 0.025)"; // Transparan super tipis agar tidak mengganggu nama klub
-        ctx.font = "black 76px Segoe UI, Impact";
+        ctx.rotate(-Math.PI / 6);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.025)";
+        ctx.font = "black 84px Segoe UI, Impact";
         ctx.textAlign = "center";
-        const txtWM = inputWM.value.toUpperCase() || "JADWAL BOLA TERBARU";
-        // Cetak berulang secara vertikal sebagai pelindung background
-        ctx.fillText(txtWM, 0, -350);
-        ctx.fillText(txtWM, 0, -100);
-        ctx.fillText(txtWM, 0, 150);
-        ctx.fillText(txtWM, 0, 400);
+        const txtWM = inputWM.value.toUpperCase() || "CORNERKIICK";
+        ctx.fillText(txtWM, 0, -400);
+        ctx.fillText(txtWM, 0, -150);
+        ctx.fillText(txtWM, 0, 100);
+        ctx.fillText(txtWM, 0, 350);
         ctx.restore();
 
-        // 3. HEADER ATAS (Judul Akun / Judul Utama)
+        // HEADER TEXT
         ctx.fillStyle = "#ffffff";
         ctx.font = "900 54px Segoe UI, Arial Black"; ctx.textAlign = "center";
         ctx.fillText(inputHeader.value.toUpperCase() || "KREATOR JADWAL BOLA", W / 2, 140);
         
-        // Tanggal Sub-Header
-        ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 32px Segoe UI";
+        ctx.fillStyle = "#94a3b8"; ctx.font = "bold 32px Segoe UI";
         ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 205);
 
-        // Garis Pembatas Atas Neon Tipis
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.3)"; ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(100, 245); ctx.lineTo(W - 100, 245); ctx.stroke();
 
-        // 4. DRAW CAPSULE ROWS (Maksimal 10 pertandingan teratas agar tidak menumpuk ke bawah)
+        // DATA KAPSUL PERTANDINGAN (Max 10 baris agar pas)
         const maxBaris = 10;
         const dataMatches = matches.slice(0, maxBaris);
 
         let startY = 290;
-        const rowW = W - 100; // Lebar bar Kapsul
-        const rowH = 108;      // Tinggi bar Kapsul
-        const gap = 24;       // Jarak antar baris
-
-        // Array Warna Border Berputar agar Keren Bergradasi (Hijau, Biru, Orange, Ungu)
-        const borderColors = ["#22c55e", "#3b82f6", "#eab308", "#a855f7"];
+        const rowW = W - 100;
+        const rowH = 114;
+        const gap = 20;
+        const borderColors = ["#22c55e", "#3b82f6", "#eab308", "#ca8a04"];
 
         dataMatches.forEach((m, i) => {
           let y = startY + (i * (rowH + gap));
           let bColor = borderColors[i % borderColors.length];
 
-          // Gambar Kapsul Melengkung Bulat Sempurna (Radius setengah dari tinggi bar)
-          drawRoundRect(ctx, 50, y, rowW, rowH, 54, "#111625", bColor, 3);
+          drawRoundRect(ctx, 50, y, rowW, rowH, 57, "#111625", bColor, 3);
 
-          // SISI KIRI: Blok Jam Kick-Off Putih Tebal
-          ctx.fillStyle = "#ffffff"; ctx.font = "900 28px Segoe UI, Arial"; ctx.textAlign = "left";
-          ctx.fillText(m.kickoff, 95, y + 64);
+          // JAM KICKOFF (Kiri)
+          ctx.fillStyle = "#ffffff"; ctx.font = "900 30px Segoe UI"; ctx.textAlign = "left";
+          ctx.fillText(m.kickoff, 95, y + 68);
           ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "700 14px Segoe UI";
-          ctx.fillText("WIB", 185, y + 62);
+          ctx.fillText("WIB", 185, y + 66);
 
-          // TENGAH-TENGAH: Logo Kompetisi Liga (Sebagai Pemisah Sumbu Tengah)
           const center = W / 2;
+
+          // LOGO LIGA / KOMPETISI (Tengah Pemisah)
           const compLogo = logoCache.images[resolveLeagueLogo(m.competition)];
           if (compLogo) {
-            ctx.drawImage(compLogo, center - 28, y + 26, 56, 56);
+            ctx.drawImage(compLogo, center - 28, y + 29, 56, 56);
           } else {
-            // Jika logo liga kosong, buat lingkaran text kecil
-            ctx.beginPath(); ctx.arc(center, y + 54, 26, 0, 2 * Math.PI);
-            ctx.fillStyle = "#1e293b"; ctx.fill();
-            ctx.fillStyle = "#64748b"; ctx.font = "bold 13px Segoe UI"; ctx.textAlign = "center";
-            ctx.fillText(m.competition.slice(0,3).toUpperCase(), center, y + 59);
+            ctx.beginPath(); ctx.arc(center, y + 57, 26, 0, 2 * Math.PI);
+            ctx.fillStyle = "#070a13"; ctx.fill();
+            ctx.fillStyle = "#475569"; ctx.font = "900 13px Segoe UI"; ctx.textAlign = "center";
+            ctx.fillText(m.competition.slice(0,3).toUpperCase(), center, y + 62);
           }
 
-          // SISI TIM KIRI (HOME): Nama & Logo Klub Kiri
+          // HOME TEAM (Kiri Tengah)
           const hLogo = logoCache.images[resolveTeamLogo(m.home)];
-          const homeTxtX = center - 75;
-          if (hLogo) ctx.drawImage(hLogo, homeTxtX - 60, y + 24, 60, 60);
+          const homeTxtX = center - 80;
+          if (hLogo) {
+            ctx.drawImage(hLogo, homeTxtX - 60, y + 27, 60, 60);
+          } else {
+            drawPlaceholderCircle(ctx, homeTxtX - 50, y + 32, 50);
+          }
           ctx.fillStyle = "#ffffff"; ctx.font = "700 28px Segoe UI"; ctx.textAlign = "right";
-          ctx.fillText(truncate(ctx, m.home, 200), homeTxtX - 75, y + 64);
+          ctx.fillText(truncate(ctx, m.home, 200), homeTxtX - 75, y + 67);
 
-          // SISI TIM KANAN (AWAY): Nama & Logo Klub Kanan
+          // AWAY TEAM (Kanan Tengah)
           const aLogo = logoCache.images[resolveTeamLogo(m.away)];
-          const awayTxtX = center + 75;
-          if (aLogo) ctx.drawImage(aLogo, awayTxtX, y + 24, 60, 60);
+          const awayTxtX = center + 80;
+          if (aLogo) {
+            ctx.drawImage(aLogo, awayTxtX, y + 27, 60, 60);
+          } else {
+            drawPlaceholderCircle(ctx, awayTxtX, y + 32, 50);
+          }
           ctx.fillStyle = "#ffffff"; ctx.font = "700 28px Segoe UI"; ctx.textAlign = "left";
-          ctx.fillText(truncate(ctx, m.away, 200), awayTxtX + 75, y + 64);
+          ctx.fillText(truncate(ctx, m.away, 200), awayTxtX + 75, y + 67);
 
-          // SISI KANAN UJUNG: Nama Siaran TV (Kuning/Hijau menyala)
-          let tvFreeStr = m.tvFree.join(" · ");
-          let tvPaidStr = m.tvPaid.join(" · ");
-          let labelTV = tvFreeStr || tvPaidStr || m.tv || "-";
-          
-          ctx.fillStyle = tvFreeStr ? "#4ade80" : "#fbbf24"; 
+          // SIARAN TV (Kanan Ujung)
+          let tvStr = m.tvFree.concat(m.tvPaid).join(" · ") || m.tv || "-";
+          ctx.fillStyle = m.tvFree.length ? "#22c55e" : "#fbbf24";
           ctx.font = "900 22px Segoe UI"; ctx.textAlign = "right";
-          ctx.fillText(truncate(ctx, labelTV, 170), W - 95, y + 64);
+          ctx.fillText(truncate(ctx, tvStr, 160), W - 95, y + 67);
         });
 
-        // 5. BAR SOSIAL MEDIA DI BAGIAN PALING BAWAH (FOOTER BLACK BOX)
+        // FOOTER BOX BLACK BAR
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, H - 100, W, 100);
         ctx.strokeStyle = "rgba(255,255,255,0.08)"; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(0, H - 100); ctx.lineTo(W, H - 100); ctx.stroke();
 
         ctx.fillStyle = "#94a3b8"; ctx.font = "bold 24px Segoe UI"; ctx.textAlign = "center";
-        ctx.fillText(inputFooter.value || "FOLLOW UNTUK UPDATE HARI LAIN", W / 2, H - 42);
+        ctx.fillText(inputFooter.value || "FOLLOW UNTUK JADWAL BOLA TERUPDATE", W / 2, H - 42);
 
-        // PROSES UNDUH FILE
+        // DOWNLOAD TRIGGER ACTION
         const link = document.createElement("a");
-        link.download = `jadwal-bola-${selectedDate}.png`;
+        link.download = `jadwal-tiktok-${selectedDate}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        statusEl.textContent = "✓ Gambar HD 9:16 Berhasil Didownload! Siap FYP di TikTok.";
+        
+        statusEl.className = "status success";
+        statusEl.textContent = "✓ Selesai! Gambar HD Kapsul Glow berhasil diunduh dengan logo lengkap.";
       } catch (err) {
-        statusEl.textContent = `Gagal ekspor: ${err.message}`;
+        statusEl.className = "status error";
+        statusEl.textContent = `Gagal ekspor gambar: ${err.message}`;
       } finally {
         btnDownload.disabled = false;
       }
     }
 
-    // Fungsi Pembantu Gambar Canvas Lingkaran Kapsul
     function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, strokeW) {
       ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
       if (fill) { ctx.fillStyle = fill; ctx.fill(); }
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = strokeW || 2; ctx.stroke(); }
+    }
+
+    function drawPlaceholderCircle(ctx, x, y, size) {
+      ctx.beginPath(); ctx.arc(x + size/2, y + size/2, size/2, 0, 2 * Math.PI);
+      ctx.fillStyle = "#1e293b"; ctx.fill();
     }
 
     function truncate(ctx, text, maxW) {
@@ -468,12 +537,13 @@
       return t + "…";
     }
 
-    $("#btn-refresh").addEventListener("click", () => { fetchStaticSchedule().catch(() => {}); });
+    $("#btn-refresh").addEventListener("click", fetchSchedule);
     $("#btn-download").addEventListener("click", downloadPNG);
-    $("#btn-today").addEventListener("click", () => { datePicker.value = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" }); renderMatches(datePicker.value); });
+    $("#btn-today").addEventListener("click", () => { selectedDate = todayISO(); datePicker.value = selectedDate; renderMatches(selectedDate); });
     datePicker.addEventListener("change", (e) => { renderMatches(e.target.value); });
+    $("#file-import").addEventListener("change", (e) => { const file = e.target.files[0]; if (file) importHtmlFile(file); e.target.value = ""; });
 
-    fetchStaticSchedule().catch(() => {});
+    fetchSchedule();
   </script>
 </body>
 </html>
