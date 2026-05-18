@@ -2,8 +2,13 @@ name: Update Jadwal Bola
 
 on:
   schedule:
-    - cron: "0 2 * * *"
-  workflow_dispatch:
+    - cron: "0 2 * * * # Otomatis jalan jam 2 pagi setiap hari"
+  workflow_dispatch:      # Fitur tombol klik manual + form ubah tanggal
+    inputs:
+      paksa_tanggal:
+        description: 'Ubah Tanggal Jadwal (Format: YYYY-MM-DD) - Kosongkan jika ingin tanggal normal otomatis'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -12,7 +17,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repositori
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -20,14 +25,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install -r scripts/requirements.txt
+      - name: Install Dependencies
+        run: |
+          pip install beautifulsoup4
 
-      - name: Fetch jadwal from Goal.com
-        run: python scripts/update_jadwal.py
+      - name: Ambil Jadwal Bola & Auto Mapping Logo
+        run: |
+          if [ "${{ github.event.inputs.paksa_tanggal }}" != "" ]; then
+            python scripts/update_jadwal.py --date "${{ github.event.inputs.paksa_tanggal }}"
+          else
+            python scripts/update_jadwal.py
+          fi
 
-      - name: Commit jadwal.json
+      - name: Commit & Push ke data/jadwal.json
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update jadwal bola"
+          commit_message: "chore: update jadwal bola [Ubah Tanggal / Auto-Mapping]"
           file_pattern: data/jadwal.json
