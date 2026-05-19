@@ -263,7 +263,7 @@ LEAGUE_BADGE_URLS = {
     "MLS": "https://crests.football-data.org/MLS.png",
     "Saudi Pro League": "https://crests.football-data.org/SA.png",
     "Liga Champions Afrika": "https://crests.football-data.org/CL.png",
-    "Liga Champions Asia Two": "https://crests.football-data.org/ACL.png",
+    "Liga Champions Asia Two": "https://crests.football-data.org/CL.png",
     "Piala Konfederasi Afrika": "https://crests.football-data.org/ACN.png",
     "Piala Afrika U-17 2026": "https://crests.football-data.org/ACN.png",
     "Piala Asia U-17 2026": "https://crests.football-data.org/AS.png",

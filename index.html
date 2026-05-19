@@ -233,12 +233,37 @@
         const res = await fetch(asset("logos.json"));
         if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
         staticLogos = await res.json();
-        console.log("Logo DB:", Object.keys(staticLogos.teams || {}).length, "klub");
+        const n = Object.keys(staticLogos.teams || {}).length;
+        console.log("Logo DB:", n, "klub");
+        if (n < 300) {
+          console.warn(
+            "logos.json tampak belum lengkap di server. Push folder assets/logos/ + logos.json terbaru ke GitHub."
+          );
+        }
       } catch (e) {
         console.warn("Gagal muat logos.json:", e);
         staticLogos = { teams: {}, leagues: {} };
       }
       return staticLogos;
+    }
+
+    function slugifyName(name) {
+      return name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "unknown";
+    }
+
+    function isRemotePath(p) {
+      return /^https?:\/\//i.test(p || "");
+    }
+
+    /** GitHub Pages: hanya file di repo (assets/). URL luar kena CORS. */
+    function preferLocalAsset(mapped, folder, name) {
+      if (mapped && !isRemotePath(mapped)) return mapped;
+      const slug = slugifyName(name);
+      return `assets/logos/${folder}/${slug}.png`;
     }
 
     function findBadge(map, name) {
@@ -261,23 +286,30 @@
     }
 
     function resolveTeamLogo(name) {
-      return staticLogos ? findBadge(staticLogos.teams, name) : null;
+      const mapped = staticLogos ? findBadge(staticLogos.teams, name) : null;
+      return preferLocalAsset(mapped, "teams", name);
     }
 
     function resolveLeagueLogo(comp) {
-      return staticLogos ? findBadge(staticLogos.leagues, comp) : null;
+      const mapped = staticLogos ? findBadge(staticLogos.leagues, comp) : null;
+      return preferLocalAsset(mapped, "leagues", comp);
     }
 
     function resolveLogoPath(pathOrUrl) {
       if (!pathOrUrl) return null;
-      if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) return pathOrUrl;
+      if (isRemotePath(pathOrUrl)) return null;
       return asset(pathOrUrl);
     }
 
     function logoTag(pathOrUrl, alt) {
       const src = resolveLogoPath(pathOrUrl);
       if (!src) return "";
-      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" crossorigin="anonymous" loading="lazy" onerror="this.style.visibility='hidden'">`;
+      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" onerror="this.style.visibility='hidden'">`;
+    }
+
+    function cacheLogo(img, pathOrUrl, resolvedSrc) {
+      logoCache[pathOrUrl] = img;
+      if (resolvedSrc) logoCache[resolvedSrc] = img;
     }
 
     function getCachedLogo(pathOrUrl) {
@@ -285,38 +317,47 @@
       return logoCache[pathOrUrl] || logoCache[resolveLogoPath(pathOrUrl)] || null;
     }
 
-    function loadImage(pathOrUrl) {
-      if (!pathOrUrl) return Promise.resolve(null);
+    function localPathCandidates(pathOrUrl) {
+      if (!pathOrUrl || isRemotePath(pathOrUrl)) return [];
+      const base = pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+      const exts = [".png", ".svg", ".jpg", ".webp"];
+      const out = [];
+      for (const ext of exts) {
+        const p = base + ext;
+        if (!out.includes(p)) out.push(p);
+      }
+      if (!out.includes(pathOrUrl)) out.unshift(pathOrUrl);
+      return out;
+    }
+
+    function tryLoadOne(pathOrUrl) {
       const src = resolveLogoPath(pathOrUrl);
+      if (!src) return Promise.resolve(null);
       const cached = getCachedLogo(pathOrUrl);
       if (cached) return Promise.resolve(cached);
 
-      const isRemote = pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://");
-
       return new Promise((resolve) => {
         const img = new Image();
-        // crossOrigin hanya untuk URL luar — logo lokal (assets/) tanpa ini agar tidak kena CORS
-        if (isRemote) img.crossOrigin = "anonymous";
-
         img.onload = () => {
-          logoCache[src] = img;
-          logoCache[pathOrUrl] = img;
+          cacheLogo(img, pathOrUrl, src);
           resolve(img);
         };
-
-        img.onerror = () => {
-          if (isRemote && !img._proxied) {
-            img._proxied = true;
-            img.crossOrigin = "anonymous";
-            img.src = "https://corsproxy.io/?" + encodeURIComponent(src);
-            return;
-          }
-          console.warn("Logo gagal dimuat:", pathOrUrl, src);
-          resolve(null);
-        };
-
+        img.onerror = () => resolve(null);
         img.src = src;
       });
+    }
+
+    async function loadImage(pathOrUrl) {
+      if (!pathOrUrl) return null;
+      const candidates = localPathCandidates(pathOrUrl);
+      for (const c of candidates) {
+        const img = await tryLoadOne(c);
+        if (img) return img;
+      }
+      if (isRemotePath(pathOrUrl)) {
+        console.warn("Logo URL luar diabaikan (CORS di GitHub Pages):", pathOrUrl);
+      }
+      return null;
     }
 
     async function renderMatches(iso) {

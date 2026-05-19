@@ -1324,10 +1324,10 @@
     "MLS": "assets/logos/leagues/mls.png",
     "Saudi Pro League": "assets/logos/leagues/saudi-pro-league.png",
     "Liga Champions Afrika": "assets/logos/leagues/liga-champions-afrika.png",
-    "Liga Champions Asia Two": "https://crests.football-data.org/ACL.png",
-    "Piala Konfederasi Afrika": "https://crests.football-data.org/ACN.png",
-    "Piala Afrika U-17 2026": "https://crests.football-data.org/ACN.png",
-    "Piala Asia U-17 2026": "https://crests.football-data.org/AS.png",
+    "Liga Champions Asia Two": "assets/logos/leagues/liga-champions.png",
+    "Piala Konfederasi Afrika": "assets/logos/leagues/liga-champions-afrika.png",
+    "Piala Afrika U-17 2026": "assets/logos/leagues/liga-champions-afrika.png",
+    "Piala Asia U-17 2026": "assets/logos/leagues/liga-europa.png",
     "ASEAN Club Championship": "assets/logos/leagues/asean-club-championship.png"
   }
 }
