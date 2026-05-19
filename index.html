@@ -193,6 +193,36 @@
       position: relative;
     }
 
+    .bg-watermark {
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: center;
+      justify-content: center;
+      gap: 28px 36px;
+      transform: rotate(-24deg);
+      opacity: 1;
+    }
+    .bg-watermark span {
+      font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--t-wm-fg, rgba(255, 255, 255, 0.045));
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    #export-area .banner,
+    #export-area .match-container,
+    #export-area .watermark-footer {
+      position: relative;
+      z-index: 1;
+    }
+
     .preview-msg {
       position: absolute;
       inset: 0;
@@ -346,8 +376,8 @@
         <label>JUDUL ATAS (HEADER)
           <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
         </label>
-        <label>NAMA WATERMARK
-          <input type="text" id="input-wm" value="CORNERKIICK" />
+        <label>NAMA TIKTOK (watermark background)
+          <input type="text" id="input-tiktok" value="@CORNERKIICK" placeholder="@username" />
         </label>
         <label>BAR SOSIAL MEDIA (FOOTER)
           <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
@@ -373,6 +403,7 @@
     <main class="preview-panel">
       <span class="preview-label">Preview live</span>
       <div id="export-area" data-theme="neon">
+        <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
         <div class="preview-msg">PREVIEW</div>
         <div class="banner">
           <h2 id="view-header">KREATOR JADWAL BOLA</h2>
@@ -498,13 +529,60 @@
     const displayDate = $("#display-date");
     const btnDownload = $("#btn-download");
     const inputHeader = $("#input-header");
-    const inputWM = $("#input-wm");
+    const inputTiktok = $("#input-tiktok");
     const inputFooter = $("#input-footer");
     const exportArea = $("#export-area");
+    const SETTINGS_KEY = "jadwal-bola-settings";
+
+    function getTiktokWmText() {
+      let v = (inputTiktok.value || "").trim();
+      if (!v) return "";
+      v = v.replace(/^@+/, "");
+      return "@" + v.toUpperCase();
+    }
+
+    function updateBgWatermark() {
+      const el = $("#bg-watermark");
+      const text = getTiktokWmText();
+      if (!text) {
+        el.innerHTML = "";
+        return;
+      }
+      el.innerHTML = Array(16).fill(`<span>${escapeHtml(text)}</span>`).join("");
+    }
+
+    function loadSettings() {
+      try {
+        const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+        if (s.header) inputHeader.value = s.header;
+        if (s.tiktok) inputTiktok.value = s.tiktok;
+        if (s.footer) inputFooter.value = s.footer;
+        if (s.theme && THEMES[s.theme]) currentTheme = s.theme;
+      } catch (_) { /* ignore */ }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        header: inputHeader.value,
+        tiktok: inputTiktok.value,
+        footer: inputFooter.value,
+        theme: currentTheme,
+      }));
+    }
 
     datePicker.value = selectedDate;
-    inputHeader.addEventListener("input", () => { $("#view-header").textContent = inputHeader.value.toUpperCase(); });
-    inputFooter.addEventListener("input", () => { $("#view-footer").textContent = inputFooter.value; });
+    inputHeader.addEventListener("input", () => {
+      $("#view-header").textContent = inputHeader.value.toUpperCase();
+      saveSettings();
+    });
+    inputTiktok.addEventListener("input", () => {
+      updateBgWatermark();
+      saveSettings();
+    });
+    inputFooter.addEventListener("input", () => {
+      $("#view-footer").textContent = inputFooter.value;
+      saveSettings();
+    });
 
     function todayISO() {
       return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
@@ -544,6 +622,8 @@
       if (previewMsg) {
         previewMsg.style.color = themeId === "clean" ? "rgba(15,23,42,0.06)" : "rgba(255,255,255,0.03)";
       }
+      exportArea.style.setProperty("--t-wm-fg", themeId === "clean" ? "rgba(15,23,42,0.05)" : "rgba(255,255,255,0.045)");
+      updateBgWatermark();
     }
 
     function buildThemePicker() {
@@ -561,6 +641,7 @@
           currentTheme = card.dataset.theme;
           grid.querySelectorAll(".theme-card").forEach((c) => c.classList.toggle("active", c.dataset.theme === currentTheme));
           applyThemePreview(currentTheme);
+          saveSettings();
         });
       });
     }
@@ -840,16 +921,82 @@
       return lines.slice(0, maxLines);
     }
 
-    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW) {
-      const logoSize = 52;
-      if (logo) ctx.drawImage(logo, xCenter - logoSize / 2, y, logoSize, logoSize);
-      const textY = y + logoSize + 8;
+    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW, logoSize) {
+      const sz = logoSize || 44;
+      if (logo) ctx.drawImage(logo, xCenter - sz / 2, y, sz, sz);
+      const textY = y + sz + 6;
       ctx.fillStyle = getTheme().text;
-      ctx.font = "700 22px Segoe UI";
+      ctx.font = "700 20px Segoe UI";
       ctx.textAlign = "center";
       const lines = wrapTeamName(ctx, name, maxW, 3);
-      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 24));
-      return textY + lines.length * 24;
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 22));
+      return textY + lines.length * 22;
+    }
+
+    function drawBackgroundWatermark(ctx, W, H, t) {
+      const wmText = getTiktokWmText();
+      if (!wmText) return;
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(-Math.PI / 6);
+      ctx.fillStyle = t.wm;
+      ctx.font = "900 72px Segoe UI, Impact";
+      ctx.textAlign = "center";
+      const rows = [-420, -280, -140, 0, 140, 280, 420];
+      rows.forEach((dy) => ctx.fillText(wmText, 0, dy));
+      ctx.restore();
+    }
+
+    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
+      const W = 1080;
+      const cardX = 44;
+      const cardW = W - 88;
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 22, t.card, borderCol, 3);
+
+      const timeX = cardX + 22;
+      ctx.fillStyle = t.accent;
+      ctx.font = "900 28px Segoe UI";
+      ctx.textAlign = "left";
+      ctx.fillText(m.kickoff, timeX, y + Math.min(50, rowH * 0.38));
+      ctx.fillStyle = t.sub;
+      ctx.font = "700 14px Segoe UI";
+      ctx.fillText("WIB", timeX, y + Math.min(74, rowH * 0.52));
+
+      const contentX = cardX + 96;
+      const contentW = cardW - 108;
+      const cx = contentX + contentW / 2;
+      const homeCx = contentX + contentW * 0.27;
+      const awayCx = contentX + contentW * 0.73;
+      const nameW = Math.floor(contentW * 0.42);
+      const teamsTop = y + 10;
+      const logoSize = rowH > 140 ? 46 : 40;
+
+      const hImg = getCachedLogo(resolveTeamLogo(m.home));
+      const aImg = getCachedLogo(resolveTeamLogo(m.away));
+      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize);
+      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize);
+
+      ctx.fillStyle = t.sub;
+      ctx.font = "900 18px Segoe UI";
+      ctx.textAlign = "center";
+      ctx.fillText("VS", cx, teamsTop + logoSize + 12);
+
+      const divY = y + rowH - 46;
+      ctx.strokeStyle = t.border;
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(contentX + 6, divY);
+      ctx.lineTo(contentX + contentW - 6, divY);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      const tvStr = shortTv(m);
+      ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
+      ctx.font = "900 19px Segoe UI";
+      ctx.textAlign = "center";
+      const tvLines = wrapTeamName(ctx, tvStr, contentW - 16, 2);
+      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 26 + j * 22));
     }
 
     async function downloadPNG() {
@@ -889,15 +1036,7 @@
         ctx.fillStyle = gr2;
         ctx.fillRect(0, 0, W, H);
 
-        const wmText = (inputWM.value || "CORNERKIICK").toUpperCase();
-        ctx.save();
-        ctx.translate(W / 2, H / 2);
-        ctx.rotate(-Math.PI / 6);
-        ctx.fillStyle = t.wm;
-        ctx.font = "black 84px Segoe UI, Impact";
-        ctx.textAlign = "center";
-        [-400, -150, 100, 350].forEach((dy) => ctx.fillText(wmText, 0, dy));
-        ctx.restore();
+        drawBackgroundWatermark(ctx, W, H, t);
 
         ctx.fillStyle = t.text;
         ctx.font = "900 52px Segoe UI, Arial Black";
@@ -916,48 +1055,18 @@
         ctx.stroke();
         ctx.globalAlpha = 1;
 
+        const footerH = 96;
+        const headerEnd = 252;
         const dataMatches = matches.slice(0, 10);
-        const rowH = 132;
-        const gap = 16;
-        let startY = 265;
+        const gap = 12;
+        const avail = H - footerH - headerEnd;
+        const rowH = Math.max(130, Math.min(156, Math.floor((avail - gap * (dataMatches.length - 1)) / dataMatches.length)));
+        const startY = headerEnd;
 
         dataMatches.forEach((m, i) => {
           const y = startY + i * (rowH + gap);
           const borderCol = t.borders[i % t.borders.length];
-          drawRoundRect(ctx, 44, y, W - 88, rowH, 22, t.card, borderCol, 3);
-
-          ctx.fillStyle = t.accent;
-          ctx.font = "900 28px Segoe UI";
-          ctx.textAlign = "left";
-          ctx.fillText(m.kickoff, 72, y + 52);
-          ctx.fillStyle = t.sub;
-          ctx.font = "700 14px Segoe UI";
-          ctx.fillText("WIB", 72, y + 78);
-
-          const cx = W / 2;
-          const compImg = getCachedLogo(resolveLeagueLogo(m.competition));
-          if (compImg) ctx.drawImage(compImg, cx - 24, y + 12, 48, 48);
-
-          const homeUrl = resolveTeamLogo(m.home);
-          const awayUrl = resolveTeamLogo(m.away);
-          const hImg = getCachedLogo(homeUrl);
-          const aImg = getCachedLogo(awayUrl);
-          const nameW = 268;
-
-          drawTeamBlock(ctx, m.home, hImg, cx - 210, y + 18, nameW);
-          drawTeamBlock(ctx, m.away, aImg, cx + 210, y + 18, nameW);
-
-          ctx.fillStyle = t.sub;
-          ctx.font = "900 20px Segoe UI";
-          ctx.textAlign = "center";
-          ctx.fillText("VS", cx, y + 72);
-
-          const tvStr = shortTv(m);
-          ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
-          ctx.font = "900 20px Segoe UI";
-          ctx.textAlign = "right";
-          const tvLines = wrapTeamName(ctx, tvStr, 200, 2);
-          tvLines.forEach((ln, j) => ctx.fillText(ln, W - 60, y + 48 + j * 24));
+          drawMatchRowPNG(ctx, m, y, rowH, t, borderCol);
         });
 
         ctx.fillStyle = t.footerBg;
@@ -1009,8 +1118,12 @@
       e.target.value = "";
     });
 
+    loadSettings();
+    $("#view-header").textContent = inputHeader.value.toUpperCase();
+    $("#view-footer").textContent = inputFooter.value;
     buildThemePicker();
     applyThemePreview(currentTheme);
+    updateBgWatermark();
     fetchSchedule();
   </script>
 </body>
