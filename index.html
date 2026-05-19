@@ -280,16 +280,23 @@
       return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" crossorigin="anonymous" loading="lazy" onerror="this.style.visibility='hidden'">`;
     }
 
+    function getCachedLogo(pathOrUrl) {
+      if (!pathOrUrl) return null;
+      return logoCache[pathOrUrl] || logoCache[resolveLogoPath(pathOrUrl)] || null;
+    }
+
     function loadImage(pathOrUrl) {
       if (!pathOrUrl) return Promise.resolve(null);
       const src = resolveLogoPath(pathOrUrl);
-      if (logoCache[src]) return Promise.resolve(logoCache[src]);
+      const cached = getCachedLogo(pathOrUrl);
+      if (cached) return Promise.resolve(cached);
 
-      const isLocal = !pathOrUrl.startsWith("http");
+      const isRemote = pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://");
 
       return new Promise((resolve) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
+        // crossOrigin hanya untuk URL luar — logo lokal (assets/) tanpa ini agar tidak kena CORS
+        if (isRemote) img.crossOrigin = "anonymous";
 
         img.onload = () => {
           logoCache[src] = img;
@@ -298,16 +305,14 @@
         };
 
         img.onerror = () => {
-          if (isLocal) {
-            resolve(null);
+          if (isRemote && !img._proxied) {
+            img._proxied = true;
+            img.crossOrigin = "anonymous";
+            img.src = "https://corsproxy.io/?" + encodeURIComponent(src);
             return;
           }
-          if (!img._proxied) {
-            img._proxied = true;
-            img.src = "https://corsproxy.io/?" + encodeURIComponent(src);
-          } else {
-            resolve(null);
-          }
+          console.warn("Logo gagal dimuat:", pathOrUrl, src);
+          resolve(null);
         };
 
         img.src = src;
@@ -501,7 +506,7 @@
           ctx.fillText("WIB", 185, y + 66);
 
           const compUrl = resolveLeagueLogo(m.competition);
-          const compImg = compUrl ? logoCache[compUrl] : null;
+          const compImg = getCachedLogo(compUrl);
           if (compImg) {
             ctx.drawImage(compImg, cx - 28, y + 29, 56, 56);
           } else {
@@ -517,7 +522,7 @@
 
           const hx = cx - 80;
           const homeUrl = resolveTeamLogo(m.home);
-          const hImg = homeUrl ? logoCache[homeUrl] : null;
+          const hImg = getCachedLogo(homeUrl);
           if (hImg) ctx.drawImage(hImg, hx - 60, y + 27, 60, 60);
           else drawCircle(ctx, hx - 50, y + 32, 50);
           ctx.fillStyle = "#ffffff";
@@ -527,7 +532,7 @@
 
           const ax = cx + 80;
           const awayUrl = resolveTeamLogo(m.away);
-          const aImg = awayUrl ? logoCache[awayUrl] : null;
+          const aImg = getCachedLogo(awayUrl);
           if (aImg) ctx.drawImage(aImg, ax, y + 27, 60, 60);
           else drawCircle(ctx, ax, y + 32, 50);
           ctx.fillStyle = "#ffffff";
@@ -560,7 +565,7 @@
         link.href = canvas.toDataURL("image/png");
         link.click();
 
-        const loaded = urls.filter((u) => logoCache[u]).length;
+        const loaded = urls.filter((u) => getCachedLogo(u)).length;
         setStatus(`✓ PNG diunduh (${loaded}/${urls.length} logo termuat).`, "success");
       } catch (err) {
         setStatus(`Gagal ekspor: ${err.message}`, "error");

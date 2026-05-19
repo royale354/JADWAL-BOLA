@@ -136,6 +136,7 @@ function Send-File([System.Net.HttpListenerResponse]$Response, [string]$FilePath
         Send-Text $Response 404 "Not Found" "text/plain"
         return
     }
+    $Response.Headers.Add("Access-Control-Allow-Origin", "*")
     $bytes = [IO.File]::ReadAllBytes($FilePath)
     Send-Response $Response 200 $bytes (Get-ContentType $FilePath)
 }
