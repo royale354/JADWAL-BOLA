@@ -183,14 +183,26 @@
       max-width: 430px;
       aspect-ratio: 9 / 16;
       max-height: min(82vh, 780px);
-      background: var(--t-bg, #070a13);
+      background-color: var(--t-bg, #070a13);
+      background-image: var(--t-preview-bg, none);
+      background-size: cover;
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 40px var(--t-glow, transparent);
       border: 2px solid var(--t-border, #1e2942);
       display: flex;
       flex-direction: column;
       position: relative;
+    }
+
+    #export-area::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--t-deco-overlay, none);
+      background-size: var(--t-deco-size, auto);
+      pointer-events: none;
+      z-index: 0;
     }
 
     .bg-watermark {
@@ -238,7 +250,7 @@
     }
 
     .banner {
-      padding: 20px 16px 8px;
+      padding: 20px 16px 10px;
       text-align: center;
       flex-shrink: 0;
       background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
@@ -247,9 +259,17 @@
       font-size: 1.15rem;
       font-weight: 900;
       color: var(--t-text, #fff);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       line-height: 1.2;
+      text-shadow: 0 0 20px var(--t-accent-glow, transparent);
+    }
+    .banner .title-bar {
+      width: 56px;
+      height: 3px;
+      margin: 8px auto 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, transparent, var(--t-accent, #22c55e), transparent);
     }
     .banner .date-label {
       font-size: 0.72rem;
@@ -273,6 +293,7 @@
       background: var(--t-card, #111625);
       border-radius: 14px;
       border: 1px solid var(--t-border, #1e2942);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
       padding: 8px 10px;
       display: grid;
       grid-template-columns: auto 1fr;
@@ -286,9 +307,11 @@
       align-self: center;
       font-weight: 800;
       color: var(--t-accent, #22c55e);
-      background: var(--t-bg, #070a13);
+      background: var(--t-time-bg, #070a13);
+      border: 1px solid var(--t-border, #1e2942);
       padding: 6px 8px;
       border-radius: 10px;
+      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
       font-size: 0.72rem;
       line-height: 1.2;
       text-align: center;
@@ -402,11 +425,12 @@
 
     <main class="preview-panel">
       <span class="preview-label">Preview live</span>
-      <div id="export-area" data-theme="neon">
+      <div id="export-area" data-theme="stadium">
         <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
         <div class="preview-msg">PREVIEW</div>
         <div class="banner">
           <h2 id="view-header">KREATOR JADWAL BOLA</h2>
+          <div class="title-bar"></div>
           <div class="date-label" id="display-date">—</div>
         </div>
         <div id="match-list" class="match-container"></div>
@@ -419,95 +443,99 @@
     const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
+    const THEME_ALIASES = {
+      neon: "stadium", midnight: "cyber", fire: "inferno", royal: "goldcup", clean: "studio",
+    };
+
     const THEMES = {
-      neon: {
-        name: "Hijau Neon",
-        swatch: "linear-gradient(135deg,#070a13,#22c55e)",
-        bg: "#070a13",
-        card: "#111625",
-        border: "#1e2942",
-        text: "#ffffff",
-        sub: "#94a3b8",
-        accent: "#22c55e",
-        tv: "#fbbf24",
-        tvFree: "#22c55e",
-        footerBg: "#000000",
-        glowTop: "rgba(34,197,94,0.18)",
-        glowBottom: "rgba(234,179,8,0.12)",
-        borders: ["#22c55e", "#3b82f6", "#eab308", "#ca8a04"],
-        wm: "rgba(255,255,255,0.025)",
-      },
-      midnight: {
-        name: "Biru Malam",
-        swatch: "linear-gradient(135deg,#0a1628,#3b82f6)",
-        bg: "#0a1628",
-        card: "#0f1f38",
-        border: "#1e3a5f",
-        text: "#f0f9ff",
-        sub: "#93c5fd",
-        accent: "#60a5fa",
-        tv: "#fcd34d",
-        tvFree: "#34d399",
-        footerBg: "#050d18",
-        glowTop: "rgba(59,130,246,0.22)",
-        glowBottom: "rgba(99,102,241,0.15)",
-        borders: ["#3b82f6", "#6366f1", "#22d3ee", "#818cf8"],
+      stadium: {
+        name: "⚽ Lapangan",
+        deco: "stadium",
+        swatch: "linear-gradient(145deg,#061208 30%,#4ade80 100%)",
+        previewBg: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(74,222,128,0.2), transparent 70%), linear-gradient(180deg, #0a1a10 0%, #061208 100%)",
+        decoOverlay: "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.02) 18px, rgba(255,255,255,0.02) 36px)",
+        bg: "#061208", bg2: "#0f2918",
+        card: "rgba(14,26,18,0.94)", cardHi: "rgba(22,40,28,0.98)",
+        timeBg: "#0a1810", border: "#2d6b45",
+        text: "#f0fdf4", sub: "#86efac",
+        accent: "#4ade80", accentGlow: "rgba(74,222,128,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#040a06", glow: "rgba(74,222,128,0.35)",
+        glowTop: "rgba(74,222,128,0.28)", glowBottom: "rgba(34,197,94,0.12)",
+        borders: ["#4ade80", "#22d3ee", "#facc15", "#34d399"],
         wm: "rgba(255,255,255,0.03)",
       },
-      fire: {
-        name: "Merah Api",
-        swatch: "linear-gradient(135deg,#1a0a0a,#ef4444)",
-        bg: "#120808",
-        card: "#1f1010",
-        border: "#3f1a1a",
-        text: "#fff5f5",
-        sub: "#fca5a5",
-        accent: "#f87171",
-        tv: "#fbbf24",
-        tvFree: "#4ade80",
-        footerBg: "#0a0404",
-        glowTop: "rgba(239,68,68,0.2)",
-        glowBottom: "rgba(249,115,22,0.14)",
-        borders: ["#ef4444", "#f97316", "#eab308", "#dc2626"],
+      cyber: {
+        name: "🌐 Neon Cyber",
+        deco: "cyber",
+        swatch: "linear-gradient(145deg,#0a0a1a 30%,#22d3ee 50%,#e879f9 100%)",
+        previewBg: "radial-gradient(circle at 20% 20%, rgba(34,211,238,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(232,121,249,0.2), transparent 45%), linear-gradient(180deg, #0a0a1a, #050510)",
+        decoOverlay: "linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px)",
+        bg: "#050510", bg2: "#0f1030",
+        card: "rgba(12,14,40,0.92)", cardHi: "rgba(18,22,55,0.98)",
+        timeBg: "#0a0c28", border: "#312e81",
+        text: "#f0f9ff", sub: "#a5b4fc",
+        accent: "#22d3ee", accentGlow: "rgba(34,211,238,0.6)",
+        tv: "#f0abfc", tvFree: "#34d399",
+        footerBg: "#030308", glow: "rgba(34,211,238,0.4)",
+        glowTop: "rgba(34,211,238,0.3)", glowBottom: "rgba(232,121,249,0.2)",
+        borders: ["#22d3ee", "#e879f9", "#818cf8", "#38bdf8"],
+        wm: "rgba(255,255,255,0.035)",
+      },
+      goldcup: {
+        name: "🏆 Trofi Emas",
+        deco: "gold",
+        swatch: "linear-gradient(145deg,#1a1208 30%,#fbbf24 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.25), transparent 55%), linear-gradient(160deg, #1a1208, #0c0804)",
+        decoOverlay: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(251,191,36,0.03) 12px, rgba(251,191,36,0.03) 24px)",
+        bg: "#0c0804", bg2: "#1f1608",
+        card: "rgba(28,20,8,0.94)", cardHi: "rgba(40,30,12,0.98)",
+        timeBg: "#141008", border: "#78590a",
+        text: "#fffbeb", sub: "#fcd34d",
+        accent: "#fbbf24", accentGlow: "rgba(251,191,36,0.55)",
+        tv: "#fde68a", tvFree: "#86efac",
+        footerBg: "#060402", glow: "rgba(251,191,36,0.35)",
+        glowTop: "rgba(251,191,36,0.22)", glowBottom: "rgba(180,83,9,0.18)",
+        borders: ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706"],
         wm: "rgba(255,255,255,0.03)",
       },
-      royal: {
-        name: "Ungu Emas",
-        swatch: "linear-gradient(135deg,#1a1030,#eab308)",
-        bg: "#140c24",
-        card: "#1e1435",
-        border: "#3b2d5c",
-        text: "#faf5ff",
-        sub: "#c4b5fd",
-        accent: "#eab308",
-        tv: "#f0abfc",
-        tvFree: "#a3e635",
-        footerBg: "#0c0618",
-        glowTop: "rgba(234,179,8,0.15)",
-        glowBottom: "rgba(168,85,247,0.18)",
-        borders: ["#eab308", "#a855f7", "#f472b6", "#c084fc"],
-        wm: "rgba(255,255,255,0.028)",
+      inferno: {
+        name: "🔥 Champions",
+        deco: "inferno",
+        swatch: "linear-gradient(145deg,#1a0505 30%,#ef4444 60%,#f97316 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.35), transparent 55%), radial-gradient(ellipse at 30% 0%, rgba(249,115,22,0.2), transparent 50%), linear-gradient(180deg, #1a0505, #0a0202)",
+        decoOverlay: "radial-gradient(circle at 50% 120%, rgba(239,68,68,0.12), transparent 50%)",
+        bg: "#0a0202", bg2: "#1f0808",
+        card: "rgba(30,10,10,0.94)", cardHi: "rgba(45,15,15,0.98)",
+        timeBg: "#180606", border: "#7f1d1d",
+        text: "#fff5f5", sub: "#fca5a5",
+        accent: "#f87171", accentGlow: "rgba(248,113,113,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#050101", glow: "rgba(239,68,68,0.4)",
+        glowTop: "rgba(239,68,68,0.28)", glowBottom: "rgba(249,115,22,0.22)",
+        borders: ["#ef4444", "#f97316", "#fbbf24", "#dc2626"],
+        wm: "rgba(255,255,255,0.035)",
       },
-      clean: {
-        name: "Putih Bersih",
-        swatch: "linear-gradient(135deg,#f8fafc,#22c55e)",
-        bg: "#f1f5f9",
-        card: "#ffffff",
-        border: "#cbd5e1",
-        text: "#0f172a",
-        sub: "#64748b",
-        accent: "#16a34a",
-        tv: "#b45309",
-        tvFree: "#15803d",
-        footerBg: "#e2e8f0",
-        glowTop: "rgba(34,197,94,0.08)",
-        glowBottom: "rgba(59,130,246,0.06)",
-        borders: ["#22c55e", "#3b82f6", "#eab308", "#16a34a"],
-        wm: "rgba(15,23,42,0.04)",
+      studio: {
+        name: "📺 Studio TV",
+        deco: "studio",
+        swatch: "linear-gradient(145deg,#0f172a 30%,#3b82f6 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.2), transparent 60%), linear-gradient(180deg, #0f172a, #020617)",
+        decoOverlay: "linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)",
+        bg: "#020617", bg2: "#0f172a",
+        card: "rgba(15,23,42,0.94)", cardHi: "rgba(30,41,59,0.98)",
+        timeBg: "#0f172a", border: "#334155",
+        text: "#f8fafc", sub: "#94a3b8",
+        accent: "#60a5fa", accentGlow: "rgba(96,165,250,0.5)",
+        tv: "#fbbf24", tvFree: "#34d399",
+        footerBg: "#010409", glow: "rgba(59,130,246,0.35)",
+        glowTop: "rgba(59,130,246,0.25)", glowBottom: "rgba(99,102,241,0.15)",
+        borders: ["#3b82f6", "#60a5fa", "#fbbf24", "#6366f1"],
+        wm: "rgba(255,255,255,0.03)",
       },
     };
 
-    let currentTheme = "neon";
+    let currentTheme = "stadium";
 
     const BASE = (() => {
       const path = location.pathname;
@@ -557,7 +585,11 @@
         if (s.header) inputHeader.value = s.header;
         if (s.tiktok) inputTiktok.value = s.tiktok;
         if (s.footer) inputFooter.value = s.footer;
-        if (s.theme && THEMES[s.theme]) currentTheme = s.theme;
+        if (s.theme) {
+          const id = THEME_ALIASES[s.theme] || s.theme;
+          if (THEMES[id]) currentTheme = id;
+        }
+        if (s.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) selectedDate = s.lastDate;
       } catch (_) { /* ignore */ }
     }
 
@@ -567,10 +599,17 @@
         tiktok: inputTiktok.value,
         footer: inputFooter.value,
         theme: currentTheme,
+        lastDate: selectedDate,
       }));
     }
 
-    datePicker.value = selectedDate;
+    function setSelectedDate(iso) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+      selectedDate = iso;
+      datePicker.value = iso;
+      saveSettings();
+      renderMatches(iso);
+    }
     inputHeader.addEventListener("input", () => {
       $("#view-header").textContent = inputHeader.value.toUpperCase();
       saveSettings();
@@ -603,26 +642,32 @@
     }
 
     function getTheme() {
-      return THEMES[currentTheme] || THEMES.neon;
+      return THEMES[currentTheme] || THEMES.stadium;
     }
 
     function applyThemePreview(themeId) {
-      const t = THEMES[themeId] || THEMES.neon;
+      const t = THEMES[themeId] || THEMES.stadium;
       exportArea.dataset.theme = themeId;
       exportArea.style.setProperty("--t-bg", t.bg);
+      exportArea.style.setProperty("--t-preview-bg", t.previewBg || "none");
+      exportArea.style.setProperty("--t-deco-overlay", t.decoOverlay || "none");
+      exportArea.style.setProperty("--t-deco-size", t.deco === "cyber" ? "36px 36px" : "auto");
       exportArea.style.setProperty("--t-card", t.card);
       exportArea.style.setProperty("--t-border", t.border);
       exportArea.style.setProperty("--t-text", t.text);
       exportArea.style.setProperty("--t-sub", t.sub);
       exportArea.style.setProperty("--t-accent", t.accent);
+      exportArea.style.setProperty("--t-accent-glow", t.accentGlow || "transparent");
       exportArea.style.setProperty("--t-tv", t.tv);
+      exportArea.style.setProperty("--t-time-bg", t.timeBg || t.bg);
       exportArea.style.setProperty("--t-footer-bg", t.footerBg);
       exportArea.style.setProperty("--t-glow-top", t.glowTop);
+      exportArea.style.setProperty("--t-glow", t.glow || "transparent");
       const previewMsg = exportArea.querySelector(".preview-msg");
       if (previewMsg) {
-        previewMsg.style.color = themeId === "clean" ? "rgba(15,23,42,0.06)" : "rgba(255,255,255,0.03)";
+        previewMsg.style.color = themeId === "studio" ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.03)";
       }
-      exportArea.style.setProperty("--t-wm-fg", themeId === "clean" ? "rgba(15,23,42,0.05)" : "rgba(255,255,255,0.045)");
+      exportArea.style.setProperty("--t-wm-fg", "rgba(255,255,255,0.045)");
       updateBgWatermark();
     }
 
@@ -870,27 +915,108 @@
       reader.readAsText(file, "UTF-8");
     }
 
+    const PNG_W = 1080;
+    const PNG_H = 1920;
+    const PNG_SCALE = 2;
+
     function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
+      const rad = Math.min(r, w / 2, h / 2);
       ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.moveTo(x + rad, y);
+      ctx.lineTo(x + w - rad, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
+      ctx.lineTo(x + w, y + h - rad);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+      ctx.lineTo(x + rad, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
+      ctx.lineTo(x, y + rad);
+      ctx.quadraticCurveTo(x, y, x + rad, y);
       ctx.closePath();
       if (fill) { ctx.fillStyle = fill; ctx.fill(); }
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 2; ctx.stroke(); }
     }
 
-    function drawCircle(ctx, x, y, size, fill) {
-      ctx.beginPath();
-      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, 2 * Math.PI);
-      ctx.fillStyle = fill || "#1e293b";
-      ctx.fill();
+    function drawDecoStadium(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(0.45, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(74,222,128,0.04)";
+      for (let i = 0; i < 14; i++) ctx.fillRect(0, i * (H / 14), W, H / 28);
+      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.lineWidth = 3;
+      const cy = H * 0.42;
+      ctx.beginPath(); ctx.arc(W / 2, cy, 200, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(50, cy); ctx.lineTo(W - 50, cy); ctx.stroke();
+      ctx.strokeRect(50, cy - 140, W - 100, 280);
+    }
+
+    function drawDecoCyber(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(1, t.bg);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(34,211,238,0.07)"; ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      const spots = [[0.15, 0.12, "rgba(34,211,238,0.35)"], [0.85, 0.88, "rgba(232,121,249,0.3)"]];
+      spots.forEach(([px, py, col]) => {
+        const rg = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, 320);
+        rg.addColorStop(0, col); rg.addColorStop(1, "transparent");
+        ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+      });
+    }
+
+    function drawDecoGold(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(251,191,36,0.08)"; ctx.lineWidth = 2;
+      for (let i = -H; i < W + H; i += 56) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+      }
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 500);
+      rg.addColorStop(0, "rgba(251,191,36,0.2)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoInferno(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, H, 0, 0);
+      g.addColorStop(0, "rgba(239,68,68,0.35)"); g.addColorStop(0.4, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      const rg = ctx.createRadialGradient(W * 0.3, H * 0.15, 0, W * 0.3, H * 0.15, 400);
+      rg.addColorStop(0, "rgba(249,115,22,0.25)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoStudio(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(59,130,246,0.06)";
+      for (let i = 0; i < 8; i++) ctx.fillRect(0, i * 120, W, 60);
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 450);
+      rg.addColorStop(0, "rgba(59,130,246,0.22)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawThemeBackground(ctx, W, H, t) {
+      switch (t.deco) {
+        case "cyber": drawDecoCyber(ctx, W, H, t); break;
+        case "gold": drawDecoGold(ctx, W, H, t); break;
+        case "inferno": drawDecoInferno(ctx, W, H, t); break;
+        case "studio": drawDecoStudio(ctx, W, H, t); break;
+        default: drawDecoStadium(ctx, W, H, t);
+      }
+      const gr1 = ctx.createRadialGradient(W / 2, 0, 80, W / 2, 0, 700);
+      gr1.addColorStop(0, t.glowTop); gr1.addColorStop(1, "transparent");
+      ctx.fillStyle = gr1; ctx.fillRect(0, 0, W, 700);
+      const gr2 = ctx.createRadialGradient(W / 2, H, 80, W / 2, H, 600);
+      gr2.addColorStop(0, t.glowBottom); gr2.addColorStop(1, "transparent");
+      ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
+    }
+
+    function drawLogoRing(ctx, x, y, size, t) {
+      const r = size / 2 + 6;
+      const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
+      g.addColorStop(0, t.cardHi || t.card); g.addColorStop(1, t.border);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = t.accent; ctx.globalAlpha = 0.35; ctx.lineWidth = 2; ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     function wrapTeamName(ctx, text, maxW, maxLines) {
@@ -921,16 +1047,16 @@
       return lines.slice(0, maxLines);
     }
 
-    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW, logoSize) {
-      const sz = logoSize || 44;
+    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW, logoSize, t) {
+      const sz = logoSize || 48;
+      drawLogoRing(ctx, xCenter, y + sz / 2, sz, t);
       if (logo) ctx.drawImage(logo, xCenter - sz / 2, y, sz, sz);
-      const textY = y + sz + 6;
-      ctx.fillStyle = getTheme().text;
-      ctx.font = "700 20px Segoe UI";
+      const textY = y + sz + 10;
+      ctx.fillStyle = t.text;
+      ctx.font = "bold 21px 'Segoe UI', system-ui, sans-serif";
       ctx.textAlign = "center";
       const lines = wrapTeamName(ctx, name, maxW, 3);
-      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 22));
-      return textY + lines.length * 22;
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 24));
     }
 
     function drawBackgroundWatermark(ctx, W, H, t) {
@@ -940,63 +1066,135 @@
       ctx.translate(W / 2, H / 2);
       ctx.rotate(-Math.PI / 6);
       ctx.fillStyle = t.wm;
-      ctx.font = "900 72px Segoe UI, Impact";
+      ctx.font = "900 68px 'Segoe UI', Impact, sans-serif";
       ctx.textAlign = "center";
-      const rows = [-420, -280, -140, 0, 140, 280, 420];
-      rows.forEach((dy) => ctx.fillText(wmText, 0, dy));
+      [-440, -300, -160, -20, 120, 260, 400].forEach((dy) => ctx.fillText(wmText, 0, dy));
       ctx.restore();
     }
 
-    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
-      const W = 1080;
-      const cardX = 44;
-      const cardW = W - 88;
-      drawRoundRect(ctx, cardX, y, cardW, rowH, 22, t.card, borderCol, 3);
+    function drawHeaderPNG(ctx, W, t) {
+      const title = (inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase();
+      const dateStr = formatDateID(selectedDate).toUpperCase();
 
-      const timeX = cardX + 22;
-      ctx.fillStyle = t.accent;
-      ctx.font = "900 28px Segoe UI";
-      ctx.textAlign = "left";
-      ctx.fillText(m.kickoff, timeX, y + Math.min(50, rowH * 0.38));
+      const barW = 200;
+      const barG = ctx.createLinearGradient(W / 2 - barW, 0, W / 2 + barW, 0);
+      barG.addColorStop(0, "transparent");
+      barG.addColorStop(0.5, t.accent);
+      barG.addColorStop(1, "transparent");
+      ctx.fillStyle = barG;
+      ctx.fillRect(W / 2 - barW, 168, barW * 2, 4);
+
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || t.accent;
+      ctx.shadowBlur = 28;
+      ctx.fillStyle = t.text;
+      ctx.font = "900 54px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(title, W / 2, 128);
+      ctx.restore();
+
+      const pillW = Math.min(ctx.measureText(dateStr).width + 56, W - 120);
+      drawRoundRect(ctx, W / 2 - pillW / 2, 182, pillW, 44, 22, t.cardHi || t.card, t.border, 1.5);
       ctx.fillStyle = t.sub;
-      ctx.font = "700 14px Segoe UI";
-      ctx.fillText("WIB", timeX, y + Math.min(74, rowH * 0.52));
+      ctx.font = "bold 22px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(dateStr, W / 2, 212);
 
-      const contentX = cardX + 96;
-      const contentW = cardW - 108;
+      ctx.strokeStyle = t.border;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(64, 248);
+      ctx.lineTo(W - 64, 248);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
+      const W = PNG_W;
+      const cardX = 40;
+      const cardW = W - 80;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 8;
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 24, t.card, null);
+      ctx.restore();
+
+      const stripe = ctx.createLinearGradient(cardX, y, cardX + 8, y);
+      stripe.addColorStop(0, borderCol);
+      stripe.addColorStop(1, "transparent");
+      ctx.fillStyle = stripe;
+      ctx.fillRect(cardX, y + 8, 6, rowH - 16);
+
+      const timeX = cardX + 18;
+      const timeW = 82;
+      const timeH = rowH - 20;
+      drawRoundRect(ctx, timeX, y + 10, timeW, timeH, 16, t.timeBg || t.bg, borderCol, 2);
+      ctx.fillStyle = t.accent;
+      ctx.font = "900 30px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.42);
+      ctx.fillStyle = t.sub;
+      ctx.font = "bold 13px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.58);
+
+      const contentX = cardX + 108;
+      const contentW = cardW - 118;
       const cx = contentX + contentW / 2;
-      const homeCx = contentX + contentW * 0.27;
-      const awayCx = contentX + contentW * 0.73;
-      const nameW = Math.floor(contentW * 0.42);
-      const teamsTop = y + 10;
-      const logoSize = rowH > 140 ? 46 : 40;
+      const homeCx = contentX + contentW * 0.26;
+      const awayCx = contentX + contentW * 0.74;
+      const nameW = Math.floor(contentW * 0.44);
+      const teamsTop = y + 8;
+      const logoSize = rowH > 142 ? 50 : 44;
 
       const hImg = getCachedLogo(resolveTeamLogo(m.home));
       const aImg = getCachedLogo(resolveTeamLogo(m.away));
-      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize);
-      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize);
+      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize, t);
+      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize, t);
 
-      ctx.fillStyle = t.sub;
-      ctx.font = "900 18px Segoe UI";
+      const vsY = teamsTop + logoSize + 8;
+      const vsG = ctx.createLinearGradient(cx - 28, vsY, cx + 28, vsY);
+      vsG.addColorStop(0, "transparent");
+      vsG.addColorStop(0.5, t.accent);
+      vsG.addColorStop(1, "transparent");
+      ctx.fillStyle = vsG;
+      ctx.fillRect(cx - 32, vsY - 14, 64, 28);
+      ctx.fillStyle = t.text;
+      ctx.font = "900 17px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("VS", cx, teamsTop + logoSize + 12);
+      ctx.fillText("VS", cx, vsY + 5);
 
-      const divY = y + rowH - 46;
-      ctx.strokeStyle = t.border;
-      ctx.globalAlpha = 0.5;
-      ctx.lineWidth = 1;
+      const divY = y + rowH - 44;
+      const divG = ctx.createLinearGradient(contentX, 0, contentX + contentW, 0);
+      divG.addColorStop(0, "transparent");
+      divG.addColorStop(0.5, t.border);
+      divG.addColorStop(1, "transparent");
+      ctx.strokeStyle = divG;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(contentX + 6, divY);
-      ctx.lineTo(contentX + contentW - 6, divY);
+      ctx.moveTo(contentX + 4, divY);
+      ctx.lineTo(contentX + contentW - 4, divY);
       ctx.stroke();
-      ctx.globalAlpha = 1;
 
       const tvStr = shortTv(m);
       ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
-      ctx.font = "900 19px Segoe UI";
+      ctx.font = "900 20px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      const tvLines = wrapTeamName(ctx, tvStr, contentW - 16, 2);
-      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 26 + j * 22));
+      const tvLines = wrapTeamName(ctx, tvStr, contentW - 12, 2);
+      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 24 + j * 24));
+    }
+
+    function exportCanvasToPNG(sourceCanvas) {
+      const out = document.createElement("canvas");
+      out.width = PNG_W;
+      out.height = PNG_H;
+      const octx = out.getContext("2d");
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = "high";
+      octx.drawImage(sourceCanvas, 0, 0, PNG_W, PNG_H);
+      return out.toDataURL("image/png");
     }
 
     async function downloadPNG() {
@@ -1014,79 +1212,57 @@
         )];
         await Promise.all(urls.map(loadImage));
 
-        const W = 1080;
-        const H = 1920;
+        const W = PNG_W;
+        const H = PNG_H;
         const canvas = document.createElement("canvas");
-        canvas.width = W;
-        canvas.height = H;
+        canvas.width = W * PNG_SCALE;
+        canvas.height = H * PNG_SCALE;
         const ctx = canvas.getContext("2d");
+        ctx.scale(PNG_SCALE, PNG_SCALE);
+        ctx.textBaseline = "alphabetic";
 
-        ctx.fillStyle = t.bg;
-        ctx.fillRect(0, 0, W, H);
-
-        const gr1 = ctx.createRadialGradient(W / 2, 0, 100, W / 2, 0, 800);
-        gr1.addColorStop(0, t.glowTop);
-        gr1.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr1;
-        ctx.fillRect(0, 0, W, 800);
-
-        const gr2 = ctx.createRadialGradient(W / 2, H, 100, W / 2, H, 700);
-        gr2.addColorStop(0, t.glowBottom);
-        gr2.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr2;
-        ctx.fillRect(0, 0, W, H);
-
+        drawThemeBackground(ctx, W, H, t);
         drawBackgroundWatermark(ctx, W, H, t);
+        drawHeaderPNG(ctx, W, t);
 
-        ctx.fillStyle = t.text;
-        ctx.font = "900 52px Segoe UI, Arial Black";
-        ctx.textAlign = "center";
-        ctx.fillText((inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase(), W / 2, 130);
-        ctx.fillStyle = t.sub;
-        ctx.font = "bold 30px Segoe UI";
-        ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 195);
-
-        ctx.strokeStyle = t.border;
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(80, 235);
-        ctx.lineTo(W - 80, 235);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-
-        const footerH = 96;
-        const headerEnd = 252;
+        const footerH = 100;
+        const headerEnd = 262;
         const dataMatches = matches.slice(0, 10);
-        const gap = 12;
+        const gap = 14;
         const avail = H - footerH - headerEnd;
-        const rowH = Math.max(130, Math.min(156, Math.floor((avail - gap * (dataMatches.length - 1)) / dataMatches.length)));
+        const rowH = Math.max(132, Math.min(160, Math.floor((avail - gap * (dataMatches.length - 1)) / dataMatches.length)));
         const startY = headerEnd;
 
         dataMatches.forEach((m, i) => {
           const y = startY + i * (rowH + gap);
-          const borderCol = t.borders[i % t.borders.length];
-          drawMatchRowPNG(ctx, m, y, rowH, t, borderCol);
+          drawMatchRowPNG(ctx, m, y, rowH, t, t.borders[i % t.borders.length]);
         });
 
-        ctx.fillStyle = t.footerBg;
-        ctx.fillRect(0, H - 96, W, 96);
-        ctx.strokeStyle = t.border;
-        ctx.globalAlpha = 0.25;
+        const footY = H - footerH;
+        const footG = ctx.createLinearGradient(0, footY, 0, H);
+        footG.addColorStop(0, t.footerBg);
+        footG.addColorStop(1, "#000");
+        ctx.fillStyle = footG;
+        ctx.fillRect(0, footY, W, footerH);
+        const accentLine = ctx.createLinearGradient(0, footY, W, footY);
+        accentLine.addColorStop(0, "transparent");
+        accentLine.addColorStop(0.5, t.accent);
+        accentLine.addColorStop(1, "transparent");
+        ctx.strokeStyle = accentLine;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, H - 96);
-        ctx.lineTo(W, H - 96);
+        ctx.moveTo(40, footY);
+        ctx.lineTo(W - 40, footY);
         ctx.stroke();
-        ctx.globalAlpha = 1;
         ctx.fillStyle = t.sub;
-        ctx.font = "bold 22px Segoe UI";
+        ctx.font = "bold 22px 'Segoe UI', sans-serif";
         ctx.textAlign = "center";
         const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
-        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, H - 58 + i * 28));
+        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footY + 48 + i * 28));
 
         const link = document.createElement("a");
         link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.href = exportCanvasToPNG(canvas);
         link.click();
 
         const loaded = urls.filter((u) => getCachedLogo(u)).length;
@@ -1106,12 +1282,8 @@
 
     $("#btn-refresh").addEventListener("click", fetchSchedule);
     $("#btn-download").addEventListener("click", downloadPNG);
-    $("#btn-today").addEventListener("click", () => {
-      selectedDate = todayISO();
-      datePicker.value = selectedDate;
-      renderMatches(selectedDate);
-    });
-    datePicker.addEventListener("change", (e) => renderMatches(e.target.value));
+    $("#btn-today").addEventListener("click", () => setSelectedDate(todayISO()));
+    datePicker.addEventListener("change", (e) => setSelectedDate(e.target.value));
     $("#file-import").addEventListener("change", (e) => {
       const f = e.target.files[0];
       if (f) importHtmlFile(f);
@@ -1119,6 +1291,7 @@
     });
 
     loadSettings();
+    datePicker.value = selectedDate;
     $("#view-header").textContent = inputHeader.value.toUpperCase();
     $("#view-footer").textContent = inputFooter.value;
     buildThemePicker();
