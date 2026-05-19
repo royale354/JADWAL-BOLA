@@ -2,193 +2,261 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Jadwal Bola — Generator PNG TikTok</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Barlow:wght@400;600;700;800;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: "Segoe UI", system-ui, sans-serif;
-      background: #060913;
-      color: #f1f5f9;
-      min-height: 100vh;
-      padding: 20px 16px 40px;
+    :root {
+      --app-bg: #05080f;
+      --sidebar-bg: #0b0f1a;
+      --card-bg: #111828;
+      --border: #1e2942;
+      --accent: #22c55e;
+      --accent-glow: rgba(34,197,94,0.4);
+      --text: #f1f5f9;
+      --sub: #64748b;
+      --radius: 14px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
 
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: "Barlow", "Segoe UI", system-ui, sans-serif;
+      background: var(--app-bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
+
+    /* ── DESKTOP LAYOUT ───────────────────────────────── */
     .app-layout {
       display: grid;
-      grid-template-columns: minmax(300px, 380px) 1fr;
-      gap: 28px;
-      max-width: 1280px;
-      margin: 0 auto;
-      align-items: start;
+      grid-template-columns: 360px 1fr;
+      gap: 0;
+      min-height: 100vh;
     }
 
-    @media (max-width: 960px) {
-      .app-layout { grid-template-columns: 1fr; }
-      .preview-panel { justify-content: center; }
-    }
-
+    /* ── SIDEBAR ──────────────────────────────────────── */
     .sidebar {
-      background: #111625;
-      padding: 22px;
-      border-radius: 14px;
-      border: 1px solid #1e293b;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 20px 18px calc(20px + var(--safe-bottom));
+      overflow-y: auto;
+      height: 100vh;
       position: sticky;
-      top: 16px;
+      top: 0;
     }
 
-    .sidebar h1 { font-size: 1.35rem; font-weight: 800; color: #22c55e; }
-    .sidebar > p { font-size: 0.82rem; color: #94a3b8; margin: 6px 0 16px; }
-
-    .branding-inputs {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-      background: #0b0f19;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #1e2942;
-    }
-    .branding-inputs label {
+    .sidebar-header {
       display: flex;
-      flex-direction: column;
-      font-size: 0.72rem;
-      color: #64748b;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .sidebar-header .icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+    }
+    .sidebar-header h1 {
+      font-family: "Oswald", sans-serif;
+      font-size: 1.15rem;
       font-weight: 700;
-      gap: 4px;
-    }
-    .branding-inputs input {
-      background: #111625;
-      border: 1px solid #334155;
       color: #fff;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      outline: none;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
     }
-    .branding-inputs input:focus { border-color: #22c55e; }
+    .sidebar-header p {
+      font-size: 0.7rem;
+      color: var(--sub);
+      margin-top: 1px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
 
     .section-label {
-      font-size: 0.72rem;
+      font-size: 0.65rem;
       font-weight: 800;
-      color: #64748b;
+      color: var(--sub);
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin: 14px 0 8px;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
     }
 
+    /* Branding inputs */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .field label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field input {
+      background: var(--app-bg);
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: "Barlow", sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    /* Theme grid */
     .theme-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
       margin-bottom: 14px;
     }
     .theme-card {
       cursor: pointer;
-      border: 2px solid #334155;
+      border: 2px solid var(--border);
       border-radius: 10px;
-      padding: 10px;
-      background: #0b0f19;
+      padding: 8px 6px;
+      background: var(--app-bg);
       transition: border-color 0.2s, transform 0.15s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
     }
-    .theme-card:hover { transform: translateY(-1px); }
-    .theme-card.active { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e44; }
+    .theme-card:active { transform: scale(0.96); }
+    .theme-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(34,197,94,0.3); }
     .theme-card input { display: none; }
     .theme-swatch {
-      height: 28px;
-      border-radius: 6px;
-      margin-bottom: 6px;
+      height: 22px;
+      border-radius: 5px;
+      margin-bottom: 5px;
     }
     .theme-card span {
-      font-size: 0.75rem;
+      font-size: 0.62rem;
       font-weight: 700;
       color: #cbd5e1;
+      line-height: 1.2;
     }
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
+    /* Date controls */
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
       gap: 8px;
       align-items: center;
     }
-
     input[type="date"] {
-      background: #1e293b;
+      background: var(--app-bg);
       color: #fff;
-      border: 1px solid #334155;
-      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      padding: 9px 12px;
       border-radius: 8px;
       font-size: 0.88rem;
+      font-family: "Barlow", sans-serif;
       outline: none;
       color-scheme: dark;
-      width: 100%;
+      -webkit-appearance: none;
     }
+    input[type="date"]:focus { border-color: var(--accent); }
     input[type="file"] { display: none; }
 
-    button, .file-label {
+    /* Buttons */
+    .btn {
       cursor: pointer;
       border: none;
       border-radius: 8px;
-      padding: 9px 14px;
-      font-size: 0.85rem;
+      padding: 9px 13px;
+      font-size: 0.82rem;
+      font-family: "Barlow", sans-serif;
       font-weight: 700;
-      transition: opacity 0.2s, transform 0.2s;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
     }
-    button:hover, .file-label:hover { opacity: 0.92; transform: translateY(-1px); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    .btn-primary {
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-today { background: #1e293b; color: #e2e8f0; }
+    .btn-refresh { background: #2563eb; color: #fff; }
+    .btn-import { background: #374151; color: #fff; display: block; text-align: center; margin-top: 8px; padding: 9px; font-size: 0.8rem; }
+    .btn-download {
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
       width: 100%;
-      margin-top: 10px;
-      padding: 13px;
-      font-size: 0.92rem;
+      margin-top: 12px;
+      padding: 14px;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(34,197,94,0.35);
     }
-    .btn-secondary { background: #2563eb; color: #fff; flex: 1; }
-    .btn-ghost { background: #334155; color: #e2e8f0; flex: 1; }
-    .btn-warn { background: #475569; color: #fff; font-size: 0.8rem; }
 
     .status {
-      margin-top: 12px;
-      font-size: 0.82rem;
+      margin-top: 10px;
+      font-size: 0.78rem;
       color: #eab308;
       font-weight: 600;
       line-height: 1.4;
+      min-height: 20px;
     }
     .status.success { color: #22c55e; }
     .status.error { color: #f87171; }
 
+    /* ── PREVIEW PANEL ────────────────────────────────── */
     .preview-panel {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      padding: 24px 20px;
+      background: #08090f;
+      overflow-y: auto;
     }
 
     .preview-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #64748b;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--sub);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+      align-self: flex-start;
     }
 
     #export-area {
       width: 100%;
-      max-width: 430px;
+      max-width: 380px;
       aspect-ratio: 9 / 16;
-      max-height: min(82vh, 780px);
       background-color: var(--t-bg, #070a13);
       background-image: var(--t-preview-bg, none);
       background-size: cover;
-      border-radius: 24px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 40px var(--t-glow, transparent);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 40px var(--t-glow, transparent);
       border: 2px solid var(--t-border, #1e2942);
       display: flex;
       flex-direction: column;
@@ -215,15 +283,14 @@
       flex-wrap: wrap;
       align-content: center;
       justify-content: center;
-      gap: 28px 36px;
+      gap: 24px 32px;
       transform: rotate(-24deg);
-      opacity: 1;
     }
     .bg-watermark span {
-      font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+      font-size: clamp(0.7rem, 2.8vw, 1rem);
       font-weight: 900;
       letter-spacing: 0.06em;
-      color: var(--t-wm-fg, rgba(255, 255, 255, 0.045));
+      color: var(--t-wm-fg, rgba(255,255,255,0.045));
       white-space: nowrap;
       user-select: none;
     }
@@ -235,75 +302,62 @@
       z-index: 1;
     }
 
-    .preview-msg {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(255, 255, 255, 0.03);
-      font-size: 1.8rem;
-      font-weight: 900;
-      text-align: center;
-      pointer-events: none;
-      letter-spacing: 2px;
-    }
-
     .banner {
-      padding: 16px 16px 10px;
+      padding: 12px 14px 8px;
       text-align: center;
       flex-shrink: 0;
-      background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
+      background: linear-gradient(180deg, var(--t-glow-top, rgba(34,197,94,0.12)) 0%, transparent 100%);
     }
     .brand-logo {
-      width: 84px;
-      height: 84px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
-      margin: 0 auto 10px;
+      margin: 0 auto 8px;
       border: 2px solid var(--t-accent, #22c55e);
-      box-shadow: 0 4px 24px var(--t-accent-glow, rgba(34, 197, 94, 0.4));
+      box-shadow: 0 4px 20px var(--t-accent-glow, rgba(34,197,94,0.4));
     }
     .brand-logo-footer {
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
-      margin: 0 auto 6px;
+      margin: 0 auto 4px;
       border: 1px solid var(--t-border, #334155);
     }
     .banner h2 {
-      font-size: 1.22rem;
-      font-weight: 900;
+      font-family: "Oswald", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
       color: var(--t-text, #fff);
-      letter-spacing: 0.06em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       line-height: 1.2;
       text-shadow: 0 0 20px var(--t-accent-glow, transparent);
     }
-    .banner .title-bar {
-      width: 56px;
-      height: 3px;
-      margin: 8px auto 0;
+    .title-bar {
+      width: 48px;
+      height: 2px;
+      margin: 6px auto 0;
       border-radius: 99px;
       background: linear-gradient(90deg, transparent, var(--t-accent, #22c55e), transparent);
     }
     .banner .date-label {
-      font-size: 0.88rem;
+      font-size: 0.72rem;
       color: var(--t-sub, #94a3b8);
-      margin-top: 8px;
-      font-weight: 800;
+      margin-top: 6px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     .match-container {
-      padding: 8px 12px 12px;
+      padding: 6px 10px 8px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 5px;
       flex: 1;
       overflow-y: auto;
       min-height: 0;
@@ -311,20 +365,19 @@
 
     .sim-card {
       background: var(--t-card, #111625);
-      border-radius: 14px;
+      border-radius: 10px;
       border: 1px solid var(--t-border, #1e2942);
-      border-left: 4px solid var(--t-accent, #22c55e);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-      padding: 10px 12px 8px;
+      border-left: 3px solid var(--t-accent, #22c55e);
+      padding: 7px 9px 6px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      font-size: 0.75rem;
+      gap: 5px;
+      font-size: 0.7rem;
     }
     .sim-main {
       display: flex;
       align-items: stretch;
-      gap: 10px;
+      gap: 8px;
       min-width: 0;
     }
     .sim-time {
@@ -333,250 +386,332 @@
       color: var(--t-accent, #22c55e);
       background: var(--t-time-bg, #070a13);
       border: 1px solid var(--t-border, #1e2942);
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      line-height: 1.15;
+      padding: 5px 7px;
+      border-radius: 7px;
+      font-size: 0.72rem;
+      line-height: 1.2;
       text-align: center;
-      min-width: 48px;
-      box-shadow: 0 0 14px var(--t-accent-glow, transparent);
+      min-width: 42px;
+      font-family: "Oswald", sans-serif;
     }
     .sim-time small {
       display: block;
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       color: var(--t-sub, #64748b);
       font-weight: 700;
+      font-family: "Barlow", sans-serif;
     }
     .sim-teams {
       flex: 1;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      gap: 14px;
+      gap: 10px;
       min-width: 0;
-      padding: 0 4px;
     }
     .team-block {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0;
+      gap: 3px;
       flex: 1;
       min-width: 0;
-      max-width: 42%;
+      max-width: 40%;
     }
     .team-block img {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
       object-fit: contain;
-      flex-shrink: 0;
     }
     .team-name {
       font-weight: 700;
-      font-size: 0.62rem;
+      font-size: 0.55rem;
       line-height: 1.2;
       word-break: break-word;
       color: var(--t-text, #fff);
       text-align: center;
-      margin-top: 6px;
-      width: 100%;
     }
     .vs-label {
       flex-shrink: 0;
-      width: 26px;
-      height: 26px;
-      margin-bottom: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: var(--t-accent, #22c55e);
       color: #fff;
-      font-size: 0.58rem;
+      font-size: 0.5rem;
       font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
+      font-family: "Oswald", sans-serif;
     }
     .sim-tv {
       color: var(--t-tv, #fbbf24);
-      font-weight: 800;
-      font-size: 0.65rem;
+      font-weight: 700;
+      font-size: 0.58rem;
       text-align: center;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 8px;
-      padding: 6px 8px;
-      word-break: break-word;
+      background: rgba(0,0,0,0.3);
+      border-radius: 5px;
+      padding: 4px 6px;
     }
     .sim-league {
-      font-size: 0.52rem;
+      font-size: 0.5rem;
       font-weight: 800;
       color: var(--t-sub, #94a3b8);
       text-align: center;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding-bottom: 4px;
+      letter-spacing: 0.08em;
     }
 
     .watermark-footer {
       background: var(--t-footer-bg, #000);
-      padding: 10px 12px;
+      padding: 7px 10px;
       text-align: center;
-      font-size: 0.62rem;
+      font-size: 0.55rem;
       color: var(--t-sub, #94a3b8);
       font-weight: 700;
       border-top: 1px solid var(--t-border, #111625);
       flex-shrink: 0;
-      line-height: 1.3;
+      line-height: 1.4;
     }
+
+    /* ── MOBILE OVERRIDES ─────────────────────────────── */
+    @media (max-width: 800px) {
+      .app-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* Mobile: tabs at top */
+      .mobile-tabs {
+        display: flex;
+        background: var(--sidebar-bg);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding-top: var(--safe-top);
+      }
+      .mobile-tab {
+        flex: 1;
+        padding: 13px 10px;
+        text-align: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--sub);
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        -webkit-tap-highlight-color: transparent;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .mobile-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 16px 16px calc(16px + var(--safe-bottom));
+        display: none;
+      }
+      .sidebar.active { display: block; }
+
+      .preview-panel {
+        display: none;
+        padding: 14px 14px calc(80px + var(--safe-bottom));
+      }
+      .preview-panel.active { display: flex; }
+
+      #export-area {
+        max-width: 320px;
+      }
+
+      /* Floating download bar on mobile */
+      .mobile-download-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 14px calc(10px + var(--safe-bottom));
+        background: var(--sidebar-bg);
+        border-top: 1px solid var(--border);
+        z-index: 200;
+        gap: 10px;
+        align-items: center;
+      }
+      .mobile-download-bar .btn-download {
+        margin: 0;
+        flex: 1;
+        padding: 12px;
+        font-size: 0.88rem;
+      }
+      .status-inline {
+        display: none;
+      }
+    }
+
+    @media (min-width: 801px) {
+      .mobile-tabs { display: none; }
+      .mobile-download-bar { display: none; }
+    }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
 <body>
 
-  <div class="app-layout">
-    <aside class="sidebar">
-      <h1>⚽ Generator Jadwal Bola</h1>
-      <p>Input kiri · Preview kanan · Pilih tema PNG</p>
+  <!-- Mobile tab bar -->
+  <div class="mobile-tabs" id="mobile-tabs">
+    <div class="mobile-tab active" data-panel="settings" onclick="switchTab('settings')">⚙️ Setting</div>
+    <div class="mobile-tab" data-panel="preview" onclick="switchTab('preview')">📱 Preview</div>
+  </div>
 
-      <div class="branding-inputs">
-        <label>JUDUL ATAS (HEADER)
-          <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
-        </label>
-        <label>NAMA TIKTOK (watermark background)
-          <input type="text" id="input-tiktok" value="@CORNERKIICK" placeholder="@username" />
-        </label>
-        <label>BAR SOSIAL MEDIA (FOOTER)
-          <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
-        </label>
+  <div class="app-layout">
+    <aside class="sidebar active" id="panel-settings">
+      <div class="sidebar-header">
+        <div class="icon">⚽</div>
+        <div>
+          <h1>Generator Jadwal</h1>
+          <p>TikTok PNG 9:16 · 1080×1920</p>
+        </div>
       </div>
 
-      <p class="section-label">Tema PNG TikTok</p>
+      <div class="divider"></div>
+
+      <div class="section-label">Branding</div>
+      <div class="field">
+        <label>Judul Header</label>
+        <input type="text" id="input-header" value="JADWAL BOLA HARI INI" />
+      </div>
+      <div class="field">
+        <label>TikTok / Watermark</label>
+        <input type="text" id="input-tiktok" value="@CORNERKIICK" placeholder="@username" />
+      </div>
+      <div class="field">
+        <label>Footer Sosmed</label>
+        <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section-label">Tema PNG</div>
       <div class="theme-grid" id="theme-grid"></div>
 
-      <p class="section-label">Jadwal</p>
-      <input type="date" id="date-picker" />
-      <div class="controls" style="margin-top:10px">
-        <button class="btn-ghost" id="btn-today" type="button">Hari Ini</button>
-        <button class="btn-secondary" id="btn-refresh" type="button">↻ Muat</button>
-      </div>
-      <input type="file" id="file-import" accept=".html,.htm,text/html" />
-      <label class="file-label btn-warn" for="file-import" style="display:block;text-align:center;margin-top:8px">📂 Import HTML</label>
+      <div class="divider"></div>
 
-      <button class="btn-primary" id="btn-download" type="button" disabled>⚡ DOWNLOAD PNG 9:16</button>
+      <div class="section-label">Tanggal</div>
+      <div class="date-row">
+        <input type="date" id="date-picker" />
+        <button class="btn btn-today" id="btn-today" type="button">Hari Ini</button>
+        <button class="btn btn-refresh" id="btn-refresh" type="button">↻</button>
+      </div>
+
+      <input type="file" id="file-import" accept=".html,.htm,text/html" />
+      <label class="btn btn-import" for="file-import">📂 Import HTML Jadwal</label>
+
+      <!-- Desktop download button -->
+      <button class="btn btn-download" id="btn-download-desk" type="button" disabled>⚡ DOWNLOAD PNG 9:16</button>
       <div class="status" id="status">Memuat data...</div>
     </aside>
 
-    <main class="preview-panel">
-      <span class="preview-label">Preview live</span>
+    <main class="preview-panel" id="panel-preview">
+      <span class="preview-label">Preview Live</span>
       <div id="export-area" data-theme="stadium">
         <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
-        <div class="preview-msg">PREVIEW</div>
         <div class="banner">
-          <img class="brand-logo" id="brand-logo" src="" alt="CORNERKIICK" />
-          <h2 id="view-header">KREATOR JADWAL BOLA</h2>
+          <img class="brand-logo" id="brand-logo" src="" alt="Logo" />
+          <h2 id="view-header">JADWAL BOLA HARI INI</h2>
           <div class="title-bar"></div>
           <div class="date-label" id="display-date">—</div>
         </div>
         <div id="match-list" class="match-container"></div>
         <div class="watermark-footer">
-          <img class="brand-logo-footer" id="brand-logo-footer" src="" alt="CORNERKIICK" />
+          <img class="brand-logo-footer" id="brand-logo-footer" src="" alt="Logo" />
           <div id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
         </div>
       </div>
     </main>
   </div>
 
-  <script>
-    const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  <!-- Mobile floating download bar -->
+  <div class="mobile-download-bar" id="mobile-dl-bar">
+    <button class="btn btn-download" id="btn-download-mob" type="button" disabled>⚡ DOWNLOAD PNG</button>
+  </div>
 
-    const THEME_ALIASES = {
-      neon: "stadium", midnight: "cyber", fire: "inferno", royal: "goldcup", clean: "studio",
-    };
+  <script>
+    // ── MOBILE TAB SWITCHING ──────────────────────────
+    function switchTab(panel) {
+      document.getElementById('panel-settings').classList.toggle('active', panel === 'settings');
+      document.getElementById('panel-preview').classList.toggle('active', panel === 'preview');
+      document.querySelectorAll('.mobile-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.panel === panel);
+      });
+    }
+
+    // ── CONSTANTS & UTILS ────────────────────────────
+    const BULAN_ID = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    const HARI_ID = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 
     const THEMES = {
       stadium: {
-        name: "⚽ Lapangan",
-        deco: "stadium",
-        swatch: "linear-gradient(145deg,#061208 30%,#4ade80 100%)",
-        previewBg: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(74,222,128,0.2), transparent 70%), linear-gradient(180deg, #0a1a10 0%, #061208 100%)",
-        decoOverlay: "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.02) 18px, rgba(255,255,255,0.02) 36px)",
-        bg: "#061208", bg2: "#0f2918",
-        card: "rgba(14,26,18,0.94)", cardHi: "rgba(22,40,28,0.98)",
-        timeBg: "#0a1810", border: "#2d6b45",
-        text: "#f0fdf4", sub: "#86efac",
-        accent: "#4ade80", accentGlow: "rgba(74,222,128,0.55)",
-        tv: "#fde047", tvFree: "#4ade80",
-        footerBg: "#040a06", glow: "rgba(74,222,128,0.35)",
-        glowTop: "rgba(74,222,128,0.28)", glowBottom: "rgba(34,197,94,0.12)",
-        borders: ["#4ade80", "#22d3ee", "#facc15", "#34d399"],
-        wm: "rgba(255,255,255,0.03)",
+        name:"⚽ Lapangan", swatch:"linear-gradient(145deg,#061208 30%,#4ade80 100%)",
+        previewBg:"radial-gradient(ellipse 80% 50% at 50% 0%,rgba(74,222,128,0.2),transparent 70%),linear-gradient(180deg,#0a1a10,#061208)",
+        decoOverlay:"repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(255,255,255,0.02) 18px,rgba(255,255,255,0.02) 36px)",
+        bg:"#061208",bg2:"#0f2918",card:"rgba(14,26,18,0.94)",cardHi:"rgba(22,40,28,0.98)",
+        timeBg:"#0a1810",border:"#2d6b45",text:"#f0fdf4",sub:"#86efac",
+        accent:"#4ade80",accentGlow:"rgba(74,222,128,0.55)",tv:"#fde047",
+        footerBg:"#040a06",glow:"rgba(74,222,128,0.35)",glowTop:"rgba(74,222,128,0.28)",glowBottom:"rgba(34,197,94,0.12)",
+        borders:["#4ade80","#22d3ee","#facc15","#34d399"],wm:"rgba(255,255,255,0.03)",deco:"stadium",
       },
       cyber: {
-        name: "🌐 Neon Cyber",
-        deco: "cyber",
-        swatch: "linear-gradient(145deg,#0a0a1a 30%,#22d3ee 50%,#e879f9 100%)",
-        previewBg: "radial-gradient(circle at 20% 20%, rgba(34,211,238,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(232,121,249,0.2), transparent 45%), linear-gradient(180deg, #0a0a1a, #050510)",
-        decoOverlay: "linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px)",
-        bg: "#050510", bg2: "#0f1030",
-        card: "rgba(12,14,40,0.92)", cardHi: "rgba(18,22,55,0.98)",
-        timeBg: "#0a0c28", border: "#312e81",
-        text: "#f0f9ff", sub: "#a5b4fc",
-        accent: "#22d3ee", accentGlow: "rgba(34,211,238,0.6)",
-        tv: "#f0abfc", tvFree: "#34d399",
-        footerBg: "#030308", glow: "rgba(34,211,238,0.4)",
-        glowTop: "rgba(34,211,238,0.3)", glowBottom: "rgba(232,121,249,0.2)",
-        borders: ["#22d3ee", "#e879f9", "#818cf8", "#38bdf8"],
-        wm: "rgba(255,255,255,0.035)",
+        name:"🌐 Cyber", swatch:"linear-gradient(145deg,#0a0a1a 30%,#22d3ee 50%,#e879f9 100%)",
+        previewBg:"radial-gradient(circle at 20% 20%,rgba(34,211,238,0.25),transparent 45%),radial-gradient(circle at 80% 80%,rgba(232,121,249,0.2),transparent 45%),linear-gradient(180deg,#0a0a1a,#050510)",
+        decoOverlay:"linear-gradient(rgba(34,211,238,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.04) 1px,transparent 1px)",
+        bg:"#050510",bg2:"#0f1030",card:"rgba(12,14,40,0.92)",cardHi:"rgba(18,22,55,0.98)",
+        timeBg:"#0a0c28",border:"#312e81",text:"#f0f9ff",sub:"#a5b4fc",
+        accent:"#22d3ee",accentGlow:"rgba(34,211,238,0.6)",tv:"#f0abfc",
+        footerBg:"#030308",glow:"rgba(34,211,238,0.4)",glowTop:"rgba(34,211,238,0.3)",glowBottom:"rgba(232,121,249,0.2)",
+        borders:["#22d3ee","#e879f9","#818cf8","#38bdf8"],wm:"rgba(255,255,255,0.035)",deco:"cyber",
       },
       goldcup: {
-        name: "🏆 Trofi Emas",
-        deco: "gold",
-        swatch: "linear-gradient(145deg,#1a1208 30%,#fbbf24 100%)",
-        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.25), transparent 55%), linear-gradient(160deg, #1a1208, #0c0804)",
-        decoOverlay: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(251,191,36,0.03) 12px, rgba(251,191,36,0.03) 24px)",
-        bg: "#0c0804", bg2: "#1f1608",
-        card: "rgba(28,20,8,0.94)", cardHi: "rgba(40,30,12,0.98)",
-        timeBg: "#141008", border: "#78590a",
-        text: "#fffbeb", sub: "#fcd34d",
-        accent: "#fbbf24", accentGlow: "rgba(251,191,36,0.55)",
-        tv: "#fde68a", tvFree: "#86efac",
-        footerBg: "#060402", glow: "rgba(251,191,36,0.35)",
-        glowTop: "rgba(251,191,36,0.22)", glowBottom: "rgba(180,83,9,0.18)",
-        borders: ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706"],
-        wm: "rgba(255,255,255,0.03)",
+        name:"🏆 Trofi", swatch:"linear-gradient(145deg,#1a1208 30%,#fbbf24 100%)",
+        previewBg:"radial-gradient(ellipse at 50% 0%,rgba(251,191,36,0.25),transparent 55%),linear-gradient(160deg,#1a1208,#0c0804)",
+        decoOverlay:"repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(251,191,36,0.03) 12px,rgba(251,191,36,0.03) 24px)",
+        bg:"#0c0804",bg2:"#1f1608",card:"rgba(28,20,8,0.94)",cardHi:"rgba(40,30,12,0.98)",
+        timeBg:"#141008",border:"#78590a",text:"#fffbeb",sub:"#fcd34d",
+        accent:"#fbbf24",accentGlow:"rgba(251,191,36,0.55)",tv:"#fde68a",
+        footerBg:"#060402",glow:"rgba(251,191,36,0.35)",glowTop:"rgba(251,191,36,0.22)",glowBottom:"rgba(180,83,9,0.18)",
+        borders:["#fbbf24","#f59e0b","#fcd34d","#d97706"],wm:"rgba(255,255,255,0.03)",deco:"gold",
       },
       inferno: {
-        name: "🔥 Champions",
-        deco: "inferno",
-        swatch: "linear-gradient(145deg,#1a0505 30%,#ef4444 60%,#f97316 100%)",
-        previewBg: "radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.35), transparent 55%), radial-gradient(ellipse at 30% 0%, rgba(249,115,22,0.2), transparent 50%), linear-gradient(180deg, #1a0505, #0a0202)",
-        decoOverlay: "radial-gradient(circle at 50% 120%, rgba(239,68,68,0.12), transparent 50%)",
-        bg: "#0a0202", bg2: "#1f0808",
-        card: "rgba(30,10,10,0.94)", cardHi: "rgba(45,15,15,0.98)",
-        timeBg: "#180606", border: "#7f1d1d",
-        text: "#fff5f5", sub: "#fca5a5",
-        accent: "#f87171", accentGlow: "rgba(248,113,113,0.55)",
-        tv: "#fde047", tvFree: "#4ade80",
-        footerBg: "#050101", glow: "rgba(239,68,68,0.4)",
-        glowTop: "rgba(239,68,68,0.28)", glowBottom: "rgba(249,115,22,0.22)",
-        borders: ["#ef4444", "#f97316", "#fbbf24", "#dc2626"],
-        wm: "rgba(255,255,255,0.035)",
+        name:"🔥 Api", swatch:"linear-gradient(145deg,#1a0505 30%,#ef4444 60%,#f97316 100%)",
+        previewBg:"radial-gradient(ellipse at 50% 100%,rgba(239,68,68,0.35),transparent 55%),linear-gradient(180deg,#1a0505,#0a0202)",
+        decoOverlay:"radial-gradient(circle at 50% 120%,rgba(239,68,68,0.12),transparent 50%)",
+        bg:"#0a0202",bg2:"#1f0808",card:"rgba(30,10,10,0.94)",cardHi:"rgba(45,15,15,0.98)",
+        timeBg:"#180606",border:"#7f1d1d",text:"#fff5f5",sub:"#fca5a5",
+        accent:"#f87171",accentGlow:"rgba(248,113,113,0.55)",tv:"#fde047",
+        footerBg:"#050101",glow:"rgba(239,68,68,0.4)",glowTop:"rgba(239,68,68,0.28)",glowBottom:"rgba(249,115,22,0.22)",
+        borders:["#ef4444","#f97316","#fbbf24","#dc2626"],wm:"rgba(255,255,255,0.035)",deco:"inferno",
       },
       studio: {
-        name: "📺 Studio TV",
-        deco: "studio",
-        swatch: "linear-gradient(145deg,#0f172a 30%,#3b82f6 100%)",
-        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.2), transparent 60%), linear-gradient(180deg, #0f172a, #020617)",
-        decoOverlay: "linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)",
-        bg: "#020617", bg2: "#0f172a",
-        card: "rgba(15,23,42,0.94)", cardHi: "rgba(30,41,59,0.98)",
-        timeBg: "#0f172a", border: "#334155",
-        text: "#f8fafc", sub: "#94a3b8",
-        accent: "#60a5fa", accentGlow: "rgba(96,165,250,0.5)",
-        tv: "#fbbf24", tvFree: "#34d399",
-        footerBg: "#010409", glow: "rgba(59,130,246,0.35)",
-        glowTop: "rgba(59,130,246,0.25)", glowBottom: "rgba(99,102,241,0.15)",
-        borders: ["#3b82f6", "#60a5fa", "#fbbf24", "#6366f1"],
-        wm: "rgba(255,255,255,0.03)",
+        name:"📺 Studio", swatch:"linear-gradient(145deg,#0f172a 30%,#3b82f6 100%)",
+        previewBg:"radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.2),transparent 60%),linear-gradient(180deg,#0f172a,#020617)",
+        decoOverlay:"linear-gradient(90deg,rgba(59,130,246,0.06) 1px,transparent 1px)",
+        bg:"#020617",bg2:"#0f172a",card:"rgba(15,23,42,0.94)",cardHi:"rgba(30,41,59,0.98)",
+        timeBg:"#0f172a",border:"#334155",text:"#f8fafc",sub:"#94a3b8",
+        accent:"#60a5fa",accentGlow:"rgba(96,165,250,0.5)",tv:"#fbbf24",
+        footerBg:"#010409",glow:"rgba(59,130,246,0.35)",glowTop:"rgba(59,130,246,0.25)",glowBottom:"rgba(99,102,241,0.15)",
+        borders:["#3b82f6","#60a5fa","#fbbf24","#6366f1"],wm:"rgba(255,255,255,0.03)",deco:"studio",
       },
     };
 
@@ -585,49 +720,46 @@
     const BASE = (() => {
       const path = location.pathname;
       if (path.endsWith("/")) return path;
-      const slash = path.lastIndexOf("/");
-      return slash > 0 ? path.slice(0, slash + 1) : "/";
+      const sl = path.lastIndexOf("/");
+      return sl > 0 ? path.slice(0, sl + 1) : "/";
     })();
-    const asset = (p) => BASE + p.replace(/^\//, "");
+    const asset = p => BASE + p.replace(/^\//, "");
 
-    const BRAND_LOGO_PATHS = [
-      "assets/branding/CORNERKIICK.png",
-      "CORNERKIICK.png",
-    ];
+    const BRAND_LOGO_PATHS = ["assets/branding/CORNERKIICK.png","CORNERKIICK.png"];
     let brandLogoImg = null;
-
     let allSchedules = {};
     let selectedDate = todayISO();
     let staticLogos = null;
     const logoCache = {};
+    const SETTINGS_KEY = "jadwal-bola-v2";
 
-    const $ = (s) => document.querySelector(s);
+    const $ = s => document.querySelector(s);
     const datePicker = $("#date-picker");
     const statusEl = $("#status");
     const matchList = $("#match-list");
     const displayDate = $("#display-date");
-    const btnDownload = $("#btn-download");
+    const btnDlDesk = $("#btn-download-desk");
+    const btnDlMob = $("#btn-download-mob");
     const inputHeader = $("#input-header");
     const inputTiktok = $("#input-tiktok");
     const inputFooter = $("#input-footer");
     const exportArea = $("#export-area");
-    const SETTINGS_KEY = "jadwal-bola-settings";
 
+    function setBtnsDisabled(v) {
+      btnDlDesk.disabled = v;
+      btnDlMob.disabled = v;
+    }
+
+    // ── SETTINGS ─────────────────────────────────────
     function getTiktokWmText() {
-      let v = (inputTiktok.value || "").trim();
-      if (!v) return "";
-      v = v.replace(/^@+/, "");
-      return "@" + v.toUpperCase();
+      let v = (inputTiktok.value || "").trim().replace(/^@+/, "");
+      return v ? "@" + v.toUpperCase() : "";
     }
 
     function updateBgWatermark() {
       const el = $("#bg-watermark");
       const text = getTiktokWmText();
-      if (!text) {
-        el.innerHTML = "";
-        return;
-      }
-      el.innerHTML = Array(16).fill(`<span>${escapeHtml(text)}</span>`).join("");
+      el.innerHTML = text ? Array(20).fill(`<span>${escapeHtml(text)}</span>`).join("") : "";
     }
 
     function loadSettings() {
@@ -636,23 +768,38 @@
         if (s.header) inputHeader.value = s.header;
         if (s.tiktok) inputTiktok.value = s.tiktok;
         if (s.footer) inputFooter.value = s.footer;
-        if (s.theme) {
-          const id = THEME_ALIASES[s.theme] || s.theme;
-          if (THEMES[id]) currentTheme = id;
-        }
+        if (s.theme && THEMES[s.theme]) currentTheme = s.theme;
         if (s.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) selectedDate = s.lastDate;
-      } catch (_) { /* ignore */ }
+      } catch(_) {}
     }
 
     function saveSettings() {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-        header: inputHeader.value,
-        tiktok: inputTiktok.value,
-        footer: inputFooter.value,
-        theme: currentTheme,
-        lastDate: selectedDate,
+        header: inputHeader.value, tiktok: inputTiktok.value,
+        footer: inputFooter.value, theme: currentTheme, lastDate: selectedDate,
       }));
     }
+
+    // ── HELPERS ───────────────────────────────────────
+    function todayISO() {
+      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    }
+
+    function formatDateID(iso) {
+      if (!iso) return "—";
+      const [y,m,d] = iso.split("-").map(Number);
+      return `${HARI_ID[new Date(y,m-1,d).getDay()]}, ${d} ${BULAN_ID[m]} ${y}`;
+    }
+
+    function normalizeName(n) {
+      return n.toLowerCase().trim().replace(/[^a-z0-9]+/g," ").trim();
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    function getTheme() { return THEMES[currentTheme] || THEMES.stadium; }
 
     function setSelectedDate(iso) {
       if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
@@ -661,598 +808,157 @@
       saveSettings();
       renderMatches(iso);
     }
+
+    // ── INPUTS ────────────────────────────────────────
     inputHeader.addEventListener("input", () => {
       $("#view-header").textContent = inputHeader.value.toUpperCase();
       saveSettings();
     });
-    inputTiktok.addEventListener("input", () => {
-      updateBgWatermark();
-      saveSettings();
-    });
+    inputTiktok.addEventListener("input", () => { updateBgWatermark(); saveSettings(); });
     inputFooter.addEventListener("input", () => {
       $("#view-footer").textContent = inputFooter.value;
       saveSettings();
     });
 
-    function todayISO() {
-      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
-    }
-
-    function formatDateID(iso) {
-      if (!iso) return "—";
-      const [y, m, d] = iso.split("-").map(Number);
-      return `${HARI_ID[new Date(y, m - 1, d).getDay()]}, ${d} ${BULAN_ID[m]} ${y}`;
-    }
-
-    function normalizeName(n) {
-      return n.toLowerCase().trim().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ");
-    }
-
-    function escapeHtml(s) {
-      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-
-    function getTheme() {
-      return THEMES[currentTheme] || THEMES.stadium;
-    }
-
-    function applyThemePreview(themeId) {
-      const t = THEMES[themeId] || THEMES.stadium;
-      exportArea.dataset.theme = themeId;
-      exportArea.style.setProperty("--t-bg", t.bg);
-      exportArea.style.setProperty("--t-preview-bg", t.previewBg || "none");
-      exportArea.style.setProperty("--t-deco-overlay", t.decoOverlay || "none");
-      exportArea.style.setProperty("--t-deco-size", t.deco === "cyber" ? "36px 36px" : "auto");
-      exportArea.style.setProperty("--t-card", t.card);
-      exportArea.style.setProperty("--t-border", t.border);
-      exportArea.style.setProperty("--t-text", t.text);
-      exportArea.style.setProperty("--t-sub", t.sub);
-      exportArea.style.setProperty("--t-accent", t.accent);
-      exportArea.style.setProperty("--t-accent-glow", t.accentGlow || "transparent");
-      exportArea.style.setProperty("--t-tv", t.tv);
-      exportArea.style.setProperty("--t-time-bg", t.timeBg || t.bg);
-      exportArea.style.setProperty("--t-footer-bg", t.footerBg);
-      exportArea.style.setProperty("--t-glow-top", t.glowTop);
-      exportArea.style.setProperty("--t-glow", t.glow || "transparent");
-      const previewMsg = exportArea.querySelector(".preview-msg");
-      if (previewMsg) {
-        previewMsg.style.color = themeId === "studio" ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.03)";
-      }
-      exportArea.style.setProperty("--t-wm-fg", "rgba(255,255,255,0.045)");
+    // ── THEME ─────────────────────────────────────────
+    function applyThemePreview(id) {
+      const t = THEMES[id] || THEMES.stadium;
+      exportArea.dataset.theme = id;
+      const props = {
+        "--t-bg": t.bg, "--t-preview-bg": t.previewBg || "none",
+        "--t-deco-overlay": t.decoOverlay || "none",
+        "--t-deco-size": t.deco === "cyber" ? "36px 36px" : "auto",
+        "--t-card": t.card, "--t-border": t.border, "--t-text": t.text,
+        "--t-sub": t.sub, "--t-accent": t.accent, "--t-accent-glow": t.accentGlow || "transparent",
+        "--t-tv": t.tv, "--t-time-bg": t.timeBg || t.bg, "--t-footer-bg": t.footerBg,
+        "--t-glow-top": t.glowTop, "--t-glow": t.glow || "transparent",
+        "--t-wm-fg": "rgba(255,255,255,0.045)",
+      };
+      Object.entries(props).forEach(([k,v]) => exportArea.style.setProperty(k,v));
       updateBgWatermark();
     }
 
     function buildThemePicker() {
       const grid = $("#theme-grid");
-      grid.innerHTML = Object.entries(THEMES).map(([id, t]) => `
-        <label class="theme-card ${id === currentTheme ? "active" : ""}" data-theme="${id}">
-          <input type="radio" name="theme" value="${id}" ${id === currentTheme ? "checked" : ""} />
+      grid.innerHTML = Object.entries(THEMES).map(([id,t]) => `
+        <label class="theme-card ${id===currentTheme?"active":""}" data-theme="${id}">
+          <input type="radio" name="theme" value="${id}" ${id===currentTheme?"checked":""} />
           <div class="theme-swatch" style="background:${t.swatch}"></div>
           <span>${t.name}</span>
         </label>
       `).join("");
-
-      grid.querySelectorAll(".theme-card").forEach((card) => {
+      grid.querySelectorAll(".theme-card").forEach(card => {
         card.addEventListener("click", () => {
           currentTheme = card.dataset.theme;
-          grid.querySelectorAll(".theme-card").forEach((c) => c.classList.toggle("active", c.dataset.theme === currentTheme));
+          grid.querySelectorAll(".theme-card").forEach(c => c.classList.toggle("active", c.dataset.theme === currentTheme));
           applyThemePreview(currentTheme);
           saveSettings();
         });
       });
     }
 
+    // ── LOGOS ─────────────────────────────────────────
     async function loadStaticLogos() {
       if (staticLogos) return staticLogos;
       try {
         const res = await fetch(asset("logos.json?v=3"));
-        if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
+        if (!res.ok) throw 0;
         staticLogos = await res.json();
-      } catch (e) {
-        console.warn("Gagal muat logos.json:", e);
+      } catch {
         staticLogos = { teams: {}, leagues: {} };
       }
       return staticLogos;
     }
 
-    function slugifyName(name) {
-      return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "unknown";
-    }
-
-    function isRemotePath(p) {
-      return /^https?:\/\//i.test(p || "");
-    }
-
-    function logoBasePath(mapped, folder, name) {
-      if (mapped && !isRemotePath(mapped)) {
-        return mapped.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
-      }
-      return `assets/logos/${folder}/${slugifyName(name)}`;
+    function slugify(n) { return n.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "unknown"; }
+    function isRemote(p) { return /^https?:\/\//i.test(p||""); }
+    function basePath(mapped, folder, name) {
+      if (mapped && !isRemote(mapped)) return mapped.replace(/\.(png|svg|jpg|jpeg|webp)$/i,"");
+      return `assets/logos/${folder}/${slugify(name)}`;
     }
 
     function findBadge(map, name) {
       if (!map || !name) return null;
-      if (map[name] && !isRemotePath(map[name])) return map[name];
+      if (map[name] && !isRemote(map[name])) return map[name];
       const norm = normalizeName(name);
-      let best = null;
-      let bestLen = 0;
-      for (const [key, url] of Object.entries(map)) {
-        if (isRemotePath(url)) continue;
-        const kn = normalizeName(key);
-        if (norm === kn) return url;
-        if (norm.includes(kn) || kn.includes(norm)) {
-          if (key.length > bestLen) {
-            best = url;
-            bestLen = key.length;
-          }
-        }
+      let best = null, bestLen = 0;
+      for (const [k,v] of Object.entries(map)) {
+        if (isRemote(v)) continue;
+        const kn = normalizeName(k);
+        if (norm === kn) return v;
+        if ((norm.includes(kn) || kn.includes(norm)) && k.length > bestLen) { best = v; bestLen = k.length; }
       }
       return best;
     }
 
-    function resolveTeamLogo(name) {
-      const mapped = staticLogos ? findBadge(staticLogos.teams, name) : null;
-      return logoBasePath(mapped, "teams", name);
+    function resolveTeamLogo(n) { return basePath(staticLogos ? findBadge(staticLogos.teams, n) : null, "teams", n); }
+    function resolveLeagueLogo(c) { return basePath(staticLogos ? findBadge(staticLogos.leagues, c) : null, "leagues", c); }
+    function resolvePath(p) { return (!p || isRemote(p)) ? null : asset(p); }
+
+    function localCandidates(p) {
+      if (!p || isRemote(p)) return [];
+      const base = p.replace(/\.(png|svg|jpg|jpeg|webp)$/i,"");
+      return [".png",".svg",".jpg",".webp"].map(e => base+e);
     }
 
-    function resolveLeagueLogo(comp) {
-      const mapped = staticLogos ? findBadge(staticLogos.leagues, comp) : null;
-      return logoBasePath(mapped, "leagues", comp);
+    function logoKey(p) { return (p||"").replace(/\.(png|svg|jpg|jpeg|webp)$/i,""); }
+    function getCachedLogo(p) {
+      if (!p) return null;
+      const k = logoKey(p);
+      return logoCache[p] || logoCache[k] || logoCache[resolvePath(p)] || logoCache[resolvePath(k)] || null;
     }
 
-    function resolveLogoPath(pathOrUrl) {
-      if (!pathOrUrl || isRemotePath(pathOrUrl)) return null;
-      return asset(pathOrUrl);
-    }
-
-    function logoTag(basePath, alt) {
-      const urls = localPathCandidates(basePath).map((c) => resolveLogoPath(c)).filter(Boolean);
-      if (!urls.length) return "";
-      const list = JSON.stringify(urls);
-      return `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(alt)}" loading="lazy" data-logos='${list.replace(/'/g, "&#39;")}' onerror="(function(el){var u=JSON.parse(el.dataset.logos);var n=+(el.dataset.i||0)+1;el.dataset.i=n;if(n<u.length)el.src=u[n];else el.style.visibility='hidden'})(this)">`;
-    }
-
-    function cacheLogo(img, pathOrUrl, resolvedSrc) {
-      logoCache[pathOrUrl] = img;
-      if (resolvedSrc) logoCache[resolvedSrc] = img;
-    }
-
-    function logoKey(pathOrUrl) {
-      return (pathOrUrl || "").replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
-    }
-
-    function getCachedLogo(pathOrUrl) {
-      if (!pathOrUrl) return null;
-      const key = logoKey(pathOrUrl);
-      return logoCache[pathOrUrl] || logoCache[key] || logoCache[resolveLogoPath(pathOrUrl)] || logoCache[resolveLogoPath(key)] || null;
-    }
-
-    function localPathCandidates(pathOrUrl) {
-      if (!pathOrUrl || isRemotePath(pathOrUrl)) return [];
-      const base = pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
-      const exts = [".png", ".svg", ".jpg", ".webp"];
-      return exts.map((ext) => base + ext).filter((p, i, a) => a.indexOf(p) === i);
-    }
-
-    function tryLoadOne(pathOrUrl) {
-      const src = resolveLogoPath(pathOrUrl);
-      if (!src) return Promise.resolve(null);
-      const cached = getCachedLogo(pathOrUrl);
-      if (cached) return Promise.resolve(cached);
-
-      return new Promise((resolve) => {
+    async function tryLoad(p) {
+      const src = resolvePath(p);
+      if (!src) return null;
+      const cached = getCachedLogo(p);
+      if (cached) return cached;
+      return new Promise(res => {
         const img = new Image();
-        img.onload = () => {
-          cacheLogo(img, pathOrUrl, src);
-          cacheLogo(img, logoKey(pathOrUrl), src);
-          resolve(img);
-        };
-        img.onerror = () => resolve(null);
+        img.onload = () => { logoCache[p] = logoCache[logoKey(p)] = img; res(img); };
+        img.onerror = () => res(null);
         img.src = src;
       });
     }
 
-    async function loadImage(pathOrUrl) {
-      if (!pathOrUrl) return null;
-      const cached = getCachedLogo(pathOrUrl);
+    async function loadImage(p) {
+      if (!p) return null;
+      const cached = getCachedLogo(p);
       if (cached) return cached;
-      for (const c of localPathCandidates(pathOrUrl)) {
-        const img = await tryLoadOne(c);
-        if (img) {
-          cacheLogo(img, logoKey(pathOrUrl), resolveLogoPath(c));
-          return img;
-        }
-      }
+      for (const c of localCandidates(p)) { const img = await tryLoad(c); if (img) return img; }
       return null;
     }
 
-    function setupBrandLogoPreview() {
+    function logoTag(basePath, alt) {
+      const urls = localCandidates(basePath).map(c => resolvePath(c)).filter(Boolean);
+      if (!urls.length) return "";
+      const list = JSON.stringify(urls);
+      return `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(alt)}" loading="lazy" data-logos='${list.replace(/'/g,"&#39;")}' onerror="(function(el){var u=JSON.parse(el.dataset.logos);var n=+(el.dataset.i||0)+1;el.dataset.i=n;if(n<u.length)el.src=u[n];else el.style.visibility='hidden'})(this)">`;
+    }
+
+    function setupBrandLogo() {
       const url = asset(BRAND_LOGO_PATHS[0]);
-      const header = $("#brand-logo");
-      const footer = $("#brand-logo-footer");
-      if (header) {
-        header.src = url;
-        header.onerror = () => { header.src = asset(BRAND_LOGO_PATHS[1]); };
-      }
-      if (footer) {
-        footer.src = url;
-        footer.onerror = () => { footer.src = asset(BRAND_LOGO_PATHS[1]); };
-      }
+      ["#brand-logo","#brand-logo-footer"].forEach(sel => {
+        const el = $(sel);
+        if (el) { el.src = url; el.onerror = () => { el.src = asset(BRAND_LOGO_PATHS[1]); }; }
+      });
     }
 
     async function loadBrandLogo() {
       if (brandLogoImg) return brandLogoImg;
       for (const p of BRAND_LOGO_PATHS) {
-        for (const c of localPathCandidates(p)) {
-          const img = await tryLoadOne(c);
-          if (img) {
-            brandLogoImg = img;
-            return img;
-          }
+        for (const c of localCandidates(p)) {
+          const img = await tryLoad(c);
+          if (img) { brandLogoImg = img; return img; }
         }
       }
       return null;
     }
 
-    function drawBrandLogoCircle(ctx, cx, cy, size, t, img) {
-      if (!img) return;
-      const r = size / 2;
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.55)";
-      ctx.shadowBlur = 18;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(img, cx - r, cy - r, size, size);
-      ctx.restore();
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = t.accent;
-      ctx.lineWidth = 3;
-      ctx.globalAlpha = 0.9;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-
+    // ── RENDER PREVIEW ────────────────────────────────
     function shortTv(m) {
       const parts = (m.tvFree || []).concat(m.tvPaid || []);
       return parts.length ? parts.join(" · ") : (m.tv || "-");
-    }
-
-    async function renderMatches(iso) {
-      selectedDate = iso;
-      const matches = getMatchesForDate(iso);
-      displayDate.textContent = formatDateID(iso);
-
-      if (!matches.length) {
-        matchList.innerHTML = `<div style="text-align:center;padding:24px 8px;color:var(--t-sub);font-size:0.8rem;">Tidak ada jadwal untuk tanggal ini.</div>`;
-        btnDownload.disabled = true;
-        return;
-      }
-
-      btnDownload.disabled = false;
-      await loadStaticLogos();
-
-      matchList.innerHTML = matches.map((m, i) => {
-        const tvStr = shortTv(m);
-        const homeUrl = resolveTeamLogo(m.home);
-        const awayUrl = resolveTeamLogo(m.away);
-        return `<div class="sim-card">
-          ${m.competition ? `<div class="sim-league">${escapeHtml(m.competition)}</div>` : ""}
-          <div class="sim-main">
-            <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
-            <span class="sim-teams">
-              <span class="team-block home">
-              ${logoTag(homeUrl, m.home)}
-              <span class="team-name">${escapeHtml(m.home)}</span>
-            </span>
-            <span class="vs-label">VS</span>
-              <span class="team-block away">
-              ${logoTag(awayUrl, m.away)}
-              <span class="team-name">${escapeHtml(m.away)}</span>
-            </span>
-          </span>
-          </div>
-          <span class="sim-tv">📺 ${escapeHtml(tvStr)}</span>
-        </div>`;
-      }).join("");
-
-      const urls = [...new Set(
-        matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
-      )];
-      Promise.all(urls.map(loadImage));
-    }
-
-    async function fetchSchedule() {
-      setStatus("Memuat jadwal...");
-      try {
-        const res = await fetch(asset("data/jadwal.json"));
-        if (!res.ok) throw new Error(`jadwal.json HTTP ${res.status}`);
-        const data = await res.json();
-        allSchedules = data.schedules || {};
-        await loadStaticLogos();
-        setStatus(`✓ ${Object.values(allSchedules).flat().length} pertandingan dimuat.`, "success");
-        renderMatches(selectedDate);
-      } catch (e) {
-        setStatus("Gagal memuat jadwal. Import HTML atau cek data/jadwal.json.", "error");
-      }
-    }
-
-    function importHtmlFile(file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const doc = new DOMParser().parseFromString(e.target.result, "text/html");
-          const rows = doc.querySelectorAll("table tr");
-          if (!rows.length) throw new Error("Tabel jadwal tidak ditemukan.");
-          let count = 0;
-          const fileDate = selectedDate;
-          rows.forEach((tr) => {
-            const cells = [...tr.querySelectorAll("td")].map((td) => td.textContent.trim());
-            if (cells.length < 4) return;
-            const [kickoff, matchup, competition, tv] = cells;
-            if (/kick-off/i.test(kickoff) || !/vs/i.test(matchup)) return;
-            const parts = matchup.split(/\s+vs\s+/i);
-            if (!allSchedules[fileDate]) allSchedules[fileDate] = [];
-            allSchedules[fileDate].push({
-              kickoff,
-              matchup,
-              home: (parts[0] || "").trim(),
-              away: (parts[1] || "").trim(),
-              competition,
-              tv,
-              tvFree: [],
-              tvPaid: [],
-            });
-            count++;
-          });
-          await loadStaticLogos();
-          setStatus(`✓ Import ${count} pertandingan.`, "success");
-          renderMatches(selectedDate);
-        } catch (err) {
-          setStatus(`Gagal import: ${err.message}`, "error");
-        }
-      };
-      reader.readAsText(file, "UTF-8");
-    }
-
-    const PNG_W = 1080;
-    const PNG_H = 1920;
-    const PNG_MAX_MATCHES = 5;
-
-    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
-      const rad = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + rad, y);
-      ctx.lineTo(x + w - rad, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
-      ctx.lineTo(x + w, y + h - rad);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
-      ctx.lineTo(x + rad, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
-      ctx.lineTo(x, y + rad);
-      ctx.quadraticCurveTo(x, y, x + rad, y);
-      ctx.closePath();
-      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 2; ctx.stroke(); }
-    }
-
-    function drawDecoStadium(ctx, W, H, t) {
-      const g = ctx.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, t.bg2); g.addColorStop(0.5, t.bg); g.addColorStop(1, t.bg2);
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(74,222,128,0.035)";
-      for (let i = 0; i < 20; i++) ctx.fillRect(0, i * (H / 20), W, H / 40);
-    }
-
-    function drawDecoCyber(ctx, W, H, t) {
-      const g = ctx.createLinearGradient(0, 0, W, H);
-      g.addColorStop(0, t.bg2); g.addColorStop(1, t.bg);
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = "rgba(34,211,238,0.07)"; ctx.lineWidth = 1;
-      for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-      for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-      const spots = [[0.15, 0.12, "rgba(34,211,238,0.35)"], [0.85, 0.88, "rgba(232,121,249,0.3)"]];
-      spots.forEach(([px, py, col]) => {
-        const rg = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, 320);
-        rg.addColorStop(0, col); rg.addColorStop(1, "transparent");
-        ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-      });
-    }
-
-    function drawDecoGold(ctx, W, H, t) {
-      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = "rgba(251,191,36,0.08)"; ctx.lineWidth = 2;
-      for (let i = -H; i < W + H; i += 56) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
-      }
-      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 500);
-      rg.addColorStop(0, "rgba(251,191,36,0.2)"); rg.addColorStop(1, "transparent");
-      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawDecoInferno(ctx, W, H, t) {
-      const g = ctx.createLinearGradient(0, H, 0, 0);
-      g.addColorStop(0, "rgba(239,68,68,0.35)"); g.addColorStop(0.4, t.bg); g.addColorStop(1, t.bg2);
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      const rg = ctx.createRadialGradient(W * 0.3, H * 0.15, 0, W * 0.3, H * 0.15, 400);
-      rg.addColorStop(0, "rgba(249,115,22,0.25)"); rg.addColorStop(1, "transparent");
-      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawDecoStudio(ctx, W, H, t) {
-      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(59,130,246,0.06)";
-      for (let i = 0; i < 8; i++) ctx.fillRect(0, i * 120, W, 60);
-      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 450);
-      rg.addColorStop(0, "rgba(59,130,246,0.22)"); rg.addColorStop(1, "transparent");
-      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawThemeBackground(ctx, W, H, t) {
-      switch (t.deco) {
-        case "cyber": drawDecoCyber(ctx, W, H, t); break;
-        case "gold": drawDecoGold(ctx, W, H, t); break;
-        case "inferno": drawDecoInferno(ctx, W, H, t); break;
-        case "studio": drawDecoStudio(ctx, W, H, t); break;
-        default: drawDecoStadium(ctx, W, H, t);
-      }
-      const gr1 = ctx.createRadialGradient(W / 2, 0, 80, W / 2, 0, 700);
-      gr1.addColorStop(0, t.glowTop); gr1.addColorStop(1, "transparent");
-      ctx.fillStyle = gr1; ctx.fillRect(0, 0, W, 700);
-      const gr2 = ctx.createRadialGradient(W / 2, H, 80, W / 2, H, 600);
-      gr2.addColorStop(0, t.glowBottom); gr2.addColorStop(1, "transparent");
-      ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
-    }
-
-    function wrapTeamName(ctx, text, maxW, maxLines) {
-      const words = text.split(/\s+/);
-      const lines = [];
-      let line = "";
-      for (const w of words) {
-        const test = line ? line + " " + w : w;
-        if (ctx.measureText(test).width <= maxW) {
-          line = test;
-        } else {
-          if (line) lines.push(line);
-          line = w;
-          if (ctx.measureText(line).width > maxW) {
-            let chunk = "";
-            for (const ch of w) {
-              if (ctx.measureText(chunk + ch).width <= maxW) chunk += ch;
-              else {
-                if (chunk) lines.push(chunk);
-                chunk = ch;
-              }
-            }
-            line = chunk;
-          }
-        }
-      }
-      if (line) lines.push(line);
-      return lines.slice(0, maxLines);
-    }
-
-    function drawLeagueTop(ctx, cardX, cardW, y, text, t) {
-      if (!text) return;
-      const label = text.length > 36 ? text.slice(0, 34) + "…" : text;
-      ctx.font = "bold 16px 'Segoe UI', sans-serif";
-      ctx.fillStyle = t.sub;
-      ctx.textAlign = "center";
-      ctx.fillText(label.toUpperCase(), cardX + cardW / 2, y + 20);
-    }
-
-    function drawTeamStack(ctx, name, logo, centerX, topY, colW, logoSz, t) {
-      const lx = centerX - logoSz / 2;
-      if (logo) ctx.drawImage(logo, lx, topY, logoSz, logoSz);
-      const fontPx = Math.max(19, Math.min(26, Math.round(colW / 7)));
-      const lineH = fontPx + 6;
-      const nameY = topY + logoSz + 14;
-      ctx.fillStyle = t.text;
-      ctx.font = `bold ${fontPx}px 'Segoe UI', sans-serif`;
-      ctx.textAlign = "center";
-      const lines = wrapTeamName(ctx, name, colW - 4, 2);
-      let ty = nameY + fontPx;
-      lines.forEach((ln) => {
-        ctx.fillText(ln, centerX, ty);
-        ty += lineH;
-      });
-    }
-
-    function drawVsBadge(ctx, cx, cy, t) {
-      const r = 26;
-      ctx.save();
-      ctx.shadowColor = t.accentGlow || t.accent;
-      ctx.shadowBlur = 16;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = t.accent;
-      ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = t.bg;
-      ctx.font = "900 18px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("VS", cx, cy + 1);
-      ctx.textBaseline = "alphabetic";
-    }
-
-    function drawTvBar(ctx, x, y, w, h, tvStr, t, isFree) {
-      const bg = ctx.createLinearGradient(x, y, x + w, y);
-      bg.addColorStop(0, "rgba(0,0,0,0.45)");
-      bg.addColorStop(1, "rgba(0,0,0,0.55)");
-      drawRoundRect(ctx, x, y, w, h, h / 2, bg, t.accent, 1);
-      ctx.fillStyle = isFree ? t.tvFree : t.tv;
-      ctx.font = "bold 28px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const lines = wrapTeamName(ctx, "📺  " + tvStr, w - 20, 1);
-      ctx.fillText(lines[0] || tvStr, x + w / 2, y + h / 2 + 1);
-      ctx.textBaseline = "alphabetic";
-    }
-
-    function drawBackgroundWatermark(ctx, W, H, t) {
-      const wmText = getTiktokWmText();
-      if (!wmText) return;
-      ctx.save();
-      ctx.translate(W / 2, H / 2);
-      ctx.rotate(-Math.PI / 6);
-      ctx.fillStyle = t.wm;
-      ctx.font = "900 68px 'Segoe UI', Impact, sans-serif";
-      ctx.textAlign = "center";
-      [-440, -300, -160, -20, 120, 260, 400].forEach((dy) => ctx.fillText(wmText, 0, dy));
-      ctx.restore();
-    }
-
-    function drawHeaderPNG(ctx, W, t, brandImg) {
-      const title = (inputHeader.value || "JADWAL BOLA").toUpperCase();
-      const dateStr = formatDateID(selectedDate).toUpperCase();
-      const pad = 28;
-      const barY = 16;
-      const cx = W / 2;
-      const barW = W - pad * 2;
-      const logoSz = brandImg ? 84 : 0;
-      const barH = brandImg ? 188 : 118;
-      let y = barY + 18;
-
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.45)";
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetY = 8;
-      const hg = ctx.createLinearGradient(pad, barY, pad + barW, barY + barH);
-      hg.addColorStop(0, t.cardHi || t.card);
-      hg.addColorStop(1, t.card);
-      drawRoundRect(ctx, pad, barY, barW, barH, 26, hg, t.accent, 3);
-      ctx.restore();
-
-      ctx.textAlign = "center";
-
-      if (brandImg) {
-        drawBrandLogoCircle(ctx, cx, y + logoSz / 2, logoSz, t, brandImg);
-        y = barY + 18 + logoSz + 14;
-      } else {
-        y = barY + 28;
-      }
-
-      ctx.save();
-      ctx.shadowColor = t.accentGlow || t.accent;
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = t.text;
-      ctx.font = "900 48px 'Segoe UI', 'Arial Black', sans-serif";
-      ctx.fillText(title, cx, y);
-      ctx.restore();
-
-      y += 44;
-      ctx.font = "bold 34px 'Segoe UI', sans-serif";
-      const dateW = ctx.measureText(dateStr).width;
-      const pillW = Math.min(dateW + 40, barW - 32);
-      const pillH = 46;
-      const pillX = cx - pillW / 2;
-      drawRoundRect(ctx, pillX, y - 6, pillW, pillH, 23, t.timeBg || t.bg, t.accent, 1.5);
-      ctx.fillStyle = t.text;
-      ctx.fillText(dateStr, cx, y + 28);
-
-      return barY + barH + 14;
     }
 
     function getMatchesForDate(iso) {
@@ -1262,170 +968,461 @@
       return [];
     }
 
-    function computePngLayout(matchCount, headerEnd, footerH) {
-      const gap = 14;
-      const n = Math.max(1, Math.min(Number(matchCount) || 0, PNG_MAX_MATCHES));
-      const listTop = headerEnd;
-      const listBottom = PNG_H - footerH;
-      const avail = listBottom - listTop;
-      let rowH = Math.floor((avail - gap * (n - 1)) / n);
-      rowH = Math.min(280, Math.max(148, rowH));
-      while (n > 0 && listTop + n * rowH + (n - 1) * gap > listBottom) rowH--;
-      return { footerH, headerEnd: listTop, gap, rowH, n, listBottom };
+    async function renderMatches(iso) {
+      selectedDate = iso;
+      const matches = getMatchesForDate(iso);
+      displayDate.textContent = formatDateID(iso);
+      if (!matches.length) {
+        matchList.innerHTML = `<div style="text-align:center;padding:20px 8px;color:var(--t-sub);font-size:0.75rem;opacity:0.7">Tidak ada jadwal untuk tanggal ini.</div>`;
+        setBtnsDisabled(true);
+        return;
+      }
+      setBtnsDisabled(false);
+      await loadStaticLogos();
+      matchList.innerHTML = matches.map(m => {
+        const tvStr = shortTv(m);
+        return `<div class="sim-card">
+          ${m.competition ? `<div class="sim-league">${escapeHtml(m.competition)}</div>` : ""}
+          <div class="sim-main">
+            <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
+            <span class="sim-teams">
+              <span class="team-block">${logoTag(resolveTeamLogo(m.home),m.home)}<span class="team-name">${escapeHtml(m.home)}</span></span>
+              <span class="vs-label">VS</span>
+              <span class="team-block">${logoTag(resolveTeamLogo(m.away),m.away)}<span class="team-name">${escapeHtml(m.away)}</span></span>
+            </span>
+          </div>
+          <span class="sim-tv">📺 ${escapeHtml(tvStr)}</span>
+        </div>`;
+      }).join("");
+      const urls = [...new Set(matches.flatMap(m => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean))];
+      Promise.all(urls.map(loadImage));
     }
 
-    function drawMatchRowPNG(ctx, m, y, rowH, t) {
-      const pad = 24;
-      const cardX = pad;
-      const cardW = PNG_W - pad * 2;
-      const tvH = 48;
-      const leagueH = m.competition ? 28 : 0;
-      const bodyTop = y + 10 + leagueH;
-      const mainH = rowH - tvH - 14 - leagueH;
-      const accent = t.accent;
+    async function fetchSchedule() {
+      setStatus("Memuat jadwal...");
+      try {
+        const res = await fetch(asset("data/jadwal.json"));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        allSchedules = data.schedules || {};
+        await loadStaticLogos();
+        const total = Object.values(allSchedules).flat().length;
+        setStatus(`✓ ${total} pertandingan dimuat.`, "success");
+        renderMatches(selectedDate);
+      } catch(e) {
+        setStatus("Gagal memuat jadwal. Import HTML atau cek data/jadwal.json.", "error");
+      }
+    }
 
+    function importHtmlFile(file) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        try {
+          const doc = new DOMParser().parseFromString(e.target.result, "text/html");
+          const rows = doc.querySelectorAll("table tr");
+          if (!rows.length) throw new Error("Tabel tidak ditemukan.");
+          let count = 0;
+          rows.forEach(tr => {
+            const cells = [...tr.querySelectorAll("td")].map(td => td.textContent.trim());
+            if (cells.length < 4) return;
+            const [kickoff, matchup, competition, tv] = cells;
+            if (/kick-off/i.test(kickoff) || !/vs/i.test(matchup)) return;
+            const parts = matchup.split(/\s+vs\s+/i);
+            if (!allSchedules[selectedDate]) allSchedules[selectedDate] = [];
+            allSchedules[selectedDate].push({ kickoff, matchup, home:(parts[0]||"").trim(), away:(parts[1]||"").trim(), competition, tv, tvFree:[], tvPaid:[] });
+            count++;
+          });
+          await loadStaticLogos();
+          setStatus(`✓ Import ${count} pertandingan.`, "success");
+          renderMatches(selectedDate);
+        } catch(err) {
+          setStatus(`Gagal import: ${err.message}`, "error");
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    // ── PNG EXPORT ────────────────────────────────────
+    const PNG_W = 1080;
+    const PNG_H = 1920;
+    const PNG_MAX = 6;
+
+    function drawRR(ctx, x, y, w, h, r, fill, stroke, sw) {
+      const rad = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
+      ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+      ctx.lineTo(x+rad,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
+      ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y);
+      ctx.closePath();
+      if (fill) { ctx.fillStyle=fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=sw||2; ctx.stroke(); }
+    }
+
+    function drawBg(ctx, W, H, t) {
+      // Base gradient
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0, t.bg2||t.bg); g.addColorStop(0.5, t.bg); g.addColorStop(1, t.bg2||t.bg);
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+      if (t.deco==="cyber") {
+        ctx.strokeStyle="rgba(34,211,238,0.07)"; ctx.lineWidth=1;
+        for(let x=0;x<W;x+=54){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        for(let y=0;y<H;y+=54){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+        [[0.15,0.12,"rgba(34,211,238,0.35)"],[0.85,0.88,"rgba(232,121,249,0.3)"]].forEach(([px,py,col])=>{
+          const rg=ctx.createRadialGradient(px*W,py*H,0,px*W,py*H,380);
+          rg.addColorStop(0,col);rg.addColorStop(1,"transparent");
+          ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+        });
+      } else if (t.deco==="gold") {
+        ctx.strokeStyle="rgba(251,191,36,0.07)"; ctx.lineWidth=2;
+        for(let i=-H;i<W+H;i+=64){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H,H);ctx.stroke();}
+      } else if (t.deco==="inferno") {
+        const rg=ctx.createRadialGradient(W/2,H,80,W/2,H,700);
+        rg.addColorStop(0,"rgba(239,68,68,0.4)");rg.addColorStop(1,"transparent");
+        ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+      } else if (t.deco==="stadium") {
+        ctx.fillStyle="rgba(74,222,128,0.025)";
+        for(let i=0;i<24;i++) ctx.fillRect(0,i*(H/24),W,H/48);
+      } else if (t.deco==="studio") {
+        ctx.fillStyle="rgba(59,130,246,0.05)";
+        for(let i=0;i<10;i++) ctx.fillRect(0,i*120,W,60);
+      }
+
+      // Top glow
+      const gr1=ctx.createRadialGradient(W/2,0,60,W/2,0,750);
+      gr1.addColorStop(0,t.glowTop);gr1.addColorStop(1,"transparent");
+      ctx.fillStyle=gr1;ctx.fillRect(0,0,W,750);
+      // Bottom glow
+      const gr2=ctx.createRadialGradient(W/2,H,60,W/2,H,650);
+      gr2.addColorStop(0,t.glowBottom);gr2.addColorStop(1,"transparent");
+      ctx.fillStyle=gr2;ctx.fillRect(0,H-650,W,650);
+    }
+
+    function drawWatermarkBg(ctx, W, H, t) {
+      const text = getTiktokWmText();
+      if (!text) return;
       ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.5)";
-      ctx.shadowBlur = 22;
-      ctx.shadowOffsetY = 10;
-      const cg = ctx.createLinearGradient(cardX, y, cardX + cardW, y + rowH);
-      cg.addColorStop(0, t.cardHi || t.card);
-      cg.addColorStop(1, t.card);
-      drawRoundRect(ctx, cardX, y, cardW, rowH, 22, cg, accent, 2.5);
+      ctx.translate(W/2, H/2);
+      ctx.rotate(-Math.PI/7);
+      ctx.fillStyle = t.wm || "rgba(255,255,255,0.03)";
+      ctx.font = `900 72px 'Impact', 'Arial Black', sans-serif`;
+      ctx.textAlign = "center";
+      for(let dy=-500; dy<=500; dy+=160) ctx.fillText(text, 0, dy);
+      ctx.restore();
+    }
+
+    function drawCircularLogo(ctx, img, cx, cy, r, accent) {
+      if (!img) return;
+      ctx.save();
+      ctx.shadowColor="rgba(0,0,0,0.6)"; ctx.shadowBlur=24;
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=accent; ctx.lineWidth=4; ctx.stroke();
+      // inner glow ring
+      ctx.beginPath(); ctx.arc(cx,cy,r+8,0,Math.PI*2);
+      ctx.strokeStyle=accent.replace(")",",0.25)").replace("rgb","rgba"); ctx.lineWidth=3; ctx.stroke();
+    }
+
+    function wrapText(ctx, text, maxW, maxLines) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = "";
+      for(const w of words) {
+        const test = line ? line+" "+w : w;
+        if(ctx.measureText(test).width <= maxW) { line=test; }
+        else { if(line) lines.push(line); line=w; }
+      }
+      if(line) lines.push(line);
+      return lines.slice(0, maxLines);
+    }
+
+    // ── HEADER PNG ────────────────────────────────────
+    function drawHeader(ctx, W, t, brandImg) {
+      const pad = 32;
+      const cx = W/2;
+      const barX = pad, barW = W-pad*2;
+      let y = 24;
+
+      // Card with gradient
+      ctx.save();
+      ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=30; ctx.shadowOffsetY=10;
+      const logoSz = brandImg ? 96 : 0;
+      const barH = brandImg ? 210 : 130;
+      const hg = ctx.createLinearGradient(barX,y,barX+barW,y+barH);
+      hg.addColorStop(0, t.cardHi||t.card); hg.addColorStop(1, t.card);
+      drawRR(ctx, barX, y, barW, barH, 28, hg, t.accent, 3);
       ctx.restore();
 
-      ctx.fillStyle = accent;
-      ctx.fillRect(cardX, y + 10, 6, rowH - 20);
+      // Accent border top
+      const borderG = ctx.createLinearGradient(barX,y,barX+barW,y);
+      borderG.addColorStop(0,"transparent"); borderG.addColorStop(0.5,t.accent); borderG.addColorStop(1,"transparent");
+      ctx.strokeStyle=borderG; ctx.lineWidth=4;
+      ctx.beginPath(); ctx.moveTo(barX+28,y+2); ctx.lineTo(barX+barW-28,y+2); ctx.stroke();
 
-      if (m.competition) drawLeagueTop(ctx, cardX, y, cardW, m.competition, t);
+      let contentY = y + 22;
 
-      const timeW = 88;
-      const timeX = cardX + 14;
-      const timeBoxH = Math.min(88, mainH - 8);
-      const timeY = bodyTop + (mainH - timeBoxH) / 2;
-      drawRoundRect(ctx, timeX, timeY, timeW, timeBoxH, 16, t.timeBg || t.bg, accent, 2);
-      ctx.fillStyle = accent;
-      ctx.font = "900 32px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(m.kickoff, timeX + timeW / 2, timeY + timeBoxH * 0.48);
-      ctx.fillStyle = t.sub;
-      ctx.font = "bold 15px 'Segoe UI', sans-serif";
-      ctx.fillText("WIB", timeX + timeW / 2, timeY + timeBoxH * 0.72);
+      if (brandImg) {
+        drawCircularLogo(ctx, brandImg, cx, contentY + logoSz/2, logoSz/2, t.accent);
+        contentY += logoSz + 18;
+      }
 
-      const contentX = cardX + timeW + 20;
-      const contentW = cardW - timeW - 34;
-      const vsSlot = 64;
-      const colW = (contentW - vsSlot) / 2;
-      const homeCx = contentX + colW / 2;
-      const awayCx = contentX + contentW - colW / 2;
-      const mid = contentX + contentW / 2;
-      const logoSz = Math.min(58, Math.max(46, Math.floor(mainH * 0.42)));
-      const teamTop = bodyTop + 6;
+      // Title
+      ctx.save();
+      ctx.shadowColor=t.accentGlow||t.accent; ctx.shadowBlur=28;
+      ctx.fillStyle=t.text;
+      ctx.font=`900 52px 'Impact', 'Arial Black', sans-serif`;
+      ctx.textAlign="center";
+      ctx.fillText((inputHeader.value||"JADWAL BOLA").toUpperCase(), cx, contentY + (brandImg?0:20));
+      ctx.restore();
 
-      const hImg = getCachedLogo(resolveTeamLogo(m.home));
-      const aImg = getCachedLogo(resolveTeamLogo(m.away));
-      drawTeamStack(ctx, m.home, hImg, homeCx, teamTop, colW, logoSz, t);
-      drawTeamStack(ctx, m.away, aImg, awayCx, teamTop, colW, logoSz, t);
-      drawVsBadge(ctx, mid, teamTop + logoSz / 2 + 8, t);
+      contentY += brandImg ? 46 : 48;
 
-      drawTvBar(ctx, cardX + timeW + 12, y + rowH - tvH - 8, cardW - timeW - 24, tvH, shortTv(m), t, !!(m.tvFree || []).length);
+      // Date pill
+      const dateStr = formatDateID(selectedDate).toUpperCase();
+      ctx.font=`700 30px 'Segoe UI', sans-serif`;
+      const dW = Math.min(ctx.measureText(dateStr).width+50, barW-60);
+      const pillH = 50;
+      drawRR(ctx, cx-dW/2, contentY-4, dW, pillH, 25, t.timeBg||t.bg, t.accent, 1.5);
+      ctx.fillStyle=t.sub;
+      ctx.textAlign="center";
+      ctx.fillText(dateStr, cx, contentY+30);
+
+      return y + barH + 20;
     }
 
+    // ── MATCH ROW PNG ─────────────────────────────────
+    function drawMatchRow(ctx, m, y, rowH, idx, t) {
+      const padH = 22;
+      const cardX = padH, cardW = PNG_W - padH*2;
+      const tvBarH = 52;
+      const leagueH = m.competition ? 30 : 0;
+      const bodyTop = y + 14 + leagueH;
+      const mainH = rowH - tvBarH - 18 - leagueH;
+      const accentColor = t.borders ? t.borders[idx % t.borders.length] : t.accent;
+
+      // Card shadow & bg
+      ctx.save();
+      ctx.shadowColor="rgba(0,0,0,0.55)"; ctx.shadowBlur=28; ctx.shadowOffsetY=12;
+      const cg = ctx.createLinearGradient(cardX,y,cardX+cardW,y+rowH);
+      cg.addColorStop(0, t.cardHi||t.card); cg.addColorStop(1, t.card);
+      drawRR(ctx, cardX, y, cardW, rowH, 24, cg, accentColor, 2);
+      ctx.restore();
+
+      // Left accent bar
+      ctx.fillStyle = accentColor;
+      const barRad = 4;
+      ctx.beginPath();
+      ctx.moveTo(cardX+barRad, y+12); ctx.lineTo(cardX+8-barRad, y+12);
+      ctx.quadraticCurveTo(cardX+8, y+12, cardX+8, y+12+barRad);
+      ctx.lineTo(cardX+8, y+rowH-12-barRad);
+      ctx.quadraticCurveTo(cardX+8, y+rowH-12, cardX+8-barRad, y+rowH-12);
+      ctx.lineTo(cardX+barRad, y+rowH-12);
+      ctx.quadraticCurveTo(cardX, y+rowH-12, cardX, y+rowH-12-barRad);
+      ctx.lineTo(cardX, y+12+barRad);
+      ctx.quadraticCurveTo(cardX, y+12, cardX+barRad, y+12);
+      ctx.closePath();
+      ctx.fill();
+
+      // League label
+      if (m.competition) {
+        ctx.font=`700 20px 'Segoe UI', sans-serif`;
+        ctx.fillStyle=t.sub;
+        ctx.textAlign="center";
+        ctx.fillText(m.competition.toUpperCase().slice(0,42), cardX+cardW/2, y+28);
+      }
+
+      // Time box
+      const timeW = 110, timeX = cardX+18;
+      const timeBoxH = Math.min(100, mainH-10);
+      const timeY = bodyTop + (mainH-timeBoxH)/2;
+      ctx.save();
+      ctx.shadowColor=accentColor; ctx.shadowBlur=18;
+      drawRR(ctx, timeX, timeY, timeW, timeBoxH, 18, t.timeBg||t.bg, accentColor, 2.5);
+      ctx.restore();
+      ctx.fillStyle=accentColor;
+      ctx.font=`900 38px 'Impact', 'Arial Black', sans-serif`;
+      ctx.textAlign="center";
+      ctx.fillText(m.kickoff, timeX+timeW/2, timeY+timeBoxH*0.5);
+      ctx.fillStyle=t.sub;
+      ctx.font=`700 18px 'Segoe UI', sans-serif`;
+      ctx.fillText("WIB", timeX+timeW/2, timeY+timeBoxH*0.76);
+
+      // Teams area
+      const contentX = cardX + timeW + 24;
+      const contentW = cardW - timeW - 38;
+      const vsBadgeR = 28;
+      const colW = (contentW - vsBadgeR*2 - 16) / 2;
+      const homeCx = contentX + colW/2;
+      const awayCx = contentX + contentW - colW/2;
+      const midX = contentX + contentW/2;
+      const logoSz = Math.min(72, Math.max(54, Math.floor(mainH*0.48)));
+      const teamTop = bodyTop + 6;
+
+      // Team logos + names
+      const hImg = getCachedLogo(resolveTeamLogo(m.home));
+      const aImg = getCachedLogo(resolveTeamLogo(m.away));
+
+      [{ img:hImg, name:m.home, cx:homeCx }, { img:aImg, name:m.away, cx:awayCx }].forEach(({img,name,cx}) => {
+        if (img) {
+          ctx.save();
+          ctx.shadowColor="rgba(0,0,0,0.4)"; ctx.shadowBlur=10;
+          ctx.drawImage(img, cx-logoSz/2, teamTop, logoSz, logoSz);
+          ctx.restore();
+        } else {
+          // Placeholder circle
+          ctx.beginPath(); ctx.arc(cx, teamTop+logoSz/2, logoSz/2, 0, Math.PI*2);
+          ctx.fillStyle=t.timeBg||t.bg; ctx.fill();
+          ctx.strokeStyle=t.border; ctx.lineWidth=1.5; ctx.stroke();
+        }
+        const nameY = teamTop + logoSz + 12;
+        ctx.font=`700 ${Math.max(18,Math.min(24,Math.round(colW/7)))}px 'Segoe UI', sans-serif`;
+        ctx.fillStyle=t.text; ctx.textAlign="center";
+        const lines = wrapText(ctx, name, colW-6, 2);
+        lines.forEach((ln,i) => ctx.fillText(ln, cx, nameY + i*26));
+      });
+
+      // VS badge
+      const vsCY = teamTop + logoSz/2 + 8;
+      ctx.save();
+      ctx.shadowColor=accentColor; ctx.shadowBlur=20;
+      ctx.beginPath(); ctx.arc(midX, vsCY, vsBadgeR, 0, Math.PI*2);
+      ctx.fillStyle=accentColor; ctx.fill();
+      ctx.restore();
+      ctx.fillStyle="#fff";
+      ctx.font=`900 20px 'Impact', 'Arial Black', sans-serif`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("VS", midX, vsCY+1);
+      ctx.textBaseline="alphabetic";
+
+      // TV bar
+      const tvBarY = y + rowH - tvBarH - 10;
+      const tvBarX = cardX + 18, tvBarW = cardW - 36;
+      const tvBg = ctx.createLinearGradient(tvBarX, tvBarY, tvBarX+tvBarW, tvBarY);
+      tvBg.addColorStop(0,"rgba(0,0,0,0.5)"); tvBg.addColorStop(1,"rgba(0,0,0,0.6)");
+      drawRR(ctx, tvBarX, tvBarY, tvBarW, tvBarH, tvBarH/2, tvBg, accentColor, 1.5);
+      ctx.fillStyle = (m.tvFree||[]).length ? t.tvFree||"#4ade80" : t.tv||"#fbbf24";
+      ctx.font=`700 26px 'Segoe UI', sans-serif`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("📺  " + shortTv(m), tvBarX+tvBarW/2, tvBarY+tvBarH/2+1);
+      ctx.textBaseline="alphabetic";
+    }
+
+    // ── FOOTER PNG ────────────────────────────────────
+    function drawFooter(ctx, W, H, footerY, t, brandImg) {
+      const footH = H - footerY;
+      const footG = ctx.createLinearGradient(0,footerY,0,H);
+      footG.addColorStop(0, t.footerBg); footG.addColorStop(1,"#000");
+      ctx.fillStyle=footG; ctx.fillRect(0,footerY,W,footH);
+
+      // Divider line
+      const lineG = ctx.createLinearGradient(0,footerY,W,footerY);
+      lineG.addColorStop(0,"transparent"); lineG.addColorStop(0.5,t.accent); lineG.addColorStop(1,"transparent");
+      ctx.strokeStyle=lineG; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(50,footerY+1); ctx.lineTo(W-50,footerY+1); ctx.stroke();
+
+      const cx = W/2;
+      let fy = footerY + 20;
+
+      if (brandImg) {
+        drawCircularLogo(ctx, brandImg, cx, fy+36, 36, t.accent);
+        fy += 88;
+      } else {
+        fy += 20;
+      }
+
+      // Footer text
+      ctx.fillStyle=t.sub;
+      ctx.font=`700 28px 'Segoe UI', sans-serif`;
+      ctx.textAlign="center";
+      const footLines = wrapText(ctx, inputFooter.value||"", W-80, 2);
+      footLines.forEach((ln,i) => ctx.fillText(ln, cx, fy + i*34));
+    }
+
+    // ── DOWNLOAD ──────────────────────────────────────
     async function downloadPNG() {
       const matches = getMatchesForDate(selectedDate);
       if (!matches.length) return;
-
-      btnDownload.disabled = true;
-      setStatus("Memuat logo untuk PNG...");
+      setBtnsDisabled(true);
+      setStatus("Memuat logo...");
 
       try {
         await loadStaticLogos();
         const t = getTheme();
-        const dataMatches = matches.slice(0, PNG_MAX_MATCHES);
-        const urls = [...new Set(
-          dataMatches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
-        )];
+        const data = matches.slice(0, PNG_MAX);
+        const urls = [...new Set(data.flatMap(m=>[resolveTeamLogo(m.home),resolveTeamLogo(m.away),resolveLeagueLogo(m.competition)]).filter(Boolean))];
         await Promise.all(urls.map(loadImage));
         const brandImg = await loadBrandLogo();
 
-        const W = PNG_W;
-        const H = PNG_H;
-        const canvas = document.createElement("canvas");
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext("2d");
-        ctx.textBaseline = "alphabetic";
+        const W=PNG_W, H=PNG_H;
+        const canvas=document.createElement("canvas");
+        canvas.width=W; canvas.height=H;
+        const ctx=canvas.getContext("2d");
+        ctx.textBaseline="alphabetic";
 
-        drawThemeBackground(ctx, W, H, t);
-        drawBackgroundWatermark(ctx, W, H, t);
-        const headerEnd = drawHeaderPNG(ctx, W, t, brandImg);
-        const footerH = brandImg ? 108 : 88;
-        const layout = computePngLayout(dataMatches.length, headerEnd, footerH);
+        // Draw background
+        drawBg(ctx, W, H, t);
+        drawWatermarkBg(ctx, W, H, t);
 
-        dataMatches.forEach((m, i) => {
-          const y = layout.headerEnd + i * (layout.rowH + layout.gap);
-          drawMatchRowPNG(ctx, m, y, layout.rowH, t);
+        // Header
+        const headerEnd = drawHeader(ctx, W, t, brandImg);
+
+        // Match rows
+        const footerH = brandImg ? 120 : 95;
+        const listTop = headerEnd;
+        const listBottom = H - footerH;
+        const n = data.length;
+        const gap = 16;
+        let rowH = Math.floor((listBottom - listTop - gap*(n-1)) / n);
+        rowH = Math.min(290, Math.max(155, rowH));
+        // Adjust to fit
+        while(n>0 && listTop + n*rowH + (n-1)*gap > listBottom) rowH--;
+
+        data.forEach((m,i) => {
+          drawMatchRow(ctx, m, listTop + i*(rowH+gap), rowH, i, t);
         });
 
-        const footY = layout.listBottom;
-        const footG = ctx.createLinearGradient(0, footY, 0, H);
-        footG.addColorStop(0, t.footerBg);
-        footG.addColorStop(1, "#000");
-        ctx.fillStyle = footG;
-        ctx.fillRect(0, footY, W, H - footY);
-        const accentLine = ctx.createLinearGradient(0, footY, W, footY);
-        accentLine.addColorStop(0, "transparent");
-        accentLine.addColorStop(0.5, t.accent);
-        accentLine.addColorStop(1, "transparent");
-        ctx.strokeStyle = accentLine;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(40, footY);
-        ctx.lineTo(W - 40, footY);
-        ctx.stroke();
-        if (brandImg) {
-          drawBrandLogoCircle(ctx, W / 2, footY + 42, 64, t, brandImg);
-        }
-        ctx.fillStyle = t.sub;
-        ctx.font = "bold 26px 'Segoe UI', sans-serif";
-        ctx.textAlign = "center";
-        const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
-        const footerTextY = brandImg ? footY + 72 : footY + 50;
-        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footerTextY + i * 30));
+        // Footer
+        drawFooter(ctx, W, H, listBottom, t, brandImg);
 
-        const link = document.createElement("a");
-        link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
-        link.href = canvas.toDataURL("image/png");
+        // Download
+        const link=document.createElement("a");
+        link.download=`jadwal-${currentTheme}-${selectedDate}.png`;
+        link.href=canvas.toDataURL("image/png");
         link.click();
 
-        const loaded = urls.filter((u) => getCachedLogo(u)).length;
-        const extra = matches.length > PNG_MAX_MATCHES ? ` (maks. ${PNG_MAX_MATCHES} dari ${matches.length})` : "";
-        setStatus(`✓ PNG "${t.name}": ${dataMatches.length} pertandingan${extra} · logo ${loaded}/${urls.length}`, "success");
-      } catch (err) {
-        setStatus(`Gagal ekspor: ${err.message}`, "error");
+        const loaded = urls.filter(u=>getCachedLogo(u)).length;
+        setStatus(`✓ PNG "${t.name}": ${data.length} match · logo ${loaded}/${urls.length}`, "success");
+      } catch(err) {
+        setStatus(`Gagal: ${err.message}`, "error");
         console.error(err);
       } finally {
-        btnDownload.disabled = false;
+        setBtnsDisabled(false);
       }
     }
 
-    function setStatus(msg, cls = "") {
-      statusEl.className = "status" + (cls ? " " + cls : "");
+    function setStatus(msg, cls="") {
+      statusEl.className = "status" + (cls?" "+cls:"");
       statusEl.textContent = msg;
     }
 
+    // ── EVENT LISTENERS ───────────────────────────────
     $("#btn-refresh").addEventListener("click", fetchSchedule);
-    $("#btn-download").addEventListener("click", downloadPNG);
+    btnDlDesk.addEventListener("click", downloadPNG);
+    btnDlMob.addEventListener("click", downloadPNG);
     $("#btn-today").addEventListener("click", () => setSelectedDate(todayISO()));
-    datePicker.addEventListener("change", (e) => setSelectedDate(e.target.value));
-    $("#file-import").addEventListener("change", (e) => {
-      const f = e.target.files[0];
-      if (f) importHtmlFile(f);
-      e.target.value = "";
+    datePicker.addEventListener("change", e => setSelectedDate(e.target.value));
+    $("#file-import").addEventListener("change", e => {
+      const f=e.target.files[0];
+      if(f) importHtmlFile(f);
+      e.target.value="";
     });
 
+    // ── INIT ──────────────────────────────────────────
     loadSettings();
-    setupBrandLogoPreview();
+    setupBrandLogo();
     datePicker.value = selectedDate;
     $("#view-header").textContent = inputHeader.value.toUpperCase();
     $("#view-footer").textContent = inputFooter.value;
