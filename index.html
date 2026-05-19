@@ -1042,11 +1042,15 @@
       reader.readAsText(file, "UTF-8");
     }
 
-    // ── PNG EXPORT ────────────────────────────────────
+    // ══════════════════════════════════════════════════
+    // PNG EXPORT — REDESIGNED
+    // ══════════════════════════════════════════════════
     const PNG_W = 1080;
     const PNG_H = 1920;
     const PNG_MAX = 6;
+    const PAD = 28; // horizontal page padding
 
+    // ── Utility: rounded rect ─────────────────────────
     function drawRR(ctx, x, y, w, h, r, fill, stroke, sw) {
       const rad = Math.min(r, w/2, h/2);
       ctx.beginPath();
@@ -1059,289 +1063,336 @@
       if (stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=sw||2; ctx.stroke(); }
     }
 
-    function drawBg(ctx, W, H, t) {
-      // Base gradient
-      const g = ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0, t.bg2||t.bg); g.addColorStop(0.5, t.bg); g.addColorStop(1, t.bg2||t.bg);
-      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-
-      if (t.deco==="cyber") {
-        ctx.strokeStyle="rgba(34,211,238,0.07)"; ctx.lineWidth=1;
-        for(let x=0;x<W;x+=54){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-        for(let y=0;y<H;y+=54){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-        [[0.15,0.12,"rgba(34,211,238,0.35)"],[0.85,0.88,"rgba(232,121,249,0.3)"]].forEach(([px,py,col])=>{
-          const rg=ctx.createRadialGradient(px*W,py*H,0,px*W,py*H,380);
-          rg.addColorStop(0,col);rg.addColorStop(1,"transparent");
-          ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
-        });
-      } else if (t.deco==="gold") {
-        ctx.strokeStyle="rgba(251,191,36,0.07)"; ctx.lineWidth=2;
-        for(let i=-H;i<W+H;i+=64){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H,H);ctx.stroke();}
-      } else if (t.deco==="inferno") {
-        const rg=ctx.createRadialGradient(W/2,H,80,W/2,H,700);
-        rg.addColorStop(0,"rgba(239,68,68,0.4)");rg.addColorStop(1,"transparent");
-        ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
-      } else if (t.deco==="stadium") {
-        ctx.fillStyle="rgba(74,222,128,0.025)";
-        for(let i=0;i<24;i++) ctx.fillRect(0,i*(H/24),W,H/48);
-      } else if (t.deco==="studio") {
-        ctx.fillStyle="rgba(59,130,246,0.05)";
-        for(let i=0;i<10;i++) ctx.fillRect(0,i*120,W,60);
-      }
-
-      // Top glow
-      const gr1=ctx.createRadialGradient(W/2,0,60,W/2,0,750);
-      gr1.addColorStop(0,t.glowTop);gr1.addColorStop(1,"transparent");
-      ctx.fillStyle=gr1;ctx.fillRect(0,0,W,750);
-      // Bottom glow
-      const gr2=ctx.createRadialGradient(W/2,H,60,W/2,H,650);
-      gr2.addColorStop(0,t.glowBottom);gr2.addColorStop(1,"transparent");
-      ctx.fillStyle=gr2;ctx.fillRect(0,H-650,W,650);
-    }
-
-    function drawWatermarkBg(ctx, W, H, t) {
-      const text = getTiktokWmText();
-      if (!text) return;
+    // ── Utility: clip-circle image ────────────────────
+    function drawCircleImg(ctx, img, cx, cy, r) {
       ctx.save();
-      ctx.translate(W/2, H/2);
-      ctx.rotate(-Math.PI/7);
-      ctx.fillStyle = t.wm || "rgba(255,255,255,0.03)";
-      ctx.font = `900 72px 'Impact', 'Arial Black', sans-serif`;
-      ctx.textAlign = "center";
-      for(let dy=-500; dy<=500; dy+=160) ctx.fillText(text, 0, dy);
-      ctx.restore();
-    }
-
-    function drawCircularLogo(ctx, img, cx, cy, r, accent) {
-      if (!img) return;
-      ctx.save();
-      ctx.shadowColor="rgba(0,0,0,0.6)"; ctx.shadowBlur=24;
-      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.clip();
       ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
       ctx.restore();
-      ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.strokeStyle=accent; ctx.lineWidth=4; ctx.stroke();
-      // inner glow ring
-      ctx.beginPath(); ctx.arc(cx,cy,r+8,0,Math.PI*2);
-      ctx.strokeStyle=accent.replace(")",",0.25)").replace("rgb","rgba"); ctx.lineWidth=3; ctx.stroke();
     }
 
+    // ── Utility: text wrap ────────────────────────────
     function wrapText(ctx, text, maxW, maxLines) {
       const words = text.split(/\s+/);
-      const lines = [];
-      let line = "";
+      const lines = []; let line = "";
       for(const w of words) {
         const test = line ? line+" "+w : w;
-        if(ctx.measureText(test).width <= maxW) { line=test; }
+        if(ctx.measureText(test).width <= maxW) line=test;
         else { if(line) lines.push(line); line=w; }
       }
       if(line) lines.push(line);
       return lines.slice(0, maxLines);
     }
 
-    // ── HEADER PNG ────────────────────────────────────
-    function drawHeader(ctx, W, t, brandImg) {
-      const pad = 32;
-      const cx = W/2;
-      const barX = pad, barW = W-pad*2;
-      let y = 24;
+    // ── BACKGROUND ────────────────────────────────────
+    function drawBg(ctx, W, H, t) {
+      // Base fill
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0, t.bg2||t.bg); g.addColorStop(0.55, t.bg); g.addColorStop(1, t.bg2||t.bg);
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
-      // Card with gradient
-      ctx.save();
-      ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=30; ctx.shadowOffsetY=10;
-      const logoSz = brandImg ? 96 : 0;
-      const barH = brandImg ? 210 : 130;
-      const hg = ctx.createLinearGradient(barX,y,barX+barW,y+barH);
-      hg.addColorStop(0, t.cardHi||t.card); hg.addColorStop(1, t.card);
-      drawRR(ctx, barX, y, barW, barH, 28, hg, t.accent, 3);
-      ctx.restore();
-
-      // Accent border top
-      const borderG = ctx.createLinearGradient(barX,y,barX+barW,y);
-      borderG.addColorStop(0,"transparent"); borderG.addColorStop(0.5,t.accent); borderG.addColorStop(1,"transparent");
-      ctx.strokeStyle=borderG; ctx.lineWidth=4;
-      ctx.beginPath(); ctx.moveTo(barX+28,y+2); ctx.lineTo(barX+barW-28,y+2); ctx.stroke();
-
-      let contentY = y + 22;
-
-      if (brandImg) {
-        drawCircularLogo(ctx, brandImg, cx, contentY + logoSz/2, logoSz/2, t.accent);
-        contentY += logoSz + 18;
+      // Deco patterns
+      if (t.deco==="stadium") {
+        ctx.fillStyle="rgba(74,222,128,0.022)";
+        for(let i=0;i<H;i+=80) ctx.fillRect(0,i,W,36);
+      } else if (t.deco==="cyber") {
+        ctx.strokeStyle="rgba(34,211,238,0.06)"; ctx.lineWidth=1;
+        for(let x=0;x<W;x+=54){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        for(let y=0;y<H;y+=54){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+        [[0.15,0.12,"rgba(34,211,238,0.3)"],[0.85,0.88,"rgba(232,121,249,0.25)"]].forEach(([px,py,col])=>{
+          const rg=ctx.createRadialGradient(px*W,py*H,0,px*W,py*H,420);
+          rg.addColorStop(0,col);rg.addColorStop(1,"transparent");
+          ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+        });
+      } else if (t.deco==="gold") {
+        ctx.strokeStyle="rgba(251,191,36,0.06)"; ctx.lineWidth=2;
+        for(let i=-H;i<W+H;i+=70){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H,H);ctx.stroke();}
+      } else if (t.deco==="inferno") {
+        const rg=ctx.createRadialGradient(W/2,H*1.1,80,W/2,H*1.1,850);
+        rg.addColorStop(0,"rgba(239,68,68,0.5)");rg.addColorStop(0.5,"rgba(249,115,22,0.15)");rg.addColorStop(1,"transparent");
+        ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+      } else if (t.deco==="studio") {
+        ctx.fillStyle="rgba(59,130,246,0.045)";
+        for(let i=0;i<H;i+=100) ctx.fillRect(0,i,W,50);
       }
 
-      // Title
-      ctx.save();
-      ctx.shadowColor=t.accentGlow||t.accent; ctx.shadowBlur=28;
-      ctx.fillStyle=t.text;
-      ctx.font=`900 52px 'Impact', 'Arial Black', sans-serif`;
-      ctx.textAlign="center";
-      ctx.fillText((inputHeader.value||"JADWAL BOLA").toUpperCase(), cx, contentY + (brandImg?0:20));
-      ctx.restore();
-
-      contentY += brandImg ? 46 : 48;
-
-      // Date pill
-      const dateStr = formatDateID(selectedDate).toUpperCase();
-      ctx.font=`700 30px 'Segoe UI', sans-serif`;
-      const dW = Math.min(ctx.measureText(dateStr).width+50, barW-60);
-      const pillH = 50;
-      drawRR(ctx, cx-dW/2, contentY-4, dW, pillH, 25, t.timeBg||t.bg, t.accent, 1.5);
-      ctx.fillStyle=t.sub;
-      ctx.textAlign="center";
-      ctx.fillText(dateStr, cx, contentY+30);
-
-      return y + barH + 20;
+      // Ambient glow top
+      const g1=ctx.createRadialGradient(W/2,0,0,W/2,0,680);
+      g1.addColorStop(0,t.glowTop);g1.addColorStop(1,"transparent");
+      ctx.fillStyle=g1;ctx.fillRect(0,0,W,680);
+      // Ambient glow bottom
+      const g2=ctx.createRadialGradient(W/2,H,0,W/2,H,600);
+      g2.addColorStop(0,t.glowBottom);g2.addColorStop(1,"transparent");
+      ctx.fillStyle=g2;ctx.fillRect(0,H-600,W,600);
     }
 
-    // ── MATCH ROW PNG ─────────────────────────────────
-    function drawMatchRow(ctx, m, y, rowH, idx, t) {
-      const padH = 22;
-      const cardX = padH, cardW = PNG_W - padH*2;
-      const tvBarH = 52;
-      const leagueH = m.competition ? 30 : 0;
-      const bodyTop = y + 14 + leagueH;
-      const mainH = rowH - tvBarH - 18 - leagueH;
-      const accentColor = t.borders ? t.borders[idx % t.borders.length] : t.accent;
-
-      // Card shadow & bg
+    // ── WATERMARK BACKGROUND ──────────────────────────
+    function drawWatermarkBg(ctx, W, H, t) {
+      const text = getTiktokWmText();
+      if (!text) return;
       ctx.save();
-      ctx.shadowColor="rgba(0,0,0,0.55)"; ctx.shadowBlur=28; ctx.shadowOffsetY=12;
-      const cg = ctx.createLinearGradient(cardX,y,cardX+cardW,y+rowH);
-      cg.addColorStop(0, t.cardHi||t.card); cg.addColorStop(1, t.card);
-      drawRR(ctx, cardX, y, cardW, rowH, 24, cg, accentColor, 2);
+      ctx.translate(W/2, H/2); ctx.rotate(-Math.PI/6.5);
+      ctx.font=`900 80px Impact, Arial, sans-serif`;
+      ctx.textAlign="center"; ctx.fillStyle=t.wm||"rgba(255,255,255,0.028)";
+      const spacing = 175;
+      const count = Math.ceil(H/spacing)+4;
+      for(let i=-Math.floor(count/2); i<=Math.floor(count/2); i++)
+        ctx.fillText(text, 0, i*spacing);
+      ctx.restore();
+    }
+
+    // ── HEADER ────────────────────────────────────────
+    // Returns the Y coordinate where match list should start
+    function drawHeader(ctx, W, t, brandImg) {
+      const cx = W/2;
+      const cX = PAD, cW = W - PAD*2;
+      let y = 28;
+
+      // — Card shadow
+      ctx.save();
+      ctx.shadowColor="rgba(0,0,0,0.65)"; ctx.shadowBlur=36; ctx.shadowOffsetY=14;
+      const logoR = brandImg ? 52 : 0;
+      // height: logo(dia) + gap + title + gap + date-pill + vertical padding
+      const cardH = brandImg
+        ? logoR*2 + 22 + 64 + 14 + 60 + 36   // with logo
+        : 64 + 14 + 60 + 48;                   // without logo
+      const hg = ctx.createLinearGradient(cX,y,cX,y+cardH);
+      hg.addColorStop(0, t.cardHi||t.card); hg.addColorStop(1, t.card);
+      drawRR(ctx, cX, y, cW, cardH, 26, hg, t.accent, 3);
       ctx.restore();
 
-      // Left accent bar
-      ctx.fillStyle = accentColor;
-      const barRad = 4;
-      ctx.beginPath();
-      ctx.moveTo(cardX+barRad, y+12); ctx.lineTo(cardX+8-barRad, y+12);
-      ctx.quadraticCurveTo(cardX+8, y+12, cardX+8, y+12+barRad);
-      ctx.lineTo(cardX+8, y+rowH-12-barRad);
-      ctx.quadraticCurveTo(cardX+8, y+rowH-12, cardX+8-barRad, y+rowH-12);
-      ctx.lineTo(cardX+barRad, y+rowH-12);
-      ctx.quadraticCurveTo(cardX, y+rowH-12, cardX, y+rowH-12-barRad);
-      ctx.lineTo(cardX, y+12+barRad);
-      ctx.quadraticCurveTo(cardX, y+12, cardX+barRad, y+12);
-      ctx.closePath();
-      ctx.fill();
+      // Top gradient shimmer inside card
+      const shimG = ctx.createLinearGradient(cX,y,cX+cW,y);
+      shimG.addColorStop(0,"transparent"); shimG.addColorStop(0.5,t.accent+"44"); shimG.addColorStop(1,"transparent");
+      ctx.fillStyle=shimG; ctx.fillRect(cX+26, y, cW-52, 3);
 
-      // League label
-      if (m.competition) {
-        ctx.font=`700 20px 'Segoe UI', sans-serif`;
-        ctx.fillStyle=t.sub;
-        ctx.textAlign="center";
-        ctx.fillText(m.competition.toUpperCase().slice(0,42), cardX+cardW/2, y+28);
+      let iy = y + 20; // inner content Y
+
+      // — Brand logo
+      if (brandImg) {
+        const logoY = iy + logoR;
+        // glow halo
+        ctx.save();
+        ctx.shadowColor=t.accent; ctx.shadowBlur=36;
+        ctx.beginPath(); ctx.arc(cx, logoY, logoR, 0, Math.PI*2);
+        ctx.strokeStyle=t.accent; ctx.lineWidth=3; ctx.stroke();
+        ctx.restore();
+        // outer ring subtle
+        ctx.beginPath(); ctx.arc(cx, logoY, logoR+9, 0, Math.PI*2);
+        ctx.strokeStyle=t.accent+"30"; ctx.lineWidth=2; ctx.stroke();
+        drawCircleImg(ctx, brandImg, cx, logoY, logoR);
+        iy += logoR*2 + 18;
       }
 
-      // Time box
-      const timeW = 110, timeX = cardX+18;
-      const timeBoxH = Math.min(100, mainH-10);
-      const timeY = bodyTop + (mainH-timeBoxH)/2;
+      // — Title text
       ctx.save();
-      ctx.shadowColor=accentColor; ctx.shadowBlur=18;
-      drawRR(ctx, timeX, timeY, timeW, timeBoxH, 18, t.timeBg||t.bg, accentColor, 2.5);
+      ctx.shadowColor=t.accent; ctx.shadowBlur=24;
+      ctx.fillStyle=t.text;
+      ctx.font=`900 58px Impact, Arial Black, sans-serif`;
+      ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+      ctx.fillText((inputHeader.value||"JADWAL BOLA").toUpperCase(), cx, iy + 56);
       ctx.restore();
+      iy += 64 + 12;
+
+      // — Date pill (wider, more prominent)
+      const dateStr = formatDateID(selectedDate).toUpperCase();
+      ctx.font=`700 32px Arial, sans-serif`;
+      const dW = Math.min(ctx.measureText(dateStr).width + 64, cW - 80);
+      const pillH = 58;
+      const pillX = cx - dW/2;
+      // pill bg with subtle gradient
+      const pillG = ctx.createLinearGradient(pillX,iy,pillX+dW,iy);
+      pillG.addColorStop(0, t.timeBg||t.bg);
+      pillG.addColorStop(0.5, (t.timeBg||t.bg)+"ee");
+      pillG.addColorStop(1, t.timeBg||t.bg);
+      drawRR(ctx, pillX, iy, dW, pillH, pillH/2, pillG, t.accent, 2);
+      ctx.fillStyle=t.text;
+      ctx.font=`800 30px Arial Black, Arial, sans-serif`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(dateStr, cx, iy+pillH/2);
+      ctx.textBaseline="alphabetic";
+
+      return y + cardH + 18;
+    }
+
+    // ── SINGLE MATCH CARD ─────────────────────────────
+    // Layout per card (from top):
+    //  [league label row — 34px if present]
+    //  [time box | team-logo home | VS | team-logo away]  — main body
+    //  [TV bar — 52px]
+    function drawMatchRow(ctx, m, cardY, cardH, idx, t) {
+      const cX = PAD, cW = PNG_W - PAD*2;
+      const accentColor = t.borders ? t.borders[idx % t.borders.length] : t.accent;
+      const LEAGUE_H = m.competition ? 36 : 0;
+      const TV_H = 52;
+      const INNER_PAD = 14;
+      const mainH = cardH - LEAGUE_H - TV_H - INNER_PAD*2 - 8;
+
+      // ─ Card background
+      ctx.save();
+      ctx.shadowColor="rgba(0,0,0,0.6)"; ctx.shadowBlur=24; ctx.shadowOffsetY=8;
+      const cg = ctx.createLinearGradient(cX,cardY,cX+cW,cardY+cardH);
+      cg.addColorStop(0, t.cardHi||t.card); cg.addColorStop(1, t.card);
+      drawRR(ctx, cX, cardY, cW, cardH, 22, cg, accentColor, 2.5);
+      ctx.restore();
+
+      // Left accent stripe (full height, rounded right side only)
+      const STRIPE = 10;
+      ctx.fillStyle = accentColor;
+      ctx.beginPath();
+      ctx.moveTo(cX, cardY+22);
+      ctx.lineTo(cX+STRIPE-4, cardY+22); ctx.quadraticCurveTo(cX+STRIPE, cardY+22, cX+STRIPE, cardY+22+4);
+      ctx.lineTo(cX+STRIPE, cardY+cardH-22-4); ctx.quadraticCurveTo(cX+STRIPE, cardY+cardH-22, cX+STRIPE-4, cardY+cardH-22);
+      ctx.lineTo(cX, cardY+cardH-22);
+      ctx.closePath(); ctx.fill();
+
+      // ─ League label
+      if (m.competition) {
+        // League badge pill
+        ctx.font=`700 22px Arial, sans-serif`;
+        const labW = Math.min(ctx.measureText(m.competition.toUpperCase()).width+36, cW-60);
+        const labX = cX+STRIPE+16, labY = cardY+INNER_PAD-4;
+        drawRR(ctx, labX, labY, labW, 28, 6, accentColor+"22", accentColor+"55", 1);
+        ctx.fillStyle=t.sub;
+        ctx.font=`700 22px Arial, sans-serif`;
+        ctx.textAlign="left"; ctx.textBaseline="middle";
+        ctx.fillText(m.competition.toUpperCase().slice(0,38), labX+10, labY+14);
+        ctx.textBaseline="alphabetic";
+      }
+
+      // ─ Main body Y start (below league label)
+      const bodyY = cardY + INNER_PAD + LEAGUE_H;
+
+      // ─ Time box
+      const TIME_W = 116;
+      const timeX = cX + STRIPE + 14;
+      const timeBoxH = Math.min(mainH - 8, 108);
+      const timeBoxY = bodyY + (mainH - timeBoxH)/2;
+
+      ctx.save();
+      ctx.shadowColor=accentColor; ctx.shadowBlur=20;
+      const timeBg = ctx.createLinearGradient(timeX, timeBoxY, timeX, timeBoxY+timeBoxH);
+      timeBg.addColorStop(0, (t.timeBg||t.bg)+"ff");
+      timeBg.addColorStop(1, (t.timeBg||t.bg)+"cc");
+      drawRR(ctx, timeX, timeBoxY, TIME_W, timeBoxH, 16, timeBg, accentColor, 2.5);
+      ctx.restore();
+      // Kickoff time
       ctx.fillStyle=accentColor;
-      ctx.font=`900 38px 'Impact', 'Arial Black', sans-serif`;
-      ctx.textAlign="center";
-      ctx.fillText(m.kickoff, timeX+timeW/2, timeY+timeBoxH*0.5);
+      ctx.font=`900 40px Impact, Arial Black, sans-serif`;
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(m.kickoff, timeX+TIME_W/2, timeBoxY + timeBoxH*0.46);
+      // WIB label
       ctx.fillStyle=t.sub;
-      ctx.font=`700 18px 'Segoe UI', sans-serif`;
-      ctx.fillText("WIB", timeX+timeW/2, timeY+timeBoxH*0.76);
+      ctx.font=`700 19px Arial, sans-serif`;
+      ctx.fillText("WIB", timeX+TIME_W/2, timeBoxY + timeBoxH*0.78);
+      ctx.textBaseline="alphabetic";
 
-      // Teams area
-      const contentX = cardX + timeW + 24;
-      const contentW = cardW - timeW - 38;
-      const vsBadgeR = 28;
-      const colW = (contentW - vsBadgeR*2 - 16) / 2;
-      const homeCx = contentX + colW/2;
-      const awayCx = contentX + contentW - colW/2;
-      const midX = contentX + contentW/2;
-      const logoSz = Math.min(72, Math.max(54, Math.floor(mainH*0.48)));
-      const teamTop = bodyTop + 6;
+      // ─ Teams area
+      const teamsX = timeX + TIME_W + 12;
+      const teamsW = cX + cW - teamsX - 14;
+      const VS_R = 26;
+      const colW = (teamsW - VS_R*2 - 8) / 2;
+      const homeCx = teamsX + colW/2;
+      const awayCx = teamsX + teamsW - colW/2;
+      const midX = teamsX + teamsW/2;
 
-      // Team logos + names
+      const LOGO_SZ = Math.min(86, Math.max(66, Math.floor(mainH * 0.52)));
+      const logoTopY = bodyY + 8;
+      const nameY = logoTopY + LOGO_SZ + 14;
+      const nameFontPx = Math.max(22, Math.min(28, Math.round(colW/6.5)));
+
       const hImg = getCachedLogo(resolveTeamLogo(m.home));
       const aImg = getCachedLogo(resolveTeamLogo(m.away));
 
-      [{ img:hImg, name:m.home, cx:homeCx }, { img:aImg, name:m.away, cx:awayCx }].forEach(({img,name,cx}) => {
+      // Draw each team
+      [[hImg, m.home, homeCx], [aImg, m.away, awayCx]].forEach(([img, name, cx]) => {
         if (img) {
-          ctx.save();
-          ctx.shadowColor="rgba(0,0,0,0.4)"; ctx.shadowBlur=10;
-          ctx.drawImage(img, cx-logoSz/2, teamTop, logoSz, logoSz);
+          ctx.save(); ctx.shadowColor="rgba(0,0,0,0.45)"; ctx.shadowBlur=12;
+          ctx.drawImage(img, cx-LOGO_SZ/2, logoTopY, LOGO_SZ, LOGO_SZ);
           ctx.restore();
         } else {
-          // Placeholder circle
-          ctx.beginPath(); ctx.arc(cx, teamTop+logoSz/2, logoSz/2, 0, Math.PI*2);
-          ctx.fillStyle=t.timeBg||t.bg; ctx.fill();
-          ctx.strokeStyle=t.border; ctx.lineWidth=1.5; ctx.stroke();
+          // Styled placeholder
+          const gr=ctx.createRadialGradient(cx,logoTopY+LOGO_SZ/2,0,cx,logoTopY+LOGO_SZ/2,LOGO_SZ/2);
+          gr.addColorStop(0,t.border+"88"); gr.addColorStop(1,t.timeBg||t.bg);
+          ctx.beginPath(); ctx.arc(cx, logoTopY+LOGO_SZ/2, LOGO_SZ/2, 0, Math.PI*2);
+          ctx.fillStyle=gr; ctx.fill();
+          ctx.strokeStyle=accentColor+"55"; ctx.lineWidth=2; ctx.stroke();
+          // team initials
+          ctx.fillStyle=t.sub; ctx.font=`900 ${Math.round(LOGO_SZ*0.35)}px Impact, Arial, sans-serif`;
+          ctx.textAlign="center"; ctx.textBaseline="middle";
+          ctx.fillText(name.slice(0,3).toUpperCase(), cx, logoTopY+LOGO_SZ/2);
+          ctx.textBaseline="alphabetic";
         }
-        const nameY = teamTop + logoSz + 12;
-        ctx.font=`700 ${Math.max(18,Math.min(24,Math.round(colW/7)))}px 'Segoe UI', sans-serif`;
+        // Team name
+        ctx.font=`700 ${nameFontPx}px Arial Black, Arial, sans-serif`;
         ctx.fillStyle=t.text; ctx.textAlign="center";
-        const lines = wrapText(ctx, name, colW-6, 2);
-        lines.forEach((ln,i) => ctx.fillText(ln, cx, nameY + i*26));
+        const lines = wrapText(ctx, name, colW-8, 2);
+        lines.forEach((ln,i) => ctx.fillText(ln, cx, nameY + i*(nameFontPx+5)));
       });
 
       // VS badge
-      const vsCY = teamTop + logoSz/2 + 8;
-      ctx.save();
-      ctx.shadowColor=accentColor; ctx.shadowBlur=20;
-      ctx.beginPath(); ctx.arc(midX, vsCY, vsBadgeR, 0, Math.PI*2);
+      const vsCY = logoTopY + LOGO_SZ/2 + 4;
+      ctx.save(); ctx.shadowColor=accentColor; ctx.shadowBlur=22;
+      ctx.beginPath(); ctx.arc(midX, vsCY, VS_R, 0, Math.PI*2);
       ctx.fillStyle=accentColor; ctx.fill();
       ctx.restore();
-      ctx.fillStyle="#fff";
-      ctx.font=`900 20px 'Impact', 'Arial Black', sans-serif`;
+      // VS inner ring
+      ctx.beginPath(); ctx.arc(midX, vsCY, VS_R-5, 0, Math.PI*2);
+      ctx.strokeStyle="rgba(255,255,255,0.25)"; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.fillStyle="#fff"; ctx.font=`900 22px Impact, Arial, sans-serif`;
       ctx.textAlign="center"; ctx.textBaseline="middle";
       ctx.fillText("VS", midX, vsCY+1);
       ctx.textBaseline="alphabetic";
 
-      // TV bar
-      const tvBarY = y + rowH - tvBarH - 10;
-      const tvBarX = cardX + 18, tvBarW = cardW - 36;
-      const tvBg = ctx.createLinearGradient(tvBarX, tvBarY, tvBarX+tvBarW, tvBarY);
-      tvBg.addColorStop(0,"rgba(0,0,0,0.5)"); tvBg.addColorStop(1,"rgba(0,0,0,0.6)");
-      drawRR(ctx, tvBarX, tvBarY, tvBarW, tvBarH, tvBarH/2, tvBg, accentColor, 1.5);
-      ctx.fillStyle = (m.tvFree||[]).length ? t.tvFree||"#4ade80" : t.tv||"#fbbf24";
-      ctx.font=`700 26px 'Segoe UI', sans-serif`;
+      // ─ TV bar (full width inside card, at bottom)
+      const tvY = cardY + cardH - TV_H - 10;
+      const tvX = cX + STRIPE + 10, tvW = cW - STRIPE - 20;
+      const tvG = ctx.createLinearGradient(tvX,tvY,tvX+tvW,tvY);
+      tvG.addColorStop(0,"rgba(0,0,0,0.55)"); tvG.addColorStop(0.5,"rgba(0,0,0,0.42)"); tvG.addColorStop(1,"rgba(0,0,0,0.55)");
+      drawRR(ctx, tvX, tvY, tvW, TV_H, TV_H/2, tvG, accentColor+"88", 1.5);
+      const isFree = (m.tvFree||[]).length > 0;
+      ctx.fillStyle = isFree ? (t.tvFree||"#4ade80") : (t.tv||"#fbbf24");
+      ctx.font=`700 27px Arial, sans-serif`;
       ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText("📺  " + shortTv(m), tvBarX+tvBarW/2, tvBarY+tvBarH/2+1);
+      const tvStr = "📺  " + shortTv(m);
+      ctx.fillText(tvStr, tvX+tvW/2, tvY+TV_H/2+1);
       ctx.textBaseline="alphabetic";
     }
 
-    // ── FOOTER PNG ────────────────────────────────────
+    // ── FOOTER ────────────────────────────────────────
     function drawFooter(ctx, W, H, footerY, t, brandImg) {
-      const footH = H - footerY;
-      const footG = ctx.createLinearGradient(0,footerY,0,H);
-      footG.addColorStop(0, t.footerBg); footG.addColorStop(1,"#000");
-      ctx.fillStyle=footG; ctx.fillRect(0,footerY,W,footH);
+      // Footer bg
+      const fg = ctx.createLinearGradient(0,footerY,0,H);
+      fg.addColorStop(0,t.footerBg); fg.addColorStop(1,"#000");
+      ctx.fillStyle=fg; ctx.fillRect(0,footerY,W,H-footerY);
 
-      // Divider line
-      const lineG = ctx.createLinearGradient(0,footerY,W,footerY);
-      lineG.addColorStop(0,"transparent"); lineG.addColorStop(0.5,t.accent); lineG.addColorStop(1,"transparent");
-      ctx.strokeStyle=lineG; ctx.lineWidth=2.5;
-      ctx.beginPath(); ctx.moveTo(50,footerY+1); ctx.lineTo(W-50,footerY+1); ctx.stroke();
+      // Divider gradient line
+      const dg = ctx.createLinearGradient(PAD,footerY,W-PAD,footerY);
+      dg.addColorStop(0,"transparent"); dg.addColorStop(0.3,t.accent+"88");
+      dg.addColorStop(0.5,t.accent); dg.addColorStop(0.7,t.accent+"88"); dg.addColorStop(1,"transparent");
+      ctx.strokeStyle=dg; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(PAD,footerY+1); ctx.lineTo(W-PAD,footerY+1); ctx.stroke();
 
       const cx = W/2;
-      let fy = footerY + 20;
+      let fy = footerY + 18;
 
       if (brandImg) {
-        drawCircularLogo(ctx, brandImg, cx, fy+36, 36, t.accent);
-        fy += 88;
-      } else {
-        fy += 20;
-      }
+        const lr = 40;
+        ctx.save(); ctx.shadowColor=t.accent; ctx.shadowBlur=20;
+        ctx.beginPath(); ctx.arc(cx,fy+lr,lr,0,Math.PI*2);
+        ctx.strokeStyle=t.accent; ctx.lineWidth=2.5; ctx.stroke();
+        ctx.restore();
+        drawCircleImg(ctx, brandImg, cx, fy+lr, lr);
+        fy += lr*2 + 14;
+      } else { fy += 12; }
 
-      // Footer text
-      ctx.fillStyle=t.sub;
-      ctx.font=`700 28px 'Segoe UI', sans-serif`;
+      ctx.fillStyle=t.sub; ctx.font=`700 28px Arial, sans-serif`;
       ctx.textAlign="center";
-      const footLines = wrapText(ctx, inputFooter.value||"", W-80, 2);
-      footLines.forEach((ln,i) => ctx.fillText(ln, cx, fy + i*34));
+      const lines = wrapText(ctx, inputFooter.value||"", W-80, 2);
+      lines.forEach((ln,i) => ctx.fillText(ln, cx, fy+30+i*36));
     }
 
-    // ── DOWNLOAD ──────────────────────────────────────
+    // ── DOWNLOAD PNG ──────────────────────────────────
     async function downloadPNG() {
       const matches = getMatchesForDate(selectedDate);
       if (!matches.length) return;
@@ -1352,7 +1403,11 @@
         await loadStaticLogos();
         const t = getTheme();
         const data = matches.slice(0, PNG_MAX);
-        const urls = [...new Set(data.flatMap(m=>[resolveTeamLogo(m.home),resolveTeamLogo(m.away),resolveLeagueLogo(m.competition)]).filter(Boolean))];
+
+        // Preload all logos
+        const urls = [...new Set(data.flatMap(m=>[
+          resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)
+        ]).filter(Boolean))];
         await Promise.all(urls.map(loadImage));
         const brandImg = await loadBrandLogo();
 
@@ -1362,39 +1417,38 @@
         const ctx=canvas.getContext("2d");
         ctx.textBaseline="alphabetic";
 
-        // Draw background
         drawBg(ctx, W, H, t);
         drawWatermarkBg(ctx, W, H, t);
-
-        // Header
         const headerEnd = drawHeader(ctx, W, t, brandImg);
 
-        // Match rows
-        const footerH = brandImg ? 120 : 95;
+        // ── Layout calculation ─────────────────────────
+        const FOOTER_H = brandImg ? 118 : 90;
         const listTop = headerEnd;
-        const listBottom = H - footerH;
+        const listBottom = H - FOOTER_H;
         const n = data.length;
-        const gap = 16;
-        let rowH = Math.floor((listBottom - listTop - gap*(n-1)) / n);
-        rowH = Math.min(290, Math.max(155, rowH));
-        // Adjust to fit
-        while(n>0 && listTop + n*rowH + (n-1)*gap > listBottom) rowH--;
+        const GAP = 14;
+        const avail = listBottom - listTop - GAP*(n-1);
 
-        data.forEach((m,i) => {
-          drawMatchRow(ctx, m, listTop + i*(rowH+gap), rowH, i, t);
+        // Dynamic card height: ideal 240-280, shrink to fit
+        let cardH = Math.floor(avail / n);
+        cardH = Math.min(286, Math.max(158, cardH));
+        // Fine-tune to fit
+        while(n > 0 && listTop + n*cardH + GAP*(n-1) > listBottom) cardH -= 1;
+
+        data.forEach((m, i) => {
+          drawMatchRow(ctx, m, listTop + i*(cardH+GAP), cardH, i, t);
         });
 
-        // Footer
         drawFooter(ctx, W, H, listBottom, t, brandImg);
 
-        // Download
-        const link=document.createElement("a");
-        link.download=`jadwal-${currentTheme}-${selectedDate}.png`;
-        link.href=canvas.toDataURL("image/png");
-        link.click();
+        // Trigger download
+        const a = document.createElement("a");
+        a.download = `jadwal-${currentTheme}-${selectedDate}.png`;
+        a.href = canvas.toDataURL("image/png");
+        a.click();
 
         const loaded = urls.filter(u=>getCachedLogo(u)).length;
-        setStatus(`✓ PNG "${t.name}": ${data.length} match · logo ${loaded}/${urls.length}`, "success");
+        setStatus(`✓ PNG "${t.name}": ${data.length} pertandingan · logo ${loaded}/${urls.length}`, "success");
       } catch(err) {
         setStatus(`Gagal: ${err.message}`, "error");
         console.error(err);
