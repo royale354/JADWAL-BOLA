@@ -3,1310 +3,1413 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jadwal Bola — Generator PNG TikTok PRO</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <title>Jadwal Bola — Generator PNG TikTok</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --col-green: #00ff87;
-      --col-cyan: #00e5ff;
-      --col-gold: #ffd700;
-      --col-red: #ff3c5a;
-      --col-purple: #bf5fff;
-      --col-dark: #06080f;
-      --col-card: rgba(255,255,255,0.04);
-      --col-border: rgba(255,255,255,0.09);
-      --radius: 16px;
-    }
-
     body {
-      font-family: 'Rajdhani', 'Segoe UI', sans-serif;
-      background: #08090f;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #060913;
       color: #f1f5f9;
       min-height: 100vh;
-      padding: 20px 16px 60px;
+      padding: 20px 16px 40px;
     }
 
     .app-layout {
       display: grid;
-      grid-template-columns: minmax(300px, 360px) 1fr;
+      grid-template-columns: minmax(300px, 380px) 1fr;
       gap: 28px;
-      max-width: 1300px;
+      max-width: 1280px;
       margin: 0 auto;
       align-items: start;
     }
 
     @media (max-width: 960px) {
       .app-layout { grid-template-columns: 1fr; }
+      .preview-panel { justify-content: center; }
     }
 
-    /* ── SIDEBAR ── */
     .sidebar {
-      background: rgba(255,255,255,0.03);
+      background: #111625;
       padding: 22px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      border: 1px solid #1e293b;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
       position: sticky;
       top: 16px;
     }
 
-    .sidebar-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.7rem;
-      letter-spacing: 3px;
-      background: linear-gradient(90deg, var(--col-green), var(--col-cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 4px;
-    }
-    .sidebar > p { font-size: 0.78rem; color: #64748b; margin-bottom: 18px; }
+    .sidebar h1 { font-size: 1.35rem; font-weight: 800; color: #22c55e; }
+    .sidebar > p { font-size: 0.82rem; color: #94a3b8; margin: 6px 0 16px; }
 
-    .field-group {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 14px;
+    .branding-inputs {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
       margin-bottom: 14px;
+      background: #0b0f19;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #1e2942;
     }
-
-    .field-group label {
+    .branding-inputs label {
       display: flex;
       flex-direction: column;
-      font-size: 0.68rem;
+      font-size: 0.72rem;
+      color: #64748b;
       font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      gap: 5px;
-      margin-bottom: 10px;
+      gap: 4px;
     }
-    .field-group label:last-child { margin-bottom: 0; }
-
-    .field-group input[type=text] {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
+    .branding-inputs input {
+      background: #111625;
+      border: 1px solid #334155;
       color: #fff;
       padding: 8px 10px;
+      border-radius: 6px;
       font-size: 0.85rem;
-      font-family: 'Rajdhani', sans-serif;
       outline: none;
-      width: 100%;
-      transition: border-color .2s;
     }
-    .field-group input[type=text]:focus { border-color: var(--col-green); }
+    .branding-inputs input:focus { border-color: #22c55e; }
 
     .section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #64748b;
       text-transform: uppercase;
-      letter-spacing: .08em;
-      margin: 16px 0 9px;
+      letter-spacing: 0.06em;
+      margin: 14px 0 8px;
     }
 
-    /* ── THEME GRID ── */
     .theme-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin-bottom: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
     }
     .theme-card {
       cursor: pointer;
-      border: 1.5px solid rgba(255,255,255,0.1);
-      border-radius: 11px;
-      padding: 9px 6px 7px;
-      background: rgba(0,0,0,0.3);
-      text-align: center;
-      transition: all .2s;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      padding: 10px;
+      background: #0b0f19;
+      transition: border-color 0.2s, transform 0.15s;
     }
-    .theme-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
-    .theme-card.active { border-color: var(--col-green); box-shadow: 0 0 0 1px rgba(0,255,135,0.25); }
+    .theme-card:hover { transform: translateY(-1px); }
+    .theme-card.active { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e44; }
     .theme-card input { display: none; }
     .theme-swatch {
-      height: 30px;
-      border-radius: 7px;
+      height: 28px;
+      border-radius: 6px;
       margin-bottom: 6px;
     }
-    .theme-card span { font-size: 0.68rem; font-weight: 700; color: #94a3b8; }
+    .theme-card span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
 
     input[type="date"] {
-      background: rgba(255,255,255,0.05);
+      background: #1e293b;
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 9px 12px;
-      border-radius: 9px;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
       font-size: 0.88rem;
-      font-family: 'Rajdhani', sans-serif;
       outline: none;
       color-scheme: dark;
       width: 100%;
-      margin-bottom: 10px;
     }
     input[type="file"] { display: none; }
-
-    .btn-row { display: flex; gap: 8px; margin-bottom: 10px; }
 
     button, .file-label {
       cursor: pointer;
       border: none;
-      border-radius: 9px;
+      border-radius: 8px;
       padding: 9px 14px;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      font-family: 'Rajdhani', sans-serif;
-      letter-spacing: .05em;
-      transition: all .2s;
+      transition: opacity 0.2s, transform 0.2s;
     }
-    button:hover:not(:disabled), .file-label:hover { opacity: .9; transform: translateY(-1px); }
-    button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+    button:hover, .file-label:hover { opacity: 0.92; transform: translateY(-1px); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .btn-ghost { background: rgba(255,255,255,0.07); color: #cbd5e1; flex: 1; }
-    .btn-blue  { background: #1d4ed8; color: #fff; flex: 1; }
-    .btn-import { background: rgba(255,255,255,0.07); color: #94a3b8; font-size:.79rem; display:block; text-align:center; }
-    .btn-download {
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
       width: 100%;
-      margin-top: 12px;
-      padding: 14px;
-      font-size: 1rem;
-      letter-spacing: .12em;
-      font-family: 'Bebas Neue', sans-serif;
-      background: linear-gradient(135deg, #00ff87 0%, #00b6ff 100%);
-      color: #000;
-      border-radius: 11px;
-      box-shadow: 0 4px 20px rgba(0,255,135,.3);
+      margin-top: 10px;
+      padding: 13px;
+      font-size: 0.92rem;
     }
+    .btn-secondary { background: #2563eb; color: #fff; flex: 1; }
+    .btn-ghost { background: #334155; color: #e2e8f0; flex: 1; }
+    .btn-warn { background: #475569; color: #fff; font-size: 0.8rem; }
 
     .status {
-      margin-top: 11px;
-      font-size: 0.8rem;
-      color: #f59e0b;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: #eab308;
       font-weight: 600;
       line-height: 1.4;
     }
     .status.success { color: #22c55e; }
     .status.error { color: #f87171; }
 
-    /* ── PREVIEW PANEL ── */
     .preview-panel {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 12px;
     }
+
     .preview-label {
-      font-size: 0.68rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      color: #475569;
+      color: #64748b;
       text-transform: uppercase;
-      letter-spacing: .1em;
+      letter-spacing: 0.1em;
     }
 
     #export-area {
       width: 100%;
-      max-width: 400px;
+      max-width: 430px;
       aspect-ratio: 9 / 16;
-      max-height: min(85vh, 800px);
-      border-radius: 26px;
+      max-height: min(82vh, 780px);
+      background-color: var(--t-bg, #070a13);
+      background-image: var(--t-preview-bg, none);
+      background-size: cover;
+      border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 40px 80px rgba(0,0,0,.8), 0 0 60px var(--t-glow, transparent);
-      border: 1.5px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 40px var(--t-glow, transparent);
+      border: 2px solid var(--t-border, #1e2942);
       display: flex;
       flex-direction: column;
       position: relative;
-      background: var(--t-bg, #06080f);
     }
 
-    /* Watermark */
-    .bg-watermark {
+    #export-area::after {
+      content: "";
       position: absolute;
-      inset: -30%;
+      inset: 0;
+      background: var(--t-deco-overlay, none);
+      background-size: var(--t-deco-size, auto);
       pointer-events: none;
       z-index: 0;
+    }
+
+    .bg-watermark {
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
       display: flex;
       flex-wrap: wrap;
       align-content: center;
       justify-content: center;
-      gap: 32px 40px;
-      transform: rotate(-22deg);
+      gap: 28px 36px;
+      transform: rotate(-24deg);
+      opacity: 1;
     }
     .bg-watermark span {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(1rem, 3vw, 1.2rem);
-      letter-spacing: .12em;
-      color: rgba(255,255,255,0.035);
+      font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--t-wm-fg, rgba(255, 255, 255, 0.045));
       white-space: nowrap;
       user-select: none;
     }
 
     #export-area .banner,
     #export-area .match-container,
-    #export-area .footer-strip {
+    #export-area .watermark-footer {
       position: relative;
       z-index: 1;
     }
 
-    /* ── BANNER ── */
-    .banner {
-      flex-shrink: 0;
-      padding: 14px 14px 8px;
-      text-align: center;
-      background: var(--t-header-bg, transparent);
-    }
-
-    .brand-logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-      margin: 0 auto 10px;
-      border: 2px solid var(--t-accent, #00ff87);
-      box-shadow: 0 0 28px var(--t-accent-glow, rgba(0,255,135,.4));
-    }
-
-    .banner-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
-      letter-spacing: .16em;
-      color: var(--t-text, #fff);
-      line-height: 1;
-      text-shadow: 0 0 30px var(--t-accent-glow, transparent);
-    }
-
-    .banner-divider {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 9px 12px 7px;
-    }
-    .banner-divider::before, .banner-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--t-accent, #00ff87));
-    }
-    .banner-divider::after {
-      background: linear-gradient(90deg, var(--t-accent, #00ff87), transparent);
-    }
-
-    .banner-date {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(0.6rem, 2vw, 0.78rem);
-      font-weight: 700;
-      color: var(--t-sub, #94a3b8);
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      background: rgba(0,0,0,.3);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 999px;
-      padding: 3px 14px;
-      display: inline-block;
-    }
-
-    /* ── MATCH LIST ── */
-    .match-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 5px 9px 9px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .sim-card {
-      background: var(--t-card, rgba(255,255,255,0.04));
-      border: 1px solid var(--t-border, rgba(255,255,255,0.08));
-      border-radius: 13px;
-      padding: 7px 9px;
-      display: grid;
-      grid-template-columns: 68px 1fr;
-      grid-template-rows: auto auto;
-      gap: 4px 8px;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .sim-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px;
-      height: 100%;
-      background: var(--t-stripe, #00ff87);
-      border-radius: 3px 0 0 3px;
-    }
-
-    .sim-card::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 40%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.015));
-      pointer-events: none;
-    }
-
-    .sim-time {
-      grid-row: 1 / 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.07);
-      border-radius: 10px;
-      padding: 6px 4px;
-      gap: 1px;
-    }
-    .sim-time .kick {
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(0.6rem, 2.2vw, 0.82rem);
-      font-weight: 700;
-      color: var(--t-accent, #00ff87);
-      letter-spacing: .04em;
-      line-height: 1;
-    }
-    .sim-time .wib {
-      font-size: clamp(0.42rem, 1.5vw, 0.55rem);
-      font-weight: 700;
-      color: var(--t-sub, #64748b);
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    .sim-teams {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .team-block {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      min-width: 0;
-    }
-
-    .team-block img {
-      width: clamp(22px, 5vw, 30px);
-      height: clamp(22px, 5vw, 30px);
-      object-fit: contain;
-    }
-
-    .team-name {
-      font-family: 'Rajdhani', sans-serif;
-      font-weight: 700;
-      font-size: clamp(0.52rem, 1.9vw, 0.72rem);
-      color: var(--t-text, #fff);
-      text-align: center;
-      line-height: 1.15;
-      word-break: break-word;
-    }
-
-    .vs-badge {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-shrink: 0;
-      gap: 1px;
-    }
-    .vs-badge .vs-line {
-      width: 1px;
-      height: 10px;
-      background: var(--t-border, rgba(255,255,255,.12));
-    }
-    .vs-badge .vs-text {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(0.55rem, 1.8vw, 0.72rem);
-      color: var(--t-sub, #64748b);
-      letter-spacing: .06em;
-    }
-
-    .sim-tv {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(0.48rem, 1.7vw, 0.65rem);
-      font-weight: 700;
-      color: var(--t-tv, #fbbf24);
-      border-top: 1px solid rgba(255,255,255,.06);
-      padding-top: 3px;
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    /* ── FOOTER ── */
-    .footer-strip {
-      flex-shrink: 0;
-      padding: 8px 12px;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,.06);
-      background: var(--t-footer-bg, rgba(0,0,0,.5));
-    }
-    .footer-logo-sm {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin: 0 auto 5px;
-      border: 1px solid rgba(255,255,255,.12);
-      display: block;
-    }
-    .footer-text {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: clamp(0.5rem, 1.6vw, 0.62rem);
-      font-weight: 700;
-      letter-spacing: .08em;
-      color: var(--t-sub, #64748b);
-    }
-
-    /* ── PREVIEW MSG ── */
     .preview-msg {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.5rem;
-      letter-spacing: 8px;
-      color: rgba(255,255,255,0.02);
+      color: rgba(255, 255, 255, 0.03);
+      font-size: 1.8rem;
+      font-weight: 900;
+      text-align: center;
       pointer-events: none;
+      letter-spacing: 2px;
     }
 
-    /* ── THEME BACKGROUNDS ── */
-    .bg-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
+    .banner {
+      padding: 16px 16px 10px;
+      text-align: center;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
+    }
+    .brand-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 10px;
+      border: 2px solid var(--t-accent, #22c55e);
+      box-shadow: 0 4px 24px var(--t-accent-glow, rgba(34, 197, 94, 0.4));
+    }
+    .brand-logo-footer {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+      border: 1px solid var(--t-border, #334155);
+    }
+    .banner h2 {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--t-text, #fff);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1.2;
+      text-shadow: 0 0 20px var(--t-accent-glow, transparent);
+    }
+    .banner .title-bar {
+      width: 56px;
+      height: 3px;
+      margin: 8px auto 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, transparent, var(--t-accent, #22c55e), transparent);
+    }
+    .banner .date-label {
+      font-size: 0.72rem;
+      color: var(--t-sub, #94a3b8);
+      margin-top: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .match-container {
+      padding: 8px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .sim-card {
+      background: var(--t-card, #111625);
+      border-radius: 14px;
+      border: 1px solid var(--t-border, #1e2942);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      gap: 6px 10px;
+      align-items: center;
+      font-size: 0.7rem;
+    }
+    .sim-time {
+      grid-row: 1 / 3;
+      align-self: center;
+      font-weight: 800;
+      color: var(--t-accent, #22c55e);
+      background: var(--t-time-bg, #070a13);
+      border: 1px solid var(--t-border, #1e2942);
+      padding: 6px 8px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
+      font-size: 0.72rem;
+      line-height: 1.2;
+      text-align: center;
+      min-width: 44px;
+    }
+    .sim-time small {
+      display: block;
+      font-size: 0.55rem;
+      color: var(--t-sub, #64748b);
+      font-weight: 700;
+    }
+    .sim-teams {
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--t-text, #fff);
+      min-width: 0;
+    }
+    .team-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .team-block img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .team-name {
+      font-weight: 700;
+      font-size: 0.68rem;
+      line-height: 1.2;
+      text-align: center;
+      word-break: break-word;
+      hyphens: auto;
+      max-width: 100%;
+      margin-top: 7px;
+    }
+    .vs-label {
+      color: var(--t-sub, #64748b);
+      font-size: 0.58rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      padding: 0 2px;
+    }
+    .sim-tv {
+      grid-column: 2;
+      grid-row: 2;
+      color: var(--t-tv, #fbbf24);
+      font-weight: 700;
+      font-size: 0.58rem;
+      line-height: 1.25;
+      text-align: center;
+      word-break: break-word;
+      padding-top: 2px;
+      border-top: 1px solid var(--t-border, #1e2942);
+    }
+
+    .watermark-footer {
+      background: var(--t-footer-bg, #000);
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 0.62rem;
+      color: var(--t-sub, #94a3b8);
+      font-weight: 700;
+      border-top: 1px solid var(--t-border, #111625);
+      flex-shrink: 0;
+      line-height: 1.3;
     }
   </style>
 </head>
 <body>
-<div class="app-layout">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-title">⚽ JADWAL BOLA PRO</div>
-    <p>Design premium · TikTok 9:16 · Export PNG</p>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <h1>⚽ Generator Jadwal Bola</h1>
+      <p>Input kiri · Preview kanan · Pilih tema PNG</p>
 
-    <div class="field-group">
-      <label>JUDUL HEADER
-        <input type="text" id="input-header" value="JADWAL BOLA MALAM INI" />
-      </label>
-      <label>NAMA AKUN (watermark)
-        <input type="text" id="input-tiktok" value="@CORNERKIICK" />
-      </label>
-      <label>FOOTER / SOSMED
-        <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
-      </label>
-    </div>
-
-    <p class="section-label">Pilih Tema</p>
-    <div class="theme-grid" id="theme-grid"></div>
-
-    <p class="section-label">Pilih Tanggal</p>
-    <input type="date" id="date-picker" />
-    <div class="btn-row">
-      <button class="btn-ghost" id="btn-today">Hari Ini</button>
-      <button class="btn-blue"  id="btn-refresh">↻ Muat Data</button>
-    </div>
-
-    <input type="file" id="file-import" accept=".html,.htm,text/html" />
-    <label class="file-label btn-import" for="file-import">📂 Import HTML Jadwal</label>
-
-    <button class="btn-download" id="btn-download" disabled>⚡ DOWNLOAD PNG 9:16</button>
-    <div class="status" id="status">Memuat data jadwal...</div>
-  </aside>
-
-  <!-- PREVIEW -->
-  <main class="preview-panel">
-    <span class="preview-label">Preview Live</span>
-    <div id="export-area">
-      <!-- BG Layer (rendered by JS) -->
-      <canvas class="bg-layer" id="bg-canvas" aria-hidden="true"></canvas>
-
-      <!-- Watermark -->
-      <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
-
-      <div class="preview-msg">PREVIEW</div>
-
-      <div class="banner">
-        <img class="brand-logo" id="brand-logo" src="" alt="" />
-        <div class="banner-title" id="view-header">JADWAL BOLA MALAM INI</div>
-        <div class="banner-divider">
-          <span class="banner-date" id="display-date">—</span>
-        </div>
+      <div class="branding-inputs">
+        <label>JUDUL ATAS (HEADER)
+          <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
+        </label>
+        <label>NAMA TIKTOK (watermark background)
+          <input type="text" id="input-tiktok" value="@CORNERKIICK" placeholder="@username" />
+        </label>
+        <label>BAR SOSIAL MEDIA (FOOTER)
+          <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
+        </label>
       </div>
 
-      <div id="match-list" class="match-container"></div>
+      <p class="section-label">Tema PNG TikTok</p>
+      <div class="theme-grid" id="theme-grid"></div>
 
-      <div class="footer-strip">
-        <img class="footer-logo-sm" id="footer-logo" src="" alt="" />
-        <div class="footer-text" id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+      <p class="section-label">Jadwal</p>
+      <input type="date" id="date-picker" />
+      <div class="controls" style="margin-top:10px">
+        <button class="btn-ghost" id="btn-today" type="button">Hari Ini</button>
+        <button class="btn-secondary" id="btn-refresh" type="button">↻ Muat</button>
       </div>
-    </div>
-  </main>
-</div>
+      <input type="file" id="file-import" accept=".html,.htm,text/html" />
+      <label class="file-label btn-warn" for="file-import" style="display:block;text-align:center;margin-top:8px">📂 Import HTML</label>
 
-<script>
-/* ─── CONSTANTS ─── */
-const BULAN_ID = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-const HARI_ID  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+      <button class="btn-primary" id="btn-download" type="button" disabled>⚡ DOWNLOAD PNG 9:16</button>
+      <div class="status" id="status">Memuat data...</div>
+    </aside>
 
-/* ─── THEMES ─── */
-const THEMES = {
-  neonGreen: {
-    name:"🟢 Neon Pitch",
-    swatch:"linear-gradient(145deg,#06080f,#00ff87)",
-    bg:"#06080f", bg2:"#0a1a12",
-    accent:"#00ff87", accentGlow:"rgba(0,255,135,.55)",
-    sub:"#34d399", text:"#f0fff4",
-    card:"rgba(0,255,135,.05)", border:"rgba(0,255,135,.15)",
-    tv:"#fde047", timeBg:"#0a1810",
-    footerBg:"rgba(0,0,0,.7)",
-    glow:"rgba(0,255,135,.35)",
-    stripes:["#00ff87","#00e5ff","#ffd700","#00c96b"],
-    wm:"rgba(0,255,135,.03)",
-    decoFn:"stadium",
-  },
-  cyberPurple: {
-    name:"🟣 Cyber Violet",
-    swatch:"linear-gradient(145deg,#060213,#bf5fff,#00e5ff)",
-    bg:"#06020f", bg2:"#12063a",
-    accent:"#bf5fff", accentGlow:"rgba(191,95,255,.55)",
-    sub:"#a78bfa", text:"#faf5ff",
-    card:"rgba(191,95,255,.05)", border:"rgba(191,95,255,.15)",
-    tv:"#f0abfc", timeBg:"#0d0620",
-    footerBg:"rgba(0,0,0,.7)",
-    glow:"rgba(191,95,255,.35)",
-    stripes:["#bf5fff","#00e5ff","#f472b6","#818cf8"],
-    wm:"rgba(191,95,255,.03)",
-    decoFn:"cyber",
-  },
-  goldCup: {
-    name:"🏆 Gold Cup",
-    swatch:"linear-gradient(145deg,#0f0b00,#ffd700,#ff8c00)",
-    bg:"#0a0700", bg2:"#1c1200",
-    accent:"#ffd700", accentGlow:"rgba(255,215,0,.55)",
-    sub:"#fbbf24", text:"#fffbeb",
-    card:"rgba(255,215,0,.05)", border:"rgba(255,215,0,.15)",
-    tv:"#fde68a", timeBg:"#120e00",
-    footerBg:"rgba(0,0,0,.75)",
-    glow:"rgba(255,215,0,.35)",
-    stripes:["#ffd700","#ff8c00","#fbbf24","#f59e0b"],
-    wm:"rgba(255,215,0,.03)",
-    decoFn:"gold",
-  },
-  champRed: {
-    name:"🔴 Champions",
-    swatch:"linear-gradient(145deg,#0a0202,#ff3c5a,#ff6b00)",
-    bg:"#080101", bg2:"#1a0505",
-    accent:"#ff3c5a", accentGlow:"rgba(255,60,90,.55)",
-    sub:"#fca5a5", text:"#fff5f5",
-    card:"rgba(255,60,90,.05)", border:"rgba(255,60,90,.15)",
-    tv:"#fde047", timeBg:"#150303",
-    footerBg:"rgba(0,0,0,.75)",
-    glow:"rgba(255,60,90,.4)",
-    stripes:["#ff3c5a","#ff6b00","#ffd700","#ff0040"],
-    wm:"rgba(255,60,90,.035)",
-    decoFn:"inferno",
-  },
-  iceCyan: {
-    name:"❄️ Ice Arena",
-    swatch:"linear-gradient(145deg,#020d18,#00e5ff,#4fd9ff)",
-    bg:"#020b14", bg2:"#061822",
-    accent:"#00e5ff", accentGlow:"rgba(0,229,255,.55)",
-    sub:"#67e8f9", text:"#f0fdff",
-    card:"rgba(0,229,255,.05)", border:"rgba(0,229,255,.15)",
-    tv:"#fde047", timeBg:"#030e18",
-    footerBg:"rgba(0,0,0,.72)",
-    glow:"rgba(0,229,255,.35)",
-    stripes:["#00e5ff","#38bdf8","#67e8f9","#0ea5e9"],
-    wm:"rgba(0,229,255,.03)",
-    decoFn:"ice",
-  },
-  darkBlaze: {
-    name:"🌙 Dark Blaze",
-    swatch:"linear-gradient(145deg,#020206,#2563eb,#7c3aed)",
-    bg:"#020206", bg2:"#0a0a1a",
-    accent:"#6366f1", accentGlow:"rgba(99,102,241,.55)",
-    sub:"#818cf8", text:"#f8faff",
-    card:"rgba(99,102,241,.05)", border:"rgba(99,102,241,.15)",
-    tv:"#fbbf24", timeBg:"#060618",
-    footerBg:"rgba(0,0,0,.75)",
-    glow:"rgba(99,102,241,.35)",
-    stripes:["#6366f1","#8b5cf6","#38bdf8","#4f46e5"],
-    wm:"rgba(99,102,241,.03)",
-    decoFn:"blaze",
-  },
-};
-
-let currentTheme = "neonGreen";
-
-/* ─── STATE ─── */
-const SETTINGS_KEY = "jadwal-bola-pro-settings";
-let allSchedules = {};
-let selectedDate = todayISO();
-let staticLogos = null;
-const logoCache = {};
-let brandLogoImg = null;
-
-const $ = s => document.querySelector(s);
-const datePicker = $("#date-picker");
-const statusEl   = $("#status");
-const matchList  = $("#match-list");
-const displayDate = $("#display-date");
-const btnDownload = $("#btn-download");
-const inputHeader = $("#input-header");
-const inputTiktok = $("#input-tiktok");
-const inputFooter = $("#input-footer");
-const exportArea  = $("#export-area");
-
-const BRAND_PATHS = ["assets/branding/CORNERKIICK.png","CORNERKIICK.png"];
-
-/* ─── HELPERS ─── */
-function todayISO() {
-  return new Date().toLocaleDateString("en-CA", {timeZone:"Asia/Jakarta"});
-}
-function formatDateID(iso) {
-  if (!iso) return "—";
-  const [y,m,d] = iso.split("-").map(Number);
-  return `${HARI_ID[new Date(y,m-1,d).getDay()]}, ${d} ${BULAN_ID[m]} ${y}`;
-}
-function escapeHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-function getTheme() { return THEMES[currentTheme] || THEMES.neonGreen; }
-function normalizeName(n) { return n.toLowerCase().trim().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," "); }
-function slugify(name) { return name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"unknown"; }
-function isRemote(p) { return /^https?:\/\//i.test(p||""); }
-function assetPath(p) {
-  const path = location.pathname;
-  const base = path.endsWith("/") ? path : path.slice(0,path.lastIndexOf("/")+1)||"/";
-  return base + p.replace(/^\//,"");
-}
-
-/* ─── WATERMARK ─── */
-function wmText() {
-  let v = (inputTiktok.value||"").trim().replace(/^@+/,"");
-  return v ? "@"+v.toUpperCase() : "";
-}
-function updateWm() {
-  const el = $("#bg-watermark");
-  const t = wmText();
-  el.innerHTML = t ? Array(20).fill(`<span>${escapeHtml(t)}</span>`).join("") : "";
-}
-
-/* ─── SETTINGS ─── */
-function loadSettings() {
-  try {
-    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");
-    if (s.header) inputHeader.value = s.header;
-    if (s.tiktok) inputTiktok.value = s.tiktok;
-    if (s.footer) inputFooter.value = s.footer;
-    if (s.theme && THEMES[s.theme]) currentTheme = s.theme;
-    if (s.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) selectedDate = s.lastDate;
-  } catch(_){}
-}
-function saveSettings() {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-    header:inputHeader.value, tiktok:inputTiktok.value,
-    footer:inputFooter.value, theme:currentTheme, lastDate:selectedDate
-  }));
-}
-
-inputHeader.addEventListener("input",()=>{ $("#view-header").textContent = inputHeader.value; saveSettings(); });
-inputTiktok.addEventListener("input",()=>{ updateWm(); saveSettings(); });
-inputFooter.addEventListener("input",()=>{ $("#view-footer").textContent = inputFooter.value; saveSettings(); });
-
-/* ─── THEME PICKER ─── */
-function buildThemePicker() {
-  const grid = $("#theme-grid");
-  grid.innerHTML = Object.entries(THEMES).map(([id,t])=>`
-    <label class="theme-card${id===currentTheme?" active":""}" data-theme="${id}">
-      <input type="radio" name="theme" value="${id}" ${id===currentTheme?"checked":""} />
-      <div class="theme-swatch" style="background:${t.swatch}"></div>
-      <span>${t.name}</span>
-    </label>`).join("");
-  grid.querySelectorAll(".theme-card").forEach(card=>{
-    card.addEventListener("click",()=>{
-      currentTheme = card.dataset.theme;
-      grid.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("active",c.dataset.theme===currentTheme));
-      applyTheme(currentTheme);
-      saveSettings();
-    });
-  });
-}
-
-function applyTheme(id) {
-  const t = THEMES[id]||THEMES.neonGreen;
-  const ea = exportArea;
-  const set = (k,v) => ea.style.setProperty(k,v);
-  set("--t-bg", t.bg);
-  set("--t-card", t.card);
-  set("--t-border", t.border);
-  set("--t-text", t.text);
-  set("--t-sub", t.sub);
-  set("--t-accent", t.accent);
-  set("--t-accent-glow", t.accentGlow);
-  set("--t-tv", t.tv);
-  set("--t-footer-bg", t.footerBg);
-  set("--t-glow", t.glow);
-  // draw BG canvas
-  const canvas = $("#bg-canvas");
-  drawBgCanvas(canvas, t);
-  // re-render match borders
-  const cards = exportArea.querySelectorAll(".sim-card");
-  cards.forEach((card,i)=>{ card.style.setProperty("--t-stripe", t.stripes[i%t.stripes.length]); });
-}
-
-function drawBgCanvas(canvas, t) {
-  const ea = exportArea;
-  const W = ea.offsetWidth || 400;
-  const H = ea.offsetHeight || 711;
-  canvas.width  = W;
-  canvas.height = H;
-  const ctx = canvas.getContext("2d");
-  // base
-  ctx.fillStyle = t.bg;
-  ctx.fillRect(0,0,W,H);
-  // deco
-  switch(t.decoFn) {
-    case "cyber":   drawDecoCyber(ctx,W,H,t); break;
-    case "gold":    drawDecoGold(ctx,W,H,t); break;
-    case "inferno": drawDecoInferno(ctx,W,H,t); break;
-    case "ice":     drawDecoIce(ctx,W,H,t); break;
-    case "blaze":   drawDecoBlaze(ctx,W,H,t); break;
-    default:        drawDecoStadium(ctx,W,H,t);
-  }
-  // top glow
-  const tg = ctx.createRadialGradient(W/2,0,0,W/2,0,H*0.5);
-  tg.addColorStop(0, t.accentGlow.replace(/[\d.]+\)$/,"0.18)"));
-  tg.addColorStop(1,"transparent");
-  ctx.fillStyle = tg; ctx.fillRect(0,0,W,H*0.5);
-}
-
-function drawDecoStadium(ctx,W,H,t) {
-  // pitch lines
-  ctx.strokeStyle = "rgba(255,255,255,0.05)"; ctx.lineWidth = 1.5;
-  for(let i=0;i<7;i++) { ctx.beginPath(); ctx.moveTo(0,i*(H/7)); ctx.lineTo(W,i*(H/7)); ctx.stroke(); }
-  ctx.beginPath(); ctx.arc(W/2,H*0.38,W*0.26,0,Math.PI*2); ctx.stroke();
-  ctx.strokeRect(W*0.1,H*0.2,W*0.8,H*0.36);
-  ctx.beginPath(); ctx.moveTo(W/2,H*0.2); ctx.lineTo(W/2,H*0.56); ctx.stroke();
-}
-function drawDecoCyber(ctx,W,H,t) {
-  ctx.strokeStyle="rgba(191,95,255,0.07)"; ctx.lineWidth=1;
-  for(let x=0;x<W;x+=44){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0;y<H;y+=44){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-  [[0.1,0.1],[0.9,0.85]].forEach(([px,py])=>{
-    const rg=ctx.createRadialGradient(px*W,py*H,0,px*W,py*H,W*0.4);
-    rg.addColorStop(0,"rgba(191,95,255,0.18)"); rg.addColorStop(1,"transparent");
-    ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
-  });
-}
-function drawDecoGold(ctx,W,H,t) {
-  ctx.strokeStyle="rgba(255,215,0,0.07)"; ctx.lineWidth=1.5;
-  for(let i=-H;i<W+H;i+=54){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+H,H); ctx.stroke(); }
-  const rg=ctx.createRadialGradient(W/2,0,0,W/2,0,H*0.55);
-  rg.addColorStop(0,"rgba(255,215,0,0.18)"); rg.addColorStop(1,"transparent");
-  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
-}
-function drawDecoInferno(ctx,W,H,t) {
-  const g=ctx.createLinearGradient(0,H,0,0);
-  g.addColorStop(0,"rgba(255,60,90,0.25)"); g.addColorStop(0.5,t.bg); g.addColorStop(1,t.bg2);
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  const rg=ctx.createRadialGradient(W*0.3,H*0.1,0,W*0.3,H*0.1,W*0.55);
-  rg.addColorStop(0,"rgba(255,107,0,0.2)"); rg.addColorStop(1,"transparent");
-  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
-}
-function drawDecoIce(ctx,W,H,t) {
-  ctx.strokeStyle="rgba(0,229,255,0.06)"; ctx.lineWidth=1;
-  for(let x=0;x<W;x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0;y<H;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-  const rg=ctx.createRadialGradient(W/2,0,0,W/2,0,W*0.7);
-  rg.addColorStop(0,"rgba(0,229,255,0.15)"); rg.addColorStop(1,"transparent");
-  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
-}
-function drawDecoBlaze(ctx,W,H,t) {
-  const g=ctx.createLinearGradient(0,0,W,H);
-  g.addColorStop(0,"rgba(37,99,235,0.2)"); g.addColorStop(1,"rgba(124,58,237,0.2)");
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle="rgba(99,102,241,0.08)"; ctx.lineWidth=1;
-  for(let i=-H;i<W+H;i+=50){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+H*0.5,H); ctx.stroke(); }
-}
-
-/* ─── LOGOS ─── */
-async function loadStaticLogos() {
-  if(staticLogos) return staticLogos;
-  try {
-    const r = await fetch(assetPath("logos.json?v=3"));
-    staticLogos = r.ok ? await r.json() : {teams:{},leagues:{}};
-  } catch(e) { staticLogos={teams:{},leagues:{}}; }
-  return staticLogos;
-}
-function findBadge(map,name) {
-  if(!map||!name) return null;
-  if(map[name]&&!isRemote(map[name])) return map[name];
-  const norm=normalizeName(name);
-  let best=null, bestLen=0;
-  for(const[k,url] of Object.entries(map)){
-    if(isRemote(url)) continue;
-    const kn=normalizeName(k);
-    if(norm===kn) return url;
-    if((norm.includes(kn)||kn.includes(norm))&&k.length>bestLen){ best=url; bestLen=k.length; }
-  }
-  return best;
-}
-function resolveTeamLogo(name) {
-  const m = staticLogos ? findBadge(staticLogos.teams,name) : null;
-  const base = m && !isRemote(m) ? m.replace(/\.(png|svg|jpg|webp)$/i,"") : `assets/logos/teams/${slugify(name)}`;
-  return base;
-}
-function localCandidates(base) {
-  if(!base||isRemote(base)) return [];
-  const b = base.replace(/\.(png|svg|jpg|webp)$/i,"");
-  return [".png",".svg",".jpg",".webp"].map(e=>b+e);
-}
-function getCached(p) { if(!p) return null; const k=p.replace(/\.(png|svg|jpg|webp)$/i,""); return logoCache[p]||logoCache[k]||null; }
-async function tryLoad(p) {
-  if(!p) return null;
-  const src = isRemote(p) ? p : assetPath(p);
-  const cached = getCached(p); if(cached) return cached;
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{ logoCache[p]=img; logoCache[p.replace(/\.(png|svg|jpg|webp)$/i,"")]=img; res(img); };
-    img.onerror=()=>res(null);
-    img.src=src;
-  });
-}
-async function loadImage(base) {
-  if(!base) return null;
-  const c=getCached(base); if(c) return c;
-  for(const cand of localCandidates(base)){ const img=await tryLoad(cand); if(img) return img; }
-  return null;
-}
-async function loadBrandLogo() {
-  if(brandLogoImg) return brandLogoImg;
-  for(const p of BRAND_PATHS){ const img=await tryLoad(p); if(img){ brandLogoImg=img; return img; }}
-  return null;
-}
-function setupBrandPreviews() {
-  const url = assetPath(BRAND_PATHS[0]);
-  ["#brand-logo","#footer-logo"].forEach(id=>{
-    const el=$(id); if(!el) return;
-    el.src=url;
-    el.onerror=()=>{ el.src=assetPath(BRAND_PATHS[1]); };
-  });
-}
-
-/* ─── LOGO TAG ─── */
-function logoTag(base,alt) {
-  const cands = localCandidates(base).map(c=>assetPath(c));
-  if(!cands.length) return "";
-  return `<img src="${escapeHtml(cands[0])}" alt="${escapeHtml(alt)}" loading="lazy"
-    data-logos='${JSON.stringify(cands).replace(/'/g,"&#39;")}'
-    onerror="(function(el){var u=JSON.parse(el.dataset.logos),n=+(el.dataset.i||0)+1;el.dataset.i=n;if(n<u.length)el.src=u[n];else el.style.visibility='hidden'})(this)">`;
-}
-
-/* ─── TV STRING ─── */
-function shortTv(m) {
-  const parts=(m.tvFree||[]).concat(m.tvPaid||[]);
-  return parts.length ? parts.join(" · ") : (m.tv||"-");
-}
-
-/* ─── RENDER MATCHES ─── */
-async function renderMatches(iso) {
-  selectedDate = iso;
-  const matches = allSchedules[iso]||[];
-  displayDate.textContent = formatDateID(iso).toUpperCase();
-  if(!matches.length) {
-    matchList.innerHTML=`<div style="text-align:center;padding:30px 8px;color:var(--t-sub);font-size:.8rem;font-family:Rajdhani,sans-serif;">Tidak ada jadwal untuk tanggal ini.</div>`;
-    btnDownload.disabled=true;
-    return;
-  }
-  btnDownload.disabled=false;
-  await loadStaticLogos();
-  const t=getTheme();
-  matchList.innerHTML = matches.map((m,i)=>{
-    const tvStr=shortTv(m);
-    const stripe=t.stripes[i%t.stripes.length];
-    return `<div class="sim-card" style="--t-stripe:${stripe}">
-      <div class="sim-time">
-        <span class="kick">${escapeHtml(m.kickoff)}</span>
-        <span class="wib">WIB</span>
-      </div>
-      <div class="sim-teams">
-        <div class="team-block">
-          ${logoTag(resolveTeamLogo(m.home),m.home)}
-          <span class="team-name">${escapeHtml(m.home)}</span>
+    <main class="preview-panel">
+      <span class="preview-label">Preview live</span>
+      <div id="export-area" data-theme="stadium">
+        <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
+        <div class="preview-msg">PREVIEW</div>
+        <div class="banner">
+          <img class="brand-logo" id="brand-logo" src="" alt="CORNERKIICK" />
+          <h2 id="view-header">KREATOR JADWAL BOLA</h2>
+          <div class="title-bar"></div>
+          <div class="date-label" id="display-date">—</div>
         </div>
-        <div class="vs-badge">
-          <div class="vs-line"></div>
-          <div class="vs-text">VS</div>
-          <div class="vs-line"></div>
-        </div>
-        <div class="team-block">
-          ${logoTag(resolveTeamLogo(m.away),m.away)}
-          <span class="team-name">${escapeHtml(m.away)}</span>
+        <div id="match-list" class="match-container"></div>
+        <div class="watermark-footer">
+          <img class="brand-logo-footer" id="brand-logo-footer" src="" alt="CORNERKIICK" />
+          <div id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
         </div>
       </div>
-      <div class="sim-tv">${escapeHtml(tvStr)}</div>
-    </div>`;
-  }).join("");
-  // preload logos
-  const urls=[...new Set(matches.flatMap(m=>[resolveTeamLogo(m.home),resolveTeamLogo(m.away)]).filter(Boolean))];
-  Promise.all(urls.map(loadImage));
-}
+    </main>
+  </div>
 
-/* ─── FETCH DATA ─── */
-async function fetchSchedule() {
-  setStatus("Memuat jadwal...");
-  try {
-    const r = await fetch(assetPath("data/jadwal.json"));
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    allSchedules = data.schedules||{};
-    await loadStaticLogos();
-    setStatus(`✓ ${Object.values(allSchedules).flat().length} pertandingan dimuat.`,"success");
-    renderMatches(selectedDate);
-  } catch(e) {
-    setStatus("Gagal memuat jadwal. Import HTML atau cek data/jadwal.json.","error");
-  }
-}
+  <script>
+    const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
-/* ─── IMPORT HTML ─── */
-function importHtmlFile(file) {
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    try {
-      const doc=new DOMParser().parseFromString(e.target.result,"text/html");
-      const rows=doc.querySelectorAll("table tr");
-      if(!rows.length) throw new Error("Tabel tidak ditemukan.");
-      let count=0;
-      rows.forEach(tr=>{
-        const cells=[...tr.querySelectorAll("td")].map(td=>td.textContent.trim());
-        if(cells.length<4) return;
-        const[kickoff,matchup,competition,tv]=cells;
-        if(/kick-off/i.test(kickoff)||!/vs/i.test(matchup)) return;
-        const parts=matchup.split(/\s+vs\s+/i);
-        if(!allSchedules[selectedDate]) allSchedules[selectedDate]=[];
-        allSchedules[selectedDate].push({kickoff,matchup,home:(parts[0]||"").trim(),away:(parts[1]||"").trim(),competition,tv,tvFree:[],tvPaid:[]});
-        count++;
-      });
-      await loadStaticLogos();
-      setStatus(`✓ Import ${count} pertandingan.`,"success");
-      renderMatches(selectedDate);
-    } catch(err){ setStatus(`Gagal import: ${err.message}`,"error"); }
-  };
-  reader.readAsText(file,"UTF-8");
-}
+    const THEME_ALIASES = {
+      neon: "stadium", midnight: "cyber", fire: "inferno", royal: "goldcup", clean: "studio",
+    };
 
-/* ═══ PNG EXPORT ═══ */
-const PNG_W = 1080, PNG_H = 1920;
+    const THEMES = {
+      stadium: {
+        name: "⚽ Lapangan",
+        deco: "stadium",
+        swatch: "linear-gradient(145deg,#061208 30%,#4ade80 100%)",
+        previewBg: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(74,222,128,0.2), transparent 70%), linear-gradient(180deg, #0a1a10 0%, #061208 100%)",
+        decoOverlay: "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.02) 18px, rgba(255,255,255,0.02) 36px)",
+        bg: "#061208", bg2: "#0f2918",
+        card: "rgba(14,26,18,0.94)", cardHi: "rgba(22,40,28,0.98)",
+        timeBg: "#0a1810", border: "#2d6b45",
+        text: "#f0fdf4", sub: "#86efac",
+        accent: "#4ade80", accentGlow: "rgba(74,222,128,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#040a06", glow: "rgba(74,222,128,0.35)",
+        glowTop: "rgba(74,222,128,0.28)", glowBottom: "rgba(34,197,94,0.12)",
+        borders: ["#4ade80", "#22d3ee", "#facc15", "#34d399"],
+        wm: "rgba(255,255,255,0.03)",
+      },
+      cyber: {
+        name: "🌐 Neon Cyber",
+        deco: "cyber",
+        swatch: "linear-gradient(145deg,#0a0a1a 30%,#22d3ee 50%,#e879f9 100%)",
+        previewBg: "radial-gradient(circle at 20% 20%, rgba(34,211,238,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(232,121,249,0.2), transparent 45%), linear-gradient(180deg, #0a0a1a, #050510)",
+        decoOverlay: "linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px)",
+        bg: "#050510", bg2: "#0f1030",
+        card: "rgba(12,14,40,0.92)", cardHi: "rgba(18,22,55,0.98)",
+        timeBg: "#0a0c28", border: "#312e81",
+        text: "#f0f9ff", sub: "#a5b4fc",
+        accent: "#22d3ee", accentGlow: "rgba(34,211,238,0.6)",
+        tv: "#f0abfc", tvFree: "#34d399",
+        footerBg: "#030308", glow: "rgba(34,211,238,0.4)",
+        glowTop: "rgba(34,211,238,0.3)", glowBottom: "rgba(232,121,249,0.2)",
+        borders: ["#22d3ee", "#e879f9", "#818cf8", "#38bdf8"],
+        wm: "rgba(255,255,255,0.035)",
+      },
+      goldcup: {
+        name: "🏆 Trofi Emas",
+        deco: "gold",
+        swatch: "linear-gradient(145deg,#1a1208 30%,#fbbf24 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.25), transparent 55%), linear-gradient(160deg, #1a1208, #0c0804)",
+        decoOverlay: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(251,191,36,0.03) 12px, rgba(251,191,36,0.03) 24px)",
+        bg: "#0c0804", bg2: "#1f1608",
+        card: "rgba(28,20,8,0.94)", cardHi: "rgba(40,30,12,0.98)",
+        timeBg: "#141008", border: "#78590a",
+        text: "#fffbeb", sub: "#fcd34d",
+        accent: "#fbbf24", accentGlow: "rgba(251,191,36,0.55)",
+        tv: "#fde68a", tvFree: "#86efac",
+        footerBg: "#060402", glow: "rgba(251,191,36,0.35)",
+        glowTop: "rgba(251,191,36,0.22)", glowBottom: "rgba(180,83,9,0.18)",
+        borders: ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706"],
+        wm: "rgba(255,255,255,0.03)",
+      },
+      inferno: {
+        name: "🔥 Champions",
+        deco: "inferno",
+        swatch: "linear-gradient(145deg,#1a0505 30%,#ef4444 60%,#f97316 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.35), transparent 55%), radial-gradient(ellipse at 30% 0%, rgba(249,115,22,0.2), transparent 50%), linear-gradient(180deg, #1a0505, #0a0202)",
+        decoOverlay: "radial-gradient(circle at 50% 120%, rgba(239,68,68,0.12), transparent 50%)",
+        bg: "#0a0202", bg2: "#1f0808",
+        card: "rgba(30,10,10,0.94)", cardHi: "rgba(45,15,15,0.98)",
+        timeBg: "#180606", border: "#7f1d1d",
+        text: "#fff5f5", sub: "#fca5a5",
+        accent: "#f87171", accentGlow: "rgba(248,113,113,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#050101", glow: "rgba(239,68,68,0.4)",
+        glowTop: "rgba(239,68,68,0.28)", glowBottom: "rgba(249,115,22,0.22)",
+        borders: ["#ef4444", "#f97316", "#fbbf24", "#dc2626"],
+        wm: "rgba(255,255,255,0.035)",
+      },
+      studio: {
+        name: "📺 Studio TV",
+        deco: "studio",
+        swatch: "linear-gradient(145deg,#0f172a 30%,#3b82f6 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.2), transparent 60%), linear-gradient(180deg, #0f172a, #020617)",
+        decoOverlay: "linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)",
+        bg: "#020617", bg2: "#0f172a",
+        card: "rgba(15,23,42,0.94)", cardHi: "rgba(30,41,59,0.98)",
+        timeBg: "#0f172a", border: "#334155",
+        text: "#f8fafc", sub: "#94a3b8",
+        accent: "#60a5fa", accentGlow: "rgba(96,165,250,0.5)",
+        tv: "#fbbf24", tvFree: "#34d399",
+        footerBg: "#010409", glow: "rgba(59,130,246,0.35)",
+        glowTop: "rgba(59,130,246,0.25)", glowBottom: "rgba(99,102,241,0.15)",
+        borders: ["#3b82f6", "#60a5fa", "#fbbf24", "#6366f1"],
+        wm: "rgba(255,255,255,0.03)",
+      },
+    };
 
-function rrect(ctx,x,y,w,h,r,fill,stroke,sw) {
-  const rad=Math.min(r,w/2,h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+rad); ctx.lineTo(x+w,y+h-rad);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h); ctx.lineTo(x+rad,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-rad); ctx.lineTo(x,y+rad);
-  ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
-  if(fill){ctx.fillStyle=fill;ctx.fill();}
-  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw||2;ctx.stroke();}
-}
+    let currentTheme = "stadium";
 
-function wrapText(ctx,text,maxW,maxLines) {
-  const words=text.split(/\s+/), lines=[];
-  let line="";
-  for(const w of words){
-    const test=line?line+" "+w:w;
-    if(ctx.measureText(test).width<=maxW) line=test;
-    else { if(line)lines.push(line); line=w; }
-  }
-  if(line)lines.push(line);
-  return lines.slice(0,maxLines);
-}
+    const BASE = (() => {
+      const path = location.pathname;
+      if (path.endsWith("/")) return path;
+      const slash = path.lastIndexOf("/");
+      return slash > 0 ? path.slice(0, slash + 1) : "/";
+    })();
+    const asset = (p) => BASE + p.replace(/^\//, "");
 
-function drawPngBackground(ctx,W,H,t) {
-  ctx.fillStyle=t.bg; ctx.fillRect(0,0,W,H);
-  switch(t.decoFn) {
-    case "cyber":   drawDecoCyber(ctx,W,H,t); break;
-    case "gold":    drawDecoGold(ctx,W,H,t); break;
-    case "inferno": drawDecoInferno(ctx,W,H,t); break;
-    case "ice":     drawDecoIce(ctx,W,H,t); break;
-    case "blaze":   drawDecoBlaze(ctx,W,H,t); break;
-    default:        drawDecoStadium(ctx,W,H,t);
-  }
-  // top glow
-  const rg=ctx.createRadialGradient(W/2,0,0,W/2,0,H*0.55);
-  rg.addColorStop(0,t.accentGlow.replace(/[\d.]+\)$/,"0.22)")); rg.addColorStop(1,"transparent");
-  ctx.fillStyle=rg; ctx.fillRect(0,0,W,H*0.55);
-  // bottom gradient
-  const bg2=ctx.createLinearGradient(0,H*0.6,0,H);
-  bg2.addColorStop(0,"transparent"); bg2.addColorStop(1,"rgba(0,0,0,0.6)");
-  ctx.fillStyle=bg2; ctx.fillRect(0,H*0.6,W,H*0.4);
-}
+    const BRAND_LOGO_PATHS = [
+      "assets/branding/CORNERKIICK.png",
+      "CORNERKIICK.png",
+    ];
+    let brandLogoImg = null;
 
-function drawPngWm(ctx,W,H,t) {
-  const text=wmText(); if(!text) return;
-  ctx.save();
-  ctx.translate(W/2,H/2); ctx.rotate(-Math.PI/7);
-  ctx.fillStyle=`rgba(255,255,255,0.03)`;
-  ctx.font="900 80px 'Bebas Neue',Impact,sans-serif";
-  ctx.textAlign="center";
-  for(let dy=-H*0.5;dy<H*0.5;dy+=160) ctx.fillText(text,0,dy);
-  ctx.restore();
-}
+    let allSchedules = {};
+    let selectedDate = todayISO();
+    let staticLogos = null;
+    const logoCache = {};
 
-function drawPngHeader(ctx,W,t,brandImg,title,dateStr) {
-  let titleY = 140;
-  if(brandImg) {
-    const sz=110, cx=W/2, cy=60+sz/2;
-    // glow ring
-    const rg=ctx.createRadialGradient(cx,cy,sz*0.3,cx,cy,sz*0.8);
-    rg.addColorStop(0,t.accentGlow); rg.addColorStop(1,"transparent");
-    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(cx,cy,sz*0.9,0,Math.PI*2); ctx.fill();
-    // clip + draw
-    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,sz/2,0,Math.PI*2); ctx.clip();
-    ctx.drawImage(brandImg,cx-sz/2,cy-sz/2,sz,sz);
-    ctx.restore();
-    // border
-    ctx.beginPath(); ctx.arc(cx,cy,sz/2,0,Math.PI*2);
-    ctx.strokeStyle=t.accent; ctx.lineWidth=4; ctx.globalAlpha=0.9; ctx.stroke(); ctx.globalAlpha=1;
-    titleY = 60+sz+36;
-  }
+    const $ = (s) => document.querySelector(s);
+    const datePicker = $("#date-picker");
+    const statusEl = $("#status");
+    const matchList = $("#match-list");
+    const displayDate = $("#display-date");
+    const btnDownload = $("#btn-download");
+    const inputHeader = $("#input-header");
+    const inputTiktok = $("#input-tiktok");
+    const inputFooter = $("#input-footer");
+    const exportArea = $("#export-area");
+    const SETTINGS_KEY = "jadwal-bola-settings";
 
-  // title glow
-  ctx.save();
-  ctx.shadowColor=t.accent; ctx.shadowBlur=60;
-  ctx.fillStyle=t.text;
-  ctx.font="900 76px 'Bebas Neue',Impact,sans-serif";
-  ctx.textAlign="center";
-  ctx.letterSpacing="12px";
-  ctx.fillText(title.toUpperCase(), W/2, titleY);
-  ctx.restore();
-
-  // divider line
-  const lineY=titleY+22;
-  const grad=ctx.createLinearGradient(W*0.1,0,W*0.9,0);
-  grad.addColorStop(0,"transparent"); grad.addColorStop(0.5,t.accent); grad.addColorStop(1,"transparent");
-  ctx.strokeStyle=grad; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(W*0.1,lineY); ctx.lineTo(W*0.9,lineY); ctx.stroke();
-
-  // date pill
-  ctx.font="bold 32px 'Rajdhani',sans-serif";
-  const dW=ctx.measureText(dateStr).width+64;
-  rrect(ctx,W/2-dW/2,lineY+14,dW,52,26,"rgba(0,0,0,0.4)",t.border,1.5);
-  ctx.fillStyle=t.sub; ctx.textAlign="center";
-  ctx.fillText(dateStr.toUpperCase(), W/2, lineY+14+37);
-
-  return lineY+14+52+30; // returns next Y
-}
-
-function drawPngMatchRow(ctx,m,y,rowH,t,stripe) {
-  const W=PNG_W;
-  const cardX=28, cardW=W-56;
-
-  // card shadow + base
-  ctx.save();
-  ctx.shadowColor="rgba(0,0,0,0.55)"; ctx.shadowBlur=24; ctx.shadowOffsetY=10;
-  rrect(ctx,cardX,y,cardW,rowH,28,"rgba(255,255,255,0.04)",null);
-  ctx.restore();
-
-  // card border
-  rrect(ctx,cardX,y,cardW,rowH,28,null,t.border,1.5);
-
-  // accent stripe (left edge)
-  ctx.fillStyle=stripe;
-  ctx.beginPath(); ctx.roundRect(cardX,y+14,7,rowH-28,4); ctx.fill();
-
-  // right shimmer
-  const shimmer=ctx.createLinearGradient(cardX+cardW*0.55,0,cardX+cardW,0);
-  shimmer.addColorStop(0,"transparent"); shimmer.addColorStop(1,"rgba(255,255,255,0.02)");
-  rrect(ctx,cardX,y,cardW,rowH,28,null,null);
-  ctx.clip(); ctx.fillStyle=shimmer; ctx.fillRect(cardX,y,cardW,rowH);
-  ctx.restore();
-
-  // TIME BOX
-  const timeX=cardX+16, timeW=106, timeH=rowH-22;
-  rrect(ctx,timeX,y+11,timeW,timeH,18,"rgba(0,0,0,0.45)",t.border+",1",1.5);
-
-  ctx.save();
-  ctx.shadowColor=t.accent; ctx.shadowBlur=20;
-  ctx.fillStyle=t.accent;
-  ctx.font="900 42px 'Orbitron',monospace";
-  ctx.textAlign="center";
-  ctx.fillText(m.kickoff,timeX+timeW/2,y+rowH*0.42);
-  ctx.restore();
-
-  ctx.fillStyle=t.sub;
-  ctx.font="700 19px 'Rajdhani',sans-serif";
-  ctx.textAlign="center";
-  ctx.fillText("WIB",timeX+timeW/2,y+rowH*0.62);
-
-  // TEAMS
-  const contentX=cardX+134, contentW=cardW-142;
-  const homeCx=contentX+contentW*0.22, awayCx=contentX+contentW*0.78, midCx=contentX+contentW/2;
-  const teamTop=y+12;
-  const logoSz=Math.min(78,Math.max(52,rowH-120));
-  const nameFontPx=Math.round(logoSz*0.44);
-  const nameGap=Math.round(logoSz*0.32);
-
-  [{ cx:homeCx, name:m.home, img:getCached(resolveTeamLogo(m.home)) },
-   { cx:awayCx, name:m.away, img:getCached(resolveTeamLogo(m.away)) }].forEach(({cx,name,img})=>{
-    // ring
-    const rg=ctx.createRadialGradient(cx,teamTop+logoSz/2,logoSz*0.2,cx,teamTop+logoSz/2,logoSz*0.65);
-    rg.addColorStop(0,"rgba(255,255,255,0.05)"); rg.addColorStop(1,"transparent");
-    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(cx,teamTop+logoSz/2,logoSz*0.65,0,Math.PI*2); ctx.fill();
-    if(img) ctx.drawImage(img,cx-logoSz/2,teamTop,logoSz,logoSz);
-    // name
-    ctx.fillStyle=t.text;
-    ctx.font=`700 ${nameFontPx}px 'Rajdhani',sans-serif`;
-    ctx.textAlign="center";
-    const lines=wrapText(ctx,name,contentW*0.42,2);
-    lines.forEach((ln,i)=>ctx.fillText(ln,cx,teamTop+logoSz+nameGap+i*nameFontPx*1.2));
-  });
-
-  // VS badge
-  ctx.fillStyle=t.accent;
-  ctx.font="900 26px 'Bebas Neue',sans-serif";
-  ctx.textAlign="center";
-  ctx.fillText("VS",midCx,teamTop+logoSz/2+10);
-
-  // TV divider
-  const divY=y+rowH-58;
-  const dg=ctx.createLinearGradient(contentX,0,contentX+contentW,0);
-  dg.addColorStop(0,"transparent"); dg.addColorStop(0.5,t.border); dg.addColorStop(1,"transparent");
-  ctx.strokeStyle=dg; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(contentX+8,divY); ctx.lineTo(contentX+contentW-8,divY); ctx.stroke();
-
-  // TV text
-  const tvStr=shortTv(m);
-  ctx.fillStyle=t.tv;
-  ctx.font="700 28px 'Rajdhani',sans-serif";
-  ctx.textAlign="center";
-  const tvLines=wrapText(ctx,tvStr,contentW-16,2);
-  tvLines.forEach((ln,j)=>ctx.fillText(ln,midCx,divY+32+j*30));
-}
-
-function drawPngFooter(ctx,W,H,t,brandImg,footerText,footerY) {
-  // bar
-  const grad=ctx.createLinearGradient(0,footerY,0,H);
-  grad.addColorStop(0,"rgba(0,0,0,0)"); grad.addColorStop(0.3,t.footerBg); grad.addColorStop(1,"#000");
-  ctx.fillStyle=grad; ctx.fillRect(0,footerY-30,W,H-footerY+30);
-
-  // accent top line
-  const lg=ctx.createLinearGradient(0,0,W,0);
-  lg.addColorStop(0,"transparent"); lg.addColorStop(0.5,t.accent); lg.addColorStop(1,"transparent");
-  ctx.strokeStyle=lg; ctx.lineWidth=2.5;
-  ctx.beginPath(); ctx.moveTo(48,footerY); ctx.lineTo(W-48,footerY); ctx.stroke();
-
-  let textY=footerY+44;
-  if(brandImg) {
-    const sz=60, cx=W/2, cy=footerY+sz/2+10;
-    ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,sz/2,0,Math.PI*2); ctx.clip();
-    ctx.drawImage(brandImg,cx-sz/2,cy-sz/2,sz,sz);
-    ctx.restore();
-    ctx.beginPath(); ctx.arc(cx,cy,sz/2,0,Math.PI*2);
-    ctx.strokeStyle=t.accent; ctx.lineWidth=2.5; ctx.globalAlpha=0.7; ctx.stroke(); ctx.globalAlpha=1;
-    textY=cy+sz/2+22;
-  }
-  ctx.fillStyle=t.sub;
-  ctx.font="700 26px 'Rajdhani',sans-serif";
-  ctx.textAlign="center";
-  const lines=wrapText(ctx,footerText,W-100,2);
-  lines.forEach((ln,i)=>ctx.fillText(ln,W/2,textY+i*32));
-}
-
-async function downloadPNG() {
-  const matches=allSchedules[selectedDate]||[];
-  if(!matches.length) return;
-  btnDownload.disabled=true;
-  setStatus("Memproses PNG...");
-  try {
-    await loadStaticLogos();
-    const t=getTheme();
-    const urls=[...new Set(matches.flatMap(m=>[resolveTeamLogo(m.home),resolveTeamLogo(m.away)]).filter(Boolean))];
-    await Promise.all(urls.map(loadImage));
-    const brandImg=await loadBrandLogo();
-
-    const canvas=document.createElement("canvas");
-    canvas.width=PNG_W*2; canvas.height=PNG_H*2;
-    const ctx=canvas.getContext("2d");
-    ctx.scale(2,2);
-    ctx.textBaseline="alphabetic";
-
-    drawPngBackground(ctx,PNG_W,PNG_H,t);
-    drawPngWm(ctx,PNG_W,PNG_H,t);
-
-    const title=inputHeader.value||"JADWAL BOLA MALAM INI";
-    const dateStr=formatDateID(selectedDate);
-    let y0=drawPngHeader(ctx,PNG_W,t,brandImg,title,dateStr);
-
-    const footerH=brandImg?120:90;
-    const gap=12;
-    const n=Math.min(matches.length,10);
-    const avail=PNG_H-footerH-y0-16;
-    const rowH=Math.max(160,Math.min(230,Math.floor((avail-gap*(n-1))/n)));
-
-    for(let i=0;i<n;i++) {
-      const m=matches[i];
-      const y=y0+i*(rowH+gap);
-      drawPngMatchRow(ctx,m,y,rowH,t,t.stripes[i%t.stripes.length]);
+    function getTiktokWmText() {
+      let v = (inputTiktok.value || "").trim();
+      if (!v) return "";
+      v = v.replace(/^@+/, "");
+      return "@" + v.toUpperCase();
     }
 
-    const footerY=y0+n*(rowH+gap);
-    drawPngFooter(ctx,PNG_W,PNG_H,t,brandImg,inputFooter.value||"",footerY);
+    function updateBgWatermark() {
+      const el = $("#bg-watermark");
+      const text = getTiktokWmText();
+      if (!text) {
+        el.innerHTML = "";
+        return;
+      }
+      el.innerHTML = Array(16).fill(`<span>${escapeHtml(text)}</span>`).join("");
+    }
 
-    // export at PNG_W x PNG_H
-    const out=document.createElement("canvas");
-    out.width=PNG_W; out.height=PNG_H;
-    out.getContext("2d").drawImage(canvas,0,0,PNG_W,PNG_H);
-    const link=document.createElement("a");
-    link.download=`jadwal-${currentTheme}-${selectedDate}.png`;
-    link.href=out.toDataURL("image/png");
-    link.click();
-    const loaded=urls.filter(u=>getCached(u)).length;
-    setStatus(`✓ PNG "${t.name}" diunduh (${loaded}/${urls.length} logo).`,"success");
-  } catch(err) {
-    setStatus(`Gagal: ${err.message}`,"error"); console.error(err);
-  } finally { btnDownload.disabled=false; }
-}
+    function loadSettings() {
+      try {
+        const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+        if (s.header) inputHeader.value = s.header;
+        if (s.tiktok) inputTiktok.value = s.tiktok;
+        if (s.footer) inputFooter.value = s.footer;
+        if (s.theme) {
+          const id = THEME_ALIASES[s.theme] || s.theme;
+          if (THEMES[id]) currentTheme = id;
+        }
+        if (s.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) selectedDate = s.lastDate;
+      } catch (_) { /* ignore */ }
+    }
 
-function setStatus(msg,cls="") {
-  statusEl.className="status"+(cls?" "+cls:"");
-  statusEl.textContent=msg;
-}
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        header: inputHeader.value,
+        tiktok: inputTiktok.value,
+        footer: inputFooter.value,
+        theme: currentTheme,
+        lastDate: selectedDate,
+      }));
+    }
 
-/* ─── EVENTS ─── */
-$("#btn-refresh").addEventListener("click",fetchSchedule);
-$("#btn-download").addEventListener("click",downloadPNG);
-$("#btn-today").addEventListener("click",()=>{ selectedDate=todayISO(); datePicker.value=selectedDate; renderMatches(selectedDate); saveSettings(); });
-datePicker.addEventListener("change",e=>{ selectedDate=e.target.value; renderMatches(selectedDate); saveSettings(); });
-$("#file-import").addEventListener("change",e=>{ const f=e.target.files[0]; if(f)importHtmlFile(f); e.target.value=""; });
+    function setSelectedDate(iso) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+      selectedDate = iso;
+      datePicker.value = iso;
+      saveSettings();
+      renderMatches(iso);
+    }
+    inputHeader.addEventListener("input", () => {
+      $("#view-header").textContent = inputHeader.value.toUpperCase();
+      saveSettings();
+    });
+    inputTiktok.addEventListener("input", () => {
+      updateBgWatermark();
+      saveSettings();
+    });
+    inputFooter.addEventListener("input", () => {
+      $("#view-footer").textContent = inputFooter.value;
+      saveSettings();
+    });
 
-/* ─── INIT ─── */
-loadSettings();
-setupBrandPreviews();
-datePicker.value=selectedDate;
-$("#view-header").textContent=inputHeader.value;
-$("#view-footer").textContent=inputFooter.value;
-buildThemePicker();
-applyTheme(currentTheme);
-updateWm();
-fetchSchedule();
+    function todayISO() {
+      return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    }
 
-// Redraw bg canvas on resize
-const ro=new ResizeObserver(()=>applyTheme(currentTheme));
-ro.observe(exportArea);
-</script>
+    function formatDateID(iso) {
+      if (!iso) return "—";
+      const [y, m, d] = iso.split("-").map(Number);
+      return `${HARI_ID[new Date(y, m - 1, d).getDay()]}, ${d} ${BULAN_ID[m]} ${y}`;
+    }
+
+    function normalizeName(n) {
+      return n.toLowerCase().trim().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ");
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function getTheme() {
+      return THEMES[currentTheme] || THEMES.stadium;
+    }
+
+    function applyThemePreview(themeId) {
+      const t = THEMES[themeId] || THEMES.stadium;
+      exportArea.dataset.theme = themeId;
+      exportArea.style.setProperty("--t-bg", t.bg);
+      exportArea.style.setProperty("--t-preview-bg", t.previewBg || "none");
+      exportArea.style.setProperty("--t-deco-overlay", t.decoOverlay || "none");
+      exportArea.style.setProperty("--t-deco-size", t.deco === "cyber" ? "36px 36px" : "auto");
+      exportArea.style.setProperty("--t-card", t.card);
+      exportArea.style.setProperty("--t-border", t.border);
+      exportArea.style.setProperty("--t-text", t.text);
+      exportArea.style.setProperty("--t-sub", t.sub);
+      exportArea.style.setProperty("--t-accent", t.accent);
+      exportArea.style.setProperty("--t-accent-glow", t.accentGlow || "transparent");
+      exportArea.style.setProperty("--t-tv", t.tv);
+      exportArea.style.setProperty("--t-time-bg", t.timeBg || t.bg);
+      exportArea.style.setProperty("--t-footer-bg", t.footerBg);
+      exportArea.style.setProperty("--t-glow-top", t.glowTop);
+      exportArea.style.setProperty("--t-glow", t.glow || "transparent");
+      const previewMsg = exportArea.querySelector(".preview-msg");
+      if (previewMsg) {
+        previewMsg.style.color = themeId === "studio" ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.03)";
+      }
+      exportArea.style.setProperty("--t-wm-fg", "rgba(255,255,255,0.045)");
+      updateBgWatermark();
+    }
+
+    function buildThemePicker() {
+      const grid = $("#theme-grid");
+      grid.innerHTML = Object.entries(THEMES).map(([id, t]) => `
+        <label class="theme-card ${id === currentTheme ? "active" : ""}" data-theme="${id}">
+          <input type="radio" name="theme" value="${id}" ${id === currentTheme ? "checked" : ""} />
+          <div class="theme-swatch" style="background:${t.swatch}"></div>
+          <span>${t.name}</span>
+        </label>
+      `).join("");
+
+      grid.querySelectorAll(".theme-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          currentTheme = card.dataset.theme;
+          grid.querySelectorAll(".theme-card").forEach((c) => c.classList.toggle("active", c.dataset.theme === currentTheme));
+          applyThemePreview(currentTheme);
+          saveSettings();
+        });
+      });
+    }
+
+    async function loadStaticLogos() {
+      if (staticLogos) return staticLogos;
+      try {
+        const res = await fetch(asset("logos.json?v=3"));
+        if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
+        staticLogos = await res.json();
+      } catch (e) {
+        console.warn("Gagal muat logos.json:", e);
+        staticLogos = { teams: {}, leagues: {} };
+      }
+      return staticLogos;
+    }
+
+    function slugifyName(name) {
+      return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "unknown";
+    }
+
+    function isRemotePath(p) {
+      return /^https?:\/\//i.test(p || "");
+    }
+
+    function logoBasePath(mapped, folder, name) {
+      if (mapped && !isRemotePath(mapped)) {
+        return mapped.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+      }
+      return `assets/logos/${folder}/${slugifyName(name)}`;
+    }
+
+    function findBadge(map, name) {
+      if (!map || !name) return null;
+      if (map[name] && !isRemotePath(map[name])) return map[name];
+      const norm = normalizeName(name);
+      let best = null;
+      let bestLen = 0;
+      for (const [key, url] of Object.entries(map)) {
+        if (isRemotePath(url)) continue;
+        const kn = normalizeName(key);
+        if (norm === kn) return url;
+        if (norm.includes(kn) || kn.includes(norm)) {
+          if (key.length > bestLen) {
+            best = url;
+            bestLen = key.length;
+          }
+        }
+      }
+      return best;
+    }
+
+    function resolveTeamLogo(name) {
+      const mapped = staticLogos ? findBadge(staticLogos.teams, name) : null;
+      return logoBasePath(mapped, "teams", name);
+    }
+
+    function resolveLeagueLogo(comp) {
+      const mapped = staticLogos ? findBadge(staticLogos.leagues, comp) : null;
+      return logoBasePath(mapped, "leagues", comp);
+    }
+
+    function resolveLogoPath(pathOrUrl) {
+      if (!pathOrUrl || isRemotePath(pathOrUrl)) return null;
+      return asset(pathOrUrl);
+    }
+
+    function logoTag(basePath, alt) {
+      const urls = localPathCandidates(basePath).map((c) => resolveLogoPath(c)).filter(Boolean);
+      if (!urls.length) return "";
+      const list = JSON.stringify(urls);
+      return `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(alt)}" loading="lazy" data-logos='${list.replace(/'/g, "&#39;")}' onerror="(function(el){var u=JSON.parse(el.dataset.logos);var n=+(el.dataset.i||0)+1;el.dataset.i=n;if(n<u.length)el.src=u[n];else el.style.visibility='hidden'})(this)">`;
+    }
+
+    function cacheLogo(img, pathOrUrl, resolvedSrc) {
+      logoCache[pathOrUrl] = img;
+      if (resolvedSrc) logoCache[resolvedSrc] = img;
+    }
+
+    function logoKey(pathOrUrl) {
+      return (pathOrUrl || "").replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+    }
+
+    function getCachedLogo(pathOrUrl) {
+      if (!pathOrUrl) return null;
+      const key = logoKey(pathOrUrl);
+      return logoCache[pathOrUrl] || logoCache[key] || logoCache[resolveLogoPath(pathOrUrl)] || logoCache[resolveLogoPath(key)] || null;
+    }
+
+    function localPathCandidates(pathOrUrl) {
+      if (!pathOrUrl || isRemotePath(pathOrUrl)) return [];
+      const base = pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+      const exts = [".png", ".svg", ".jpg", ".webp"];
+      return exts.map((ext) => base + ext).filter((p, i, a) => a.indexOf(p) === i);
+    }
+
+    function tryLoadOne(pathOrUrl) {
+      const src = resolveLogoPath(pathOrUrl);
+      if (!src) return Promise.resolve(null);
+      const cached = getCachedLogo(pathOrUrl);
+      if (cached) return Promise.resolve(cached);
+
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          cacheLogo(img, pathOrUrl, src);
+          cacheLogo(img, logoKey(pathOrUrl), src);
+          resolve(img);
+        };
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    async function loadImage(pathOrUrl) {
+      if (!pathOrUrl) return null;
+      const cached = getCachedLogo(pathOrUrl);
+      if (cached) return cached;
+      for (const c of localPathCandidates(pathOrUrl)) {
+        const img = await tryLoadOne(c);
+        if (img) {
+          cacheLogo(img, logoKey(pathOrUrl), resolveLogoPath(c));
+          return img;
+        }
+      }
+      return null;
+    }
+
+    function setupBrandLogoPreview() {
+      const url = asset(BRAND_LOGO_PATHS[0]);
+      const header = $("#brand-logo");
+      const footer = $("#brand-logo-footer");
+      if (header) {
+        header.src = url;
+        header.onerror = () => { header.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+      if (footer) {
+        footer.src = url;
+        footer.onerror = () => { footer.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+    }
+
+    async function loadBrandLogo() {
+      if (brandLogoImg) return brandLogoImg;
+      for (const p of BRAND_LOGO_PATHS) {
+        for (const c of localPathCandidates(p)) {
+          const img = await tryLoadOne(c);
+          if (img) {
+            brandLogoImg = img;
+            return img;
+          }
+        }
+      }
+      return null;
+    }
+
+    function drawBrandLogoCircle(ctx, cx, cy, size, t, img) {
+      if (!img) return;
+      const r = size / 2;
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, cx - r, cy - r, size, size);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = t.accent;
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.9;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function shortTv(m) {
+      const parts = (m.tvFree || []).concat(m.tvPaid || []);
+      return parts.length ? parts.join(" · ") : (m.tv || "-");
+    }
+
+    async function renderMatches(iso) {
+      selectedDate = iso;
+      const matches = getMatchesForDate(iso);
+      displayDate.textContent = formatDateID(iso);
+
+      if (!matches.length) {
+        matchList.innerHTML = `<div style="text-align:center;padding:24px 8px;color:var(--t-sub);font-size:0.8rem;">Tidak ada jadwal untuk tanggal ini.</div>`;
+        btnDownload.disabled = true;
+        return;
+      }
+
+      btnDownload.disabled = false;
+      await loadStaticLogos();
+
+      matchList.innerHTML = matches.map((m, i) => {
+        const tvStr = shortTv(m);
+        const homeUrl = resolveTeamLogo(m.home);
+        const awayUrl = resolveTeamLogo(m.away);
+        const borderColor = getTheme().borders[i % getTheme().borders.length];
+        return `<div class="sim-card" style="border-left:3px solid ${borderColor}">
+          <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
+          <span class="sim-teams">
+            <span class="team-block">
+              ${logoTag(homeUrl, m.home)}
+              <span class="team-name">${escapeHtml(m.home)}</span>
+            </span>
+            <span class="vs-label">VS</span>
+            <span class="team-block">
+              ${logoTag(awayUrl, m.away)}
+              <span class="team-name">${escapeHtml(m.away)}</span>
+            </span>
+          </span>
+          <span class="sim-tv">${escapeHtml(tvStr)}</span>
+        </div>`;
+      }).join("");
+
+      const urls = [...new Set(
+        matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
+      )];
+      Promise.all(urls.map(loadImage));
+    }
+
+    async function fetchSchedule() {
+      setStatus("Memuat jadwal...");
+      try {
+        const res = await fetch(asset("data/jadwal.json"));
+        if (!res.ok) throw new Error(`jadwal.json HTTP ${res.status}`);
+        const data = await res.json();
+        allSchedules = data.schedules || {};
+        await loadStaticLogos();
+        setStatus(`✓ ${Object.values(allSchedules).flat().length} pertandingan dimuat.`, "success");
+        renderMatches(selectedDate);
+      } catch (e) {
+        setStatus("Gagal memuat jadwal. Import HTML atau cek data/jadwal.json.", "error");
+      }
+    }
+
+    function importHtmlFile(file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const doc = new DOMParser().parseFromString(e.target.result, "text/html");
+          const rows = doc.querySelectorAll("table tr");
+          if (!rows.length) throw new Error("Tabel jadwal tidak ditemukan.");
+          let count = 0;
+          const fileDate = selectedDate;
+          rows.forEach((tr) => {
+            const cells = [...tr.querySelectorAll("td")].map((td) => td.textContent.trim());
+            if (cells.length < 4) return;
+            const [kickoff, matchup, competition, tv] = cells;
+            if (/kick-off/i.test(kickoff) || !/vs/i.test(matchup)) return;
+            const parts = matchup.split(/\s+vs\s+/i);
+            if (!allSchedules[fileDate]) allSchedules[fileDate] = [];
+            allSchedules[fileDate].push({
+              kickoff,
+              matchup,
+              home: (parts[0] || "").trim(),
+              away: (parts[1] || "").trim(),
+              competition,
+              tv,
+              tvFree: [],
+              tvPaid: [],
+            });
+            count++;
+          });
+          await loadStaticLogos();
+          setStatus(`✓ Import ${count} pertandingan.`, "success");
+          renderMatches(selectedDate);
+        } catch (err) {
+          setStatus(`Gagal import: ${err.message}`, "error");
+        }
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    const PNG_W = 1080;
+    const PNG_H = 1920;
+
+    function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
+      const rad = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rad, y);
+      ctx.lineTo(x + w - rad, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
+      ctx.lineTo(x + w, y + h - rad);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+      ctx.lineTo(x + rad, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
+      ctx.lineTo(x, y + rad);
+      ctx.quadraticCurveTo(x, y, x + rad, y);
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 2; ctx.stroke(); }
+    }
+
+    function drawDecoStadium(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(0.45, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(74,222,128,0.04)";
+      for (let i = 0; i < 14; i++) ctx.fillRect(0, i * (H / 14), W, H / 28);
+      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.lineWidth = 3;
+      const cy = H * 0.42;
+      ctx.beginPath(); ctx.arc(W / 2, cy, 200, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(50, cy); ctx.lineTo(W - 50, cy); ctx.stroke();
+      ctx.strokeRect(50, cy - 140, W - 100, 280);
+    }
+
+    function drawDecoCyber(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(1, t.bg);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(34,211,238,0.07)"; ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      const spots = [[0.15, 0.12, "rgba(34,211,238,0.35)"], [0.85, 0.88, "rgba(232,121,249,0.3)"]];
+      spots.forEach(([px, py, col]) => {
+        const rg = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, 320);
+        rg.addColorStop(0, col); rg.addColorStop(1, "transparent");
+        ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+      });
+    }
+
+    function drawDecoGold(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(251,191,36,0.08)"; ctx.lineWidth = 2;
+      for (let i = -H; i < W + H; i += 56) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+      }
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 500);
+      rg.addColorStop(0, "rgba(251,191,36,0.2)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoInferno(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, H, 0, 0);
+      g.addColorStop(0, "rgba(239,68,68,0.35)"); g.addColorStop(0.4, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      const rg = ctx.createRadialGradient(W * 0.3, H * 0.15, 0, W * 0.3, H * 0.15, 400);
+      rg.addColorStop(0, "rgba(249,115,22,0.25)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoStudio(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(59,130,246,0.06)";
+      for (let i = 0; i < 8; i++) ctx.fillRect(0, i * 120, W, 60);
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 450);
+      rg.addColorStop(0, "rgba(59,130,246,0.22)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawThemeBackground(ctx, W, H, t) {
+      switch (t.deco) {
+        case "cyber": drawDecoCyber(ctx, W, H, t); break;
+        case "gold": drawDecoGold(ctx, W, H, t); break;
+        case "inferno": drawDecoInferno(ctx, W, H, t); break;
+        case "studio": drawDecoStudio(ctx, W, H, t); break;
+        default: drawDecoStadium(ctx, W, H, t);
+      }
+      const gr1 = ctx.createRadialGradient(W / 2, 0, 80, W / 2, 0, 700);
+      gr1.addColorStop(0, t.glowTop); gr1.addColorStop(1, "transparent");
+      ctx.fillStyle = gr1; ctx.fillRect(0, 0, W, 700);
+      const gr2 = ctx.createRadialGradient(W / 2, H, 80, W / 2, H, 600);
+      gr2.addColorStop(0, t.glowBottom); gr2.addColorStop(1, "transparent");
+      ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
+    }
+
+    function pngLogoSize(rowH) {
+      const tvZone = 56;
+      const teamsH = rowH - tvZone - 14;
+      const nameBlock = 2 * 28;
+      const gap = 22;
+      return Math.round(Math.min(78, Math.max(56, teamsH - nameBlock - gap)));
+    }
+
+    function pngNameGap(logoSize) {
+      return Math.max(20, Math.round(logoSize * 0.34));
+    }
+
+    function drawLogoRing(ctx, x, y, size, t) {
+      const r = size / 2 + 10;
+      const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
+      g.addColorStop(0, t.cardHi || t.card); g.addColorStop(1, t.border);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = t.accent; ctx.globalAlpha = 0.35; ctx.lineWidth = 2; ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function wrapTeamName(ctx, text, maxW, maxLines) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = "";
+      for (const w of words) {
+        const test = line ? line + " " + w : w;
+        if (ctx.measureText(test).width <= maxW) {
+          line = test;
+        } else {
+          if (line) lines.push(line);
+          line = w;
+          if (ctx.measureText(line).width > maxW) {
+            let chunk = "";
+            for (const ch of w) {
+              if (ctx.measureText(chunk + ch).width <= maxW) chunk += ch;
+              else {
+                if (chunk) lines.push(chunk);
+                chunk = ch;
+              }
+            }
+            line = chunk;
+          }
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, maxLines);
+    }
+
+    function drawTeamBlock(ctx, name, logo, xCenter, logoY, maxW, logoSize, t) {
+      const sz = logoSize || 64;
+      const gap = pngNameGap(sz);
+      const fontPx = Math.round(sz * 0.42);
+      const lineH = Math.round(fontPx * 1.2);
+      drawLogoRing(ctx, xCenter, logoY + sz / 2, sz, t);
+      if (logo) ctx.drawImage(logo, xCenter - sz / 2, logoY, sz, sz);
+      const textY = logoY + sz + gap;
+      ctx.fillStyle = t.text;
+      ctx.font = `bold ${fontPx}px 'Segoe UI', system-ui, sans-serif`;
+      ctx.textAlign = "center";
+      const lines = wrapTeamName(ctx, name, maxW, 2);
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * lineH));
+      return textY + lines.length * lineH;
+    }
+
+    function drawBackgroundWatermark(ctx, W, H, t) {
+      const wmText = getTiktokWmText();
+      if (!wmText) return;
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(-Math.PI / 6);
+      ctx.fillStyle = t.wm;
+      ctx.font = "900 68px 'Segoe UI', Impact, sans-serif";
+      ctx.textAlign = "center";
+      [-440, -300, -160, -20, 120, 260, 400].forEach((dy) => ctx.fillText(wmText, 0, dy));
+      ctx.restore();
+    }
+
+    function drawHeaderPNG(ctx, W, t, brandImg) {
+      const title = (inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase();
+      const dateStr = formatDateID(selectedDate).toUpperCase();
+
+      let titleY = 108;
+      if (brandImg) {
+        const sz = 104;
+        drawBrandLogoCircle(ctx, W / 2, 14 + sz / 2, sz, t, brandImg);
+        titleY = 14 + sz + 32;
+      }
+
+      const barW = 220;
+      const barG = ctx.createLinearGradient(W / 2 - barW, 0, W / 2 + barW, 0);
+      barG.addColorStop(0, "transparent");
+      barG.addColorStop(0.5, t.accent);
+      barG.addColorStop(1, "transparent");
+      ctx.fillStyle = barG;
+      ctx.fillRect(W / 2 - barW, titleY + 42, barW * 2, 4);
+
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || t.accent;
+      ctx.shadowBlur = 24;
+      ctx.fillStyle = t.text;
+      ctx.font = "900 46px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(title, W / 2, titleY);
+      ctx.restore();
+
+      const pillW = Math.min(ctx.measureText(dateStr).width + 48, W - 100);
+      const dateY = titleY + 52;
+      drawRoundRect(ctx, W / 2 - pillW / 2, dateY, pillW, 40, 20, t.cardHi || t.card, t.border, 1.5);
+      ctx.fillStyle = t.sub;
+      ctx.font = "bold 21px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(dateStr, W / 2, dateY + 27);
+
+      const lineY = dateY + 58;
+      ctx.strokeStyle = t.border;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(48, lineY);
+      ctx.lineTo(W - 48, lineY);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      return lineY + 16;
+    }
+
+    function getMatchesForDate(iso) {
+      const raw = allSchedules[iso];
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === "object") return [raw];
+      return [];
+    }
+
+    function computePngLayout(matchCount, headerEnd, footerH) {
+      const gap = 10;
+      const n = Math.max(1, Math.min(Number(matchCount) || 0, 10));
+      const listTop = Math.max(200, headerEnd);
+      const listBottom = PNG_H - footerH;
+      const avail = listBottom - listTop;
+      let rowH = Math.floor((avail - gap * (n - 1)) / n);
+      rowH = Math.min(185, Math.max(96, rowH));
+      while (n > 0 && listTop + n * rowH + (n - 1) * gap > listBottom) {
+        rowH--;
+      }
+      return { footerH, headerEnd: listTop, gap, rowH, n, listBottom };
+    }
+
+    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
+      const W = PNG_W;
+      const cardX = 24;
+      const cardW = W - 48;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 8;
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 26, t.card, null);
+      ctx.restore();
+
+      ctx.fillStyle = borderCol;
+      ctx.fillRect(cardX, y + 10, 7, rowH - 20);
+
+      const timeX = cardX + 14;
+      const timeW = 94;
+      const timeH = rowH - 16;
+      drawRoundRect(ctx, timeX, y + 8, timeW, timeH, 18, t.timeBg || t.bg, borderCol, 2.5);
+      ctx.fillStyle = t.accent;
+      ctx.font = "900 34px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.4);
+      ctx.fillStyle = t.sub;
+      ctx.font = "bold 15px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.57);
+
+      const contentX = cardX + 116;
+      const contentW = cardW - 124;
+      const cx = contentX + contentW / 2;
+      const homeCx = contentX + contentW * 0.24;
+      const awayCx = contentX + contentW * 0.76;
+      const nameW = Math.floor(contentW * 0.46);
+      const teamsTop = y + 10;
+      const logoSize = pngLogoSize(rowH);
+
+      const hImg = getCachedLogo(resolveTeamLogo(m.home));
+      const aImg = getCachedLogo(resolveTeamLogo(m.away));
+      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize, t);
+      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize, t);
+
+      const vsY = teamsTop + logoSize / 2 + 4;
+      const vsPadW = 44;
+      const vsG = ctx.createLinearGradient(cx - vsPadW, vsY, cx + vsPadW, vsY);
+      vsG.addColorStop(0, "transparent");
+      vsG.addColorStop(0.5, t.accent);
+      vsG.addColorStop(1, "transparent");
+      ctx.fillStyle = vsG;
+      ctx.fillRect(cx - vsPadW - 4, vsY - 16, vsPadW * 2 + 8, 32);
+      ctx.fillStyle = t.text;
+      ctx.font = "900 20px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("VS", cx, vsY + 7);
+
+      const divY = y + rowH - 50;
+      const divG = ctx.createLinearGradient(contentX, 0, contentX + contentW, 0);
+      divG.addColorStop(0, "transparent");
+      divG.addColorStop(0.5, t.border);
+      divG.addColorStop(1, "transparent");
+      ctx.strokeStyle = divG;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(contentX + 4, divY);
+      ctx.lineTo(contentX + contentW - 4, divY);
+      ctx.stroke();
+
+      const tvStr = shortTv(m);
+      ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
+      ctx.font = "900 24px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      const tvLines = wrapTeamName(ctx, tvStr, contentW - 8, 2);
+      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 28 + j * 28));
+    }
+
+    async function downloadPNG() {
+      const matches = getMatchesForDate(selectedDate);
+      if (!matches.length) return;
+
+      btnDownload.disabled = true;
+      setStatus("Memuat logo untuk PNG...");
+
+      try {
+        await loadStaticLogos();
+        const t = getTheme();
+        const dataMatches = matches.slice(0, 10);
+        const urls = [...new Set(
+          dataMatches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
+        )];
+        await Promise.all(urls.map(loadImage));
+        const brandImg = await loadBrandLogo();
+
+        const W = PNG_W;
+        const H = PNG_H;
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+        ctx.textBaseline = "alphabetic";
+
+        drawThemeBackground(ctx, W, H, t);
+        drawBackgroundWatermark(ctx, W, H, t);
+        const headerEnd = drawHeaderPNG(ctx, W, t, brandImg);
+        const footerH = brandImg ? 100 : 82;
+        const layout = computePngLayout(dataMatches.length, headerEnd, footerH);
+
+        dataMatches.forEach((m, i) => {
+          const y = layout.headerEnd + i * (layout.rowH + layout.gap);
+          drawMatchRowPNG(ctx, m, y, layout.rowH, t, t.borders[i % t.borders.length]);
+        });
+
+        const footY = layout.listBottom;
+        const footG = ctx.createLinearGradient(0, footY, 0, H);
+        footG.addColorStop(0, t.footerBg);
+        footG.addColorStop(1, "#000");
+        ctx.fillStyle = footG;
+        ctx.fillRect(0, footY, W, H - footY);
+        const accentLine = ctx.createLinearGradient(0, footY, W, footY);
+        accentLine.addColorStop(0, "transparent");
+        accentLine.addColorStop(0.5, t.accent);
+        accentLine.addColorStop(1, "transparent");
+        ctx.strokeStyle = accentLine;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(40, footY);
+        ctx.lineTo(W - 40, footY);
+        ctx.stroke();
+        if (brandImg) {
+          drawBrandLogoCircle(ctx, W / 2, footY + 38, 56, t, brandImg);
+        }
+        ctx.fillStyle = t.sub;
+        ctx.font = "bold 24px 'Segoe UI', sans-serif";
+        ctx.textAlign = "center";
+        const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
+        const footerTextY = brandImg ? footY + 72 : footY + 50;
+        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footerTextY + i * 30));
+
+        const link = document.createElement("a");
+        link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        const loaded = urls.filter((u) => getCachedLogo(u)).length;
+        const extra = matches.length > 10 ? ` (maks. 10 dari ${matches.length})` : "";
+        setStatus(`✓ PNG "${t.name}": ${dataMatches.length} pertandingan${extra} · logo ${loaded}/${urls.length}`, "success");
+      } catch (err) {
+        setStatus(`Gagal ekspor: ${err.message}`, "error");
+        console.error(err);
+      } finally {
+        btnDownload.disabled = false;
+      }
+    }
+
+    function setStatus(msg, cls = "") {
+      statusEl.className = "status" + (cls ? " " + cls : "");
+      statusEl.textContent = msg;
+    }
+
+    $("#btn-refresh").addEventListener("click", fetchSchedule);
+    $("#btn-download").addEventListener("click", downloadPNG);
+    $("#btn-today").addEventListener("click", () => setSelectedDate(todayISO()));
+    datePicker.addEventListener("change", (e) => setSelectedDate(e.target.value));
+    $("#file-import").addEventListener("change", (e) => {
+      const f = e.target.files[0];
+      if (f) importHtmlFile(f);
+      e.target.value = "";
+    });
+
+    loadSettings();
+    setupBrandLogoPreview();
+    datePicker.value = selectedDate;
+    $("#view-header").textContent = inputHeader.value.toUpperCase();
+    $("#view-footer").textContent = inputFooter.value;
+    buildThemePicker();
+    applyThemePreview(currentTheme);
+    updateBgWatermark();
+    fetchSchedule();
+  </script>
 </body>
 </html>
