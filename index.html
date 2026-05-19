@@ -183,14 +183,56 @@
       max-width: 430px;
       aspect-ratio: 9 / 16;
       max-height: min(82vh, 780px);
-      background: var(--t-bg, #070a13);
+      background-color: var(--t-bg, #070a13);
+      background-image: var(--t-preview-bg, none);
+      background-size: cover;
       border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65), 0 0 40px var(--t-glow, transparent);
       border: 2px solid var(--t-border, #1e2942);
       display: flex;
       flex-direction: column;
       position: relative;
+    }
+
+    #export-area::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--t-deco-overlay, none);
+      background-size: var(--t-deco-size, auto);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-watermark {
+      position: absolute;
+      inset: -20%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: center;
+      justify-content: center;
+      gap: 28px 36px;
+      transform: rotate(-24deg);
+      opacity: 1;
+    }
+    .bg-watermark span {
+      font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      color: var(--t-wm-fg, rgba(255, 255, 255, 0.045));
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    #export-area .banner,
+    #export-area .match-container,
+    #export-area .watermark-footer {
+      position: relative;
+      z-index: 1;
     }
 
     .preview-msg {
@@ -208,18 +250,45 @@
     }
 
     .banner {
-      padding: 20px 16px 8px;
+      padding: 16px 16px 10px;
       text-align: center;
       flex-shrink: 0;
       background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
+    }
+    .brand-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 10px;
+      border: 2px solid var(--t-accent, #22c55e);
+      box-shadow: 0 4px 24px var(--t-accent-glow, rgba(34, 197, 94, 0.4));
+    }
+    .brand-logo-footer {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+      border: 1px solid var(--t-border, #334155);
     }
     .banner h2 {
       font-size: 1.15rem;
       font-weight: 900;
       color: var(--t-text, #fff);
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       line-height: 1.2;
+      text-shadow: 0 0 20px var(--t-accent-glow, transparent);
+    }
+    .banner .title-bar {
+      width: 56px;
+      height: 3px;
+      margin: 8px auto 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, transparent, var(--t-accent, #22c55e), transparent);
     }
     .banner .date-label {
       font-size: 0.72rem;
@@ -243,6 +312,7 @@
       background: var(--t-card, #111625);
       border-radius: 14px;
       border: 1px solid var(--t-border, #1e2942);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
       padding: 8px 10px;
       display: grid;
       grid-template-columns: auto 1fr;
@@ -256,9 +326,11 @@
       align-self: center;
       font-weight: 800;
       color: var(--t-accent, #22c55e);
-      background: var(--t-bg, #070a13);
+      background: var(--t-time-bg, #070a13);
+      border: 1px solid var(--t-border, #1e2942);
       padding: 6px 8px;
       border-radius: 10px;
+      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
       font-size: 0.72rem;
       line-height: 1.2;
       text-align: center;
@@ -283,24 +355,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 0;
       flex: 1 1 0;
       min-width: 0;
     }
     .team-block img {
-      width: 26px;
-      height: 26px;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
       flex-shrink: 0;
     }
     .team-name {
       font-weight: 700;
-      font-size: 0.62rem;
-      line-height: 1.15;
+      font-size: 0.68rem;
+      line-height: 1.2;
       text-align: center;
       word-break: break-word;
       hyphens: auto;
       max-width: 100%;
+      margin-top: 7px;
     }
     .vs-label {
       color: var(--t-sub, #64748b);
@@ -346,8 +419,8 @@
         <label>JUDUL ATAS (HEADER)
           <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
         </label>
-        <label>NAMA WATERMARK
-          <input type="text" id="input-wm" value="CORNERKIICK" />
+        <label>NAMA TIKTOK (watermark background)
+          <input type="text" id="input-tiktok" value="@CORNERKIICK" placeholder="@username" />
         </label>
         <label>BAR SOSIAL MEDIA (FOOTER)
           <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
@@ -372,14 +445,20 @@
 
     <main class="preview-panel">
       <span class="preview-label">Preview live</span>
-      <div id="export-area" data-theme="neon">
+      <div id="export-area" data-theme="stadium">
+        <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
         <div class="preview-msg">PREVIEW</div>
         <div class="banner">
+          <img class="brand-logo" id="brand-logo" src="" alt="CORNERKIICK" />
           <h2 id="view-header">KREATOR JADWAL BOLA</h2>
+          <div class="title-bar"></div>
           <div class="date-label" id="display-date">—</div>
         </div>
         <div id="match-list" class="match-container"></div>
-        <div class="watermark-footer" id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+        <div class="watermark-footer">
+          <img class="brand-logo-footer" id="brand-logo-footer" src="" alt="CORNERKIICK" />
+          <div id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+        </div>
       </div>
     </main>
   </div>
@@ -388,95 +467,99 @@
     const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
+    const THEME_ALIASES = {
+      neon: "stadium", midnight: "cyber", fire: "inferno", royal: "goldcup", clean: "studio",
+    };
+
     const THEMES = {
-      neon: {
-        name: "Hijau Neon",
-        swatch: "linear-gradient(135deg,#070a13,#22c55e)",
-        bg: "#070a13",
-        card: "#111625",
-        border: "#1e2942",
-        text: "#ffffff",
-        sub: "#94a3b8",
-        accent: "#22c55e",
-        tv: "#fbbf24",
-        tvFree: "#22c55e",
-        footerBg: "#000000",
-        glowTop: "rgba(34,197,94,0.18)",
-        glowBottom: "rgba(234,179,8,0.12)",
-        borders: ["#22c55e", "#3b82f6", "#eab308", "#ca8a04"],
-        wm: "rgba(255,255,255,0.025)",
-      },
-      midnight: {
-        name: "Biru Malam",
-        swatch: "linear-gradient(135deg,#0a1628,#3b82f6)",
-        bg: "#0a1628",
-        card: "#0f1f38",
-        border: "#1e3a5f",
-        text: "#f0f9ff",
-        sub: "#93c5fd",
-        accent: "#60a5fa",
-        tv: "#fcd34d",
-        tvFree: "#34d399",
-        footerBg: "#050d18",
-        glowTop: "rgba(59,130,246,0.22)",
-        glowBottom: "rgba(99,102,241,0.15)",
-        borders: ["#3b82f6", "#6366f1", "#22d3ee", "#818cf8"],
+      stadium: {
+        name: "⚽ Lapangan",
+        deco: "stadium",
+        swatch: "linear-gradient(145deg,#061208 30%,#4ade80 100%)",
+        previewBg: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(74,222,128,0.2), transparent 70%), linear-gradient(180deg, #0a1a10 0%, #061208 100%)",
+        decoOverlay: "repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(255,255,255,0.02) 18px, rgba(255,255,255,0.02) 36px)",
+        bg: "#061208", bg2: "#0f2918",
+        card: "rgba(14,26,18,0.94)", cardHi: "rgba(22,40,28,0.98)",
+        timeBg: "#0a1810", border: "#2d6b45",
+        text: "#f0fdf4", sub: "#86efac",
+        accent: "#4ade80", accentGlow: "rgba(74,222,128,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#040a06", glow: "rgba(74,222,128,0.35)",
+        glowTop: "rgba(74,222,128,0.28)", glowBottom: "rgba(34,197,94,0.12)",
+        borders: ["#4ade80", "#22d3ee", "#facc15", "#34d399"],
         wm: "rgba(255,255,255,0.03)",
       },
-      fire: {
-        name: "Merah Api",
-        swatch: "linear-gradient(135deg,#1a0a0a,#ef4444)",
-        bg: "#120808",
-        card: "#1f1010",
-        border: "#3f1a1a",
-        text: "#fff5f5",
-        sub: "#fca5a5",
-        accent: "#f87171",
-        tv: "#fbbf24",
-        tvFree: "#4ade80",
-        footerBg: "#0a0404",
-        glowTop: "rgba(239,68,68,0.2)",
-        glowBottom: "rgba(249,115,22,0.14)",
-        borders: ["#ef4444", "#f97316", "#eab308", "#dc2626"],
+      cyber: {
+        name: "🌐 Neon Cyber",
+        deco: "cyber",
+        swatch: "linear-gradient(145deg,#0a0a1a 30%,#22d3ee 50%,#e879f9 100%)",
+        previewBg: "radial-gradient(circle at 20% 20%, rgba(34,211,238,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(232,121,249,0.2), transparent 45%), linear-gradient(180deg, #0a0a1a, #050510)",
+        decoOverlay: "linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px)",
+        bg: "#050510", bg2: "#0f1030",
+        card: "rgba(12,14,40,0.92)", cardHi: "rgba(18,22,55,0.98)",
+        timeBg: "#0a0c28", border: "#312e81",
+        text: "#f0f9ff", sub: "#a5b4fc",
+        accent: "#22d3ee", accentGlow: "rgba(34,211,238,0.6)",
+        tv: "#f0abfc", tvFree: "#34d399",
+        footerBg: "#030308", glow: "rgba(34,211,238,0.4)",
+        glowTop: "rgba(34,211,238,0.3)", glowBottom: "rgba(232,121,249,0.2)",
+        borders: ["#22d3ee", "#e879f9", "#818cf8", "#38bdf8"],
+        wm: "rgba(255,255,255,0.035)",
+      },
+      goldcup: {
+        name: "🏆 Trofi Emas",
+        deco: "gold",
+        swatch: "linear-gradient(145deg,#1a1208 30%,#fbbf24 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.25), transparent 55%), linear-gradient(160deg, #1a1208, #0c0804)",
+        decoOverlay: "repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(251,191,36,0.03) 12px, rgba(251,191,36,0.03) 24px)",
+        bg: "#0c0804", bg2: "#1f1608",
+        card: "rgba(28,20,8,0.94)", cardHi: "rgba(40,30,12,0.98)",
+        timeBg: "#141008", border: "#78590a",
+        text: "#fffbeb", sub: "#fcd34d",
+        accent: "#fbbf24", accentGlow: "rgba(251,191,36,0.55)",
+        tv: "#fde68a", tvFree: "#86efac",
+        footerBg: "#060402", glow: "rgba(251,191,36,0.35)",
+        glowTop: "rgba(251,191,36,0.22)", glowBottom: "rgba(180,83,9,0.18)",
+        borders: ["#fbbf24", "#f59e0b", "#fcd34d", "#d97706"],
         wm: "rgba(255,255,255,0.03)",
       },
-      royal: {
-        name: "Ungu Emas",
-        swatch: "linear-gradient(135deg,#1a1030,#eab308)",
-        bg: "#140c24",
-        card: "#1e1435",
-        border: "#3b2d5c",
-        text: "#faf5ff",
-        sub: "#c4b5fd",
-        accent: "#eab308",
-        tv: "#f0abfc",
-        tvFree: "#a3e635",
-        footerBg: "#0c0618",
-        glowTop: "rgba(234,179,8,0.15)",
-        glowBottom: "rgba(168,85,247,0.18)",
-        borders: ["#eab308", "#a855f7", "#f472b6", "#c084fc"],
-        wm: "rgba(255,255,255,0.028)",
+      inferno: {
+        name: "🔥 Champions",
+        deco: "inferno",
+        swatch: "linear-gradient(145deg,#1a0505 30%,#ef4444 60%,#f97316 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.35), transparent 55%), radial-gradient(ellipse at 30% 0%, rgba(249,115,22,0.2), transparent 50%), linear-gradient(180deg, #1a0505, #0a0202)",
+        decoOverlay: "radial-gradient(circle at 50% 120%, rgba(239,68,68,0.12), transparent 50%)",
+        bg: "#0a0202", bg2: "#1f0808",
+        card: "rgba(30,10,10,0.94)", cardHi: "rgba(45,15,15,0.98)",
+        timeBg: "#180606", border: "#7f1d1d",
+        text: "#fff5f5", sub: "#fca5a5",
+        accent: "#f87171", accentGlow: "rgba(248,113,113,0.55)",
+        tv: "#fde047", tvFree: "#4ade80",
+        footerBg: "#050101", glow: "rgba(239,68,68,0.4)",
+        glowTop: "rgba(239,68,68,0.28)", glowBottom: "rgba(249,115,22,0.22)",
+        borders: ["#ef4444", "#f97316", "#fbbf24", "#dc2626"],
+        wm: "rgba(255,255,255,0.035)",
       },
-      clean: {
-        name: "Putih Bersih",
-        swatch: "linear-gradient(135deg,#f8fafc,#22c55e)",
-        bg: "#f1f5f9",
-        card: "#ffffff",
-        border: "#cbd5e1",
-        text: "#0f172a",
-        sub: "#64748b",
-        accent: "#16a34a",
-        tv: "#b45309",
-        tvFree: "#15803d",
-        footerBg: "#e2e8f0",
-        glowTop: "rgba(34,197,94,0.08)",
-        glowBottom: "rgba(59,130,246,0.06)",
-        borders: ["#22c55e", "#3b82f6", "#eab308", "#16a34a"],
-        wm: "rgba(15,23,42,0.04)",
+      studio: {
+        name: "📺 Studio TV",
+        deco: "studio",
+        swatch: "linear-gradient(145deg,#0f172a 30%,#3b82f6 100%)",
+        previewBg: "radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.2), transparent 60%), linear-gradient(180deg, #0f172a, #020617)",
+        decoOverlay: "linear-gradient(90deg, rgba(59,130,246,0.06) 1px, transparent 1px)",
+        bg: "#020617", bg2: "#0f172a",
+        card: "rgba(15,23,42,0.94)", cardHi: "rgba(30,41,59,0.98)",
+        timeBg: "#0f172a", border: "#334155",
+        text: "#f8fafc", sub: "#94a3b8",
+        accent: "#60a5fa", accentGlow: "rgba(96,165,250,0.5)",
+        tv: "#fbbf24", tvFree: "#34d399",
+        footerBg: "#010409", glow: "rgba(59,130,246,0.35)",
+        glowTop: "rgba(59,130,246,0.25)", glowBottom: "rgba(99,102,241,0.15)",
+        borders: ["#3b82f6", "#60a5fa", "#fbbf24", "#6366f1"],
+        wm: "rgba(255,255,255,0.03)",
       },
     };
 
-    let currentTheme = "neon";
+    let currentTheme = "stadium";
 
     const BASE = (() => {
       const path = location.pathname;
@@ -485,6 +568,12 @@
       return slash > 0 ? path.slice(0, slash + 1) : "/";
     })();
     const asset = (p) => BASE + p.replace(/^\//, "");
+
+    const BRAND_LOGO_PATHS = [
+      "assets/branding/CORNERKIICK.png",
+      "CORNERKIICK.png",
+    ];
+    let brandLogoImg = null;
 
     let allSchedules = {};
     let selectedDate = todayISO();
@@ -498,13 +587,71 @@
     const displayDate = $("#display-date");
     const btnDownload = $("#btn-download");
     const inputHeader = $("#input-header");
-    const inputWM = $("#input-wm");
+    const inputTiktok = $("#input-tiktok");
     const inputFooter = $("#input-footer");
     const exportArea = $("#export-area");
+    const SETTINGS_KEY = "jadwal-bola-settings";
 
-    datePicker.value = selectedDate;
-    inputHeader.addEventListener("input", () => { $("#view-header").textContent = inputHeader.value.toUpperCase(); });
-    inputFooter.addEventListener("input", () => { $("#view-footer").textContent = inputFooter.value; });
+    function getTiktokWmText() {
+      let v = (inputTiktok.value || "").trim();
+      if (!v) return "";
+      v = v.replace(/^@+/, "");
+      return "@" + v.toUpperCase();
+    }
+
+    function updateBgWatermark() {
+      const el = $("#bg-watermark");
+      const text = getTiktokWmText();
+      if (!text) {
+        el.innerHTML = "";
+        return;
+      }
+      el.innerHTML = Array(16).fill(`<span>${escapeHtml(text)}</span>`).join("");
+    }
+
+    function loadSettings() {
+      try {
+        const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+        if (s.header) inputHeader.value = s.header;
+        if (s.tiktok) inputTiktok.value = s.tiktok;
+        if (s.footer) inputFooter.value = s.footer;
+        if (s.theme) {
+          const id = THEME_ALIASES[s.theme] || s.theme;
+          if (THEMES[id]) currentTheme = id;
+        }
+        if (s.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(s.lastDate)) selectedDate = s.lastDate;
+      } catch (_) { /* ignore */ }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        header: inputHeader.value,
+        tiktok: inputTiktok.value,
+        footer: inputFooter.value,
+        theme: currentTheme,
+        lastDate: selectedDate,
+      }));
+    }
+
+    function setSelectedDate(iso) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+      selectedDate = iso;
+      datePicker.value = iso;
+      saveSettings();
+      renderMatches(iso);
+    }
+    inputHeader.addEventListener("input", () => {
+      $("#view-header").textContent = inputHeader.value.toUpperCase();
+      saveSettings();
+    });
+    inputTiktok.addEventListener("input", () => {
+      updateBgWatermark();
+      saveSettings();
+    });
+    inputFooter.addEventListener("input", () => {
+      $("#view-footer").textContent = inputFooter.value;
+      saveSettings();
+    });
 
     function todayISO() {
       return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
@@ -525,25 +672,33 @@
     }
 
     function getTheme() {
-      return THEMES[currentTheme] || THEMES.neon;
+      return THEMES[currentTheme] || THEMES.stadium;
     }
 
     function applyThemePreview(themeId) {
-      const t = THEMES[themeId] || THEMES.neon;
+      const t = THEMES[themeId] || THEMES.stadium;
       exportArea.dataset.theme = themeId;
       exportArea.style.setProperty("--t-bg", t.bg);
+      exportArea.style.setProperty("--t-preview-bg", t.previewBg || "none");
+      exportArea.style.setProperty("--t-deco-overlay", t.decoOverlay || "none");
+      exportArea.style.setProperty("--t-deco-size", t.deco === "cyber" ? "36px 36px" : "auto");
       exportArea.style.setProperty("--t-card", t.card);
       exportArea.style.setProperty("--t-border", t.border);
       exportArea.style.setProperty("--t-text", t.text);
       exportArea.style.setProperty("--t-sub", t.sub);
       exportArea.style.setProperty("--t-accent", t.accent);
+      exportArea.style.setProperty("--t-accent-glow", t.accentGlow || "transparent");
       exportArea.style.setProperty("--t-tv", t.tv);
+      exportArea.style.setProperty("--t-time-bg", t.timeBg || t.bg);
       exportArea.style.setProperty("--t-footer-bg", t.footerBg);
       exportArea.style.setProperty("--t-glow-top", t.glowTop);
+      exportArea.style.setProperty("--t-glow", t.glow || "transparent");
       const previewMsg = exportArea.querySelector(".preview-msg");
       if (previewMsg) {
-        previewMsg.style.color = themeId === "clean" ? "rgba(15,23,42,0.06)" : "rgba(255,255,255,0.03)";
+        previewMsg.style.color = themeId === "studio" ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.03)";
       }
+      exportArea.style.setProperty("--t-wm-fg", "rgba(255,255,255,0.045)");
+      updateBgWatermark();
     }
 
     function buildThemePicker() {
@@ -561,6 +716,7 @@
           currentTheme = card.dataset.theme;
           grid.querySelectorAll(".theme-card").forEach((c) => c.classList.toggle("active", c.dataset.theme === currentTheme));
           applyThemePreview(currentTheme);
+          saveSettings();
         });
       });
     }
@@ -689,6 +845,54 @@
       return null;
     }
 
+    function setupBrandLogoPreview() {
+      const url = asset(BRAND_LOGO_PATHS[0]);
+      const header = $("#brand-logo");
+      const footer = $("#brand-logo-footer");
+      if (header) {
+        header.src = url;
+        header.onerror = () => { header.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+      if (footer) {
+        footer.src = url;
+        footer.onerror = () => { footer.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+    }
+
+    async function loadBrandLogo() {
+      if (brandLogoImg) return brandLogoImg;
+      for (const p of BRAND_LOGO_PATHS) {
+        for (const c of localPathCandidates(p)) {
+          const img = await tryLoadOne(c);
+          if (img) {
+            brandLogoImg = img;
+            return img;
+          }
+        }
+      }
+      return null;
+    }
+
+    function drawBrandLogoCircle(ctx, cx, cy, size, t, img) {
+      if (!img) return;
+      const r = size / 2;
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, cx - r, cy - r, size, size);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = t.accent;
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.9;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
     function shortTv(m) {
       const parts = (m.tvFree || []).concat(m.tvPaid || []);
       return parts.length ? parts.join(" · ") : (m.tv || "-");
@@ -789,27 +993,120 @@
       reader.readAsText(file, "UTF-8");
     }
 
+    const PNG_W = 1080;
+    const PNG_H = 1920;
+    const PNG_SCALE = 2;
+
     function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
+      const rad = Math.min(r, w / 2, h / 2);
       ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.moveTo(x + rad, y);
+      ctx.lineTo(x + w - rad, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
+      ctx.lineTo(x + w, y + h - rad);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+      ctx.lineTo(x + rad, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
+      ctx.lineTo(x, y + rad);
+      ctx.quadraticCurveTo(x, y, x + rad, y);
       ctx.closePath();
       if (fill) { ctx.fillStyle = fill; ctx.fill(); }
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 2; ctx.stroke(); }
     }
 
-    function drawCircle(ctx, x, y, size, fill) {
-      ctx.beginPath();
-      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, 2 * Math.PI);
-      ctx.fillStyle = fill || "#1e293b";
-      ctx.fill();
+    function drawDecoStadium(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(0.45, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(74,222,128,0.04)";
+      for (let i = 0; i < 14; i++) ctx.fillRect(0, i * (H / 14), W, H / 28);
+      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.lineWidth = 3;
+      const cy = H * 0.42;
+      ctx.beginPath(); ctx.arc(W / 2, cy, 200, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(50, cy); ctx.lineTo(W - 50, cy); ctx.stroke();
+      ctx.strokeRect(50, cy - 140, W - 100, 280);
+    }
+
+    function drawDecoCyber(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, t.bg2); g.addColorStop(1, t.bg);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(34,211,238,0.07)"; ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+      const spots = [[0.15, 0.12, "rgba(34,211,238,0.35)"], [0.85, 0.88, "rgba(232,121,249,0.3)"]];
+      spots.forEach(([px, py, col]) => {
+        const rg = ctx.createRadialGradient(px * W, py * H, 0, px * W, py * H, 320);
+        rg.addColorStop(0, col); rg.addColorStop(1, "transparent");
+        ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+      });
+    }
+
+    function drawDecoGold(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = "rgba(251,191,36,0.08)"; ctx.lineWidth = 2;
+      for (let i = -H; i < W + H; i += 56) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke();
+      }
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 500);
+      rg.addColorStop(0, "rgba(251,191,36,0.2)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoInferno(ctx, W, H, t) {
+      const g = ctx.createLinearGradient(0, H, 0, 0);
+      g.addColorStop(0, "rgba(239,68,68,0.35)"); g.addColorStop(0.4, t.bg); g.addColorStop(1, t.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      const rg = ctx.createRadialGradient(W * 0.3, H * 0.15, 0, W * 0.3, H * 0.15, 400);
+      rg.addColorStop(0, "rgba(249,115,22,0.25)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawDecoStudio(ctx, W, H, t) {
+      ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(59,130,246,0.06)";
+      for (let i = 0; i < 8; i++) ctx.fillRect(0, i * 120, W, 60);
+      const rg = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, 450);
+      rg.addColorStop(0, "rgba(59,130,246,0.22)"); rg.addColorStop(1, "transparent");
+      ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawThemeBackground(ctx, W, H, t) {
+      switch (t.deco) {
+        case "cyber": drawDecoCyber(ctx, W, H, t); break;
+        case "gold": drawDecoGold(ctx, W, H, t); break;
+        case "inferno": drawDecoInferno(ctx, W, H, t); break;
+        case "studio": drawDecoStudio(ctx, W, H, t); break;
+        default: drawDecoStadium(ctx, W, H, t);
+      }
+      const gr1 = ctx.createRadialGradient(W / 2, 0, 80, W / 2, 0, 700);
+      gr1.addColorStop(0, t.glowTop); gr1.addColorStop(1, "transparent");
+      ctx.fillStyle = gr1; ctx.fillRect(0, 0, W, 700);
+      const gr2 = ctx.createRadialGradient(W / 2, H, 80, W / 2, H, 600);
+      gr2.addColorStop(0, t.glowBottom); gr2.addColorStop(1, "transparent");
+      ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
+    }
+
+    function pngLogoSize(rowH) {
+      const tvZone = 56;
+      const teamsH = rowH - tvZone - 14;
+      const nameBlock = 2 * 28;
+      const gap = 22;
+      return Math.round(Math.min(78, Math.max(56, teamsH - nameBlock - gap)));
+    }
+
+    function pngNameGap(logoSize) {
+      return Math.max(20, Math.round(logoSize * 0.34));
+    }
+
+    function drawLogoRing(ctx, x, y, size, t) {
+      const r = size / 2 + 10;
+      const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
+      g.addColorStop(0, t.cardHi || t.card); g.addColorStop(1, t.border);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+      ctx.strokeStyle = t.accent; ctx.globalAlpha = 0.35; ctx.lineWidth = 2; ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     function wrapTeamName(ctx, text, maxW, maxLines) {
@@ -840,16 +1137,175 @@
       return lines.slice(0, maxLines);
     }
 
-    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW) {
-      const logoSize = 52;
-      if (logo) ctx.drawImage(logo, xCenter - logoSize / 2, y, logoSize, logoSize);
-      const textY = y + logoSize + 8;
-      ctx.fillStyle = getTheme().text;
-      ctx.font = "700 22px Segoe UI";
+    function drawTeamBlock(ctx, name, logo, xCenter, logoY, maxW, logoSize, t) {
+      const sz = logoSize || 64;
+      const gap = pngNameGap(sz);
+      const fontPx = Math.round(sz * 0.42);
+      const lineH = Math.round(fontPx * 1.2);
+      drawLogoRing(ctx, xCenter, logoY + sz / 2, sz, t);
+      if (logo) ctx.drawImage(logo, xCenter - sz / 2, logoY, sz, sz);
+      const textY = logoY + sz + gap;
+      ctx.fillStyle = t.text;
+      ctx.font = `bold ${fontPx}px 'Segoe UI', system-ui, sans-serif`;
       ctx.textAlign = "center";
-      const lines = wrapTeamName(ctx, name, maxW, 3);
-      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 24));
-      return textY + lines.length * 24;
+      const lines = wrapTeamName(ctx, name, maxW, 2);
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * lineH));
+      return textY + lines.length * lineH;
+    }
+
+    function drawBackgroundWatermark(ctx, W, H, t) {
+      const wmText = getTiktokWmText();
+      if (!wmText) return;
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.rotate(-Math.PI / 6);
+      ctx.fillStyle = t.wm;
+      ctx.font = "900 68px 'Segoe UI', Impact, sans-serif";
+      ctx.textAlign = "center";
+      [-440, -300, -160, -20, 120, 260, 400].forEach((dy) => ctx.fillText(wmText, 0, dy));
+      ctx.restore();
+    }
+
+    function drawHeaderPNG(ctx, W, t, brandImg) {
+      const title = (inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase();
+      const dateStr = formatDateID(selectedDate).toUpperCase();
+
+      let titleY = 108;
+      if (brandImg) {
+        const sz = 104;
+        drawBrandLogoCircle(ctx, W / 2, 14 + sz / 2, sz, t, brandImg);
+        titleY = 14 + sz + 32;
+      }
+
+      const barW = 220;
+      const barG = ctx.createLinearGradient(W / 2 - barW, 0, W / 2 + barW, 0);
+      barG.addColorStop(0, "transparent");
+      barG.addColorStop(0.5, t.accent);
+      barG.addColorStop(1, "transparent");
+      ctx.fillStyle = barG;
+      ctx.fillRect(W / 2 - barW, titleY + 42, barW * 2, 4);
+
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || t.accent;
+      ctx.shadowBlur = 24;
+      ctx.fillStyle = t.text;
+      ctx.font = "900 46px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(title, W / 2, titleY);
+      ctx.restore();
+
+      const pillW = Math.min(ctx.measureText(dateStr).width + 48, W - 100);
+      const dateY = titleY + 52;
+      drawRoundRect(ctx, W / 2 - pillW / 2, dateY, pillW, 40, 20, t.cardHi || t.card, t.border, 1.5);
+      ctx.fillStyle = t.sub;
+      ctx.font = "bold 21px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(dateStr, W / 2, dateY + 27);
+
+      const lineY = dateY + 58;
+      ctx.strokeStyle = t.border;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(48, lineY);
+      ctx.lineTo(W - 48, lineY);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function computePngLayout(matchCount, hasBrandLogo) {
+      const footerH = hasBrandLogo ? 108 : 86;
+      const headerEnd = hasBrandLogo ? 278 : 222;
+      const gap = 11;
+      const n = Math.min(matchCount, 10);
+      const avail = PNG_H - footerH - headerEnd;
+      const rowH = Math.max(152, Math.min(220, Math.floor((avail - gap * Math.max(0, n - 1)) / n)));
+      return { footerH, headerEnd, gap, rowH, n };
+    }
+
+    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
+      const W = PNG_W;
+      const cardX = 24;
+      const cardW = W - 48;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 8;
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 26, t.card, null);
+      ctx.restore();
+
+      ctx.fillStyle = borderCol;
+      ctx.fillRect(cardX, y + 10, 7, rowH - 20);
+
+      const timeX = cardX + 14;
+      const timeW = 94;
+      const timeH = rowH - 16;
+      drawRoundRect(ctx, timeX, y + 8, timeW, timeH, 18, t.timeBg || t.bg, borderCol, 2.5);
+      ctx.fillStyle = t.accent;
+      ctx.font = "900 34px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.4);
+      ctx.fillStyle = t.sub;
+      ctx.font = "bold 15px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.57);
+
+      const contentX = cardX + 116;
+      const contentW = cardW - 124;
+      const cx = contentX + contentW / 2;
+      const homeCx = contentX + contentW * 0.24;
+      const awayCx = contentX + contentW * 0.76;
+      const nameW = Math.floor(contentW * 0.46);
+      const teamsTop = y + 10;
+      const logoSize = pngLogoSize(rowH);
+
+      const hImg = getCachedLogo(resolveTeamLogo(m.home));
+      const aImg = getCachedLogo(resolveTeamLogo(m.away));
+      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize, t);
+      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize, t);
+
+      const vsY = teamsTop + logoSize / 2 + 4;
+      const vsPadW = 44;
+      const vsG = ctx.createLinearGradient(cx - vsPadW, vsY, cx + vsPadW, vsY);
+      vsG.addColorStop(0, "transparent");
+      vsG.addColorStop(0.5, t.accent);
+      vsG.addColorStop(1, "transparent");
+      ctx.fillStyle = vsG;
+      ctx.fillRect(cx - vsPadW - 4, vsY - 16, vsPadW * 2 + 8, 32);
+      ctx.fillStyle = t.text;
+      ctx.font = "900 20px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("VS", cx, vsY + 7);
+
+      const divY = y + rowH - 50;
+      const divG = ctx.createLinearGradient(contentX, 0, contentX + contentW, 0);
+      divG.addColorStop(0, "transparent");
+      divG.addColorStop(0.5, t.border);
+      divG.addColorStop(1, "transparent");
+      ctx.strokeStyle = divG;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(contentX + 4, divY);
+      ctx.lineTo(contentX + contentW - 4, divY);
+      ctx.stroke();
+
+      const tvStr = shortTv(m);
+      ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
+      ctx.font = "900 24px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      const tvLines = wrapTeamName(ctx, tvStr, contentW - 8, 2);
+      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 28 + j * 28));
+    }
+
+    function exportCanvasToPNG(sourceCanvas) {
+      const out = document.createElement("canvas");
+      out.width = PNG_W;
+      out.height = PNG_H;
+      const octx = out.getContext("2d");
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = "high";
+      octx.drawImage(sourceCanvas, 0, 0, PNG_W, PNG_H);
+      return out.toDataURL("image/png");
     }
 
     async function downloadPNG() {
@@ -866,118 +1322,59 @@
           matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
         )];
         await Promise.all(urls.map(loadImage));
+        const brandImg = await loadBrandLogo();
 
-        const W = 1080;
-        const H = 1920;
+        const W = PNG_W;
+        const H = PNG_H;
         const canvas = document.createElement("canvas");
-        canvas.width = W;
-        canvas.height = H;
+        canvas.width = W * PNG_SCALE;
+        canvas.height = H * PNG_SCALE;
         const ctx = canvas.getContext("2d");
+        ctx.scale(PNG_SCALE, PNG_SCALE);
+        ctx.textBaseline = "alphabetic";
 
-        ctx.fillStyle = t.bg;
-        ctx.fillRect(0, 0, W, H);
-
-        const gr1 = ctx.createRadialGradient(W / 2, 0, 100, W / 2, 0, 800);
-        gr1.addColorStop(0, t.glowTop);
-        gr1.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr1;
-        ctx.fillRect(0, 0, W, 800);
-
-        const gr2 = ctx.createRadialGradient(W / 2, H, 100, W / 2, H, 700);
-        gr2.addColorStop(0, t.glowBottom);
-        gr2.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr2;
-        ctx.fillRect(0, 0, W, H);
-
-        const wmText = (inputWM.value || "CORNERKIICK").toUpperCase();
-        ctx.save();
-        ctx.translate(W / 2, H / 2);
-        ctx.rotate(-Math.PI / 6);
-        ctx.fillStyle = t.wm;
-        ctx.font = "black 84px Segoe UI, Impact";
-        ctx.textAlign = "center";
-        [-400, -150, 100, 350].forEach((dy) => ctx.fillText(wmText, 0, dy));
-        ctx.restore();
-
-        ctx.fillStyle = t.text;
-        ctx.font = "900 52px Segoe UI, Arial Black";
-        ctx.textAlign = "center";
-        ctx.fillText((inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase(), W / 2, 130);
-        ctx.fillStyle = t.sub;
-        ctx.font = "bold 30px Segoe UI";
-        ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 195);
-
-        ctx.strokeStyle = t.border;
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(80, 235);
-        ctx.lineTo(W - 80, 235);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
+        drawThemeBackground(ctx, W, H, t);
+        drawBackgroundWatermark(ctx, W, H, t);
+        drawHeaderPNG(ctx, W, t, brandImg);
 
         const dataMatches = matches.slice(0, 10);
-        const rowH = 132;
-        const gap = 16;
-        let startY = 265;
+        const layout = computePngLayout(dataMatches.length, !!brandImg);
+        const startY = layout.headerEnd;
 
         dataMatches.forEach((m, i) => {
-          const y = startY + i * (rowH + gap);
-          const borderCol = t.borders[i % t.borders.length];
-          drawRoundRect(ctx, 44, y, W - 88, rowH, 22, t.card, borderCol, 3);
-
-          ctx.fillStyle = t.accent;
-          ctx.font = "900 28px Segoe UI";
-          ctx.textAlign = "left";
-          ctx.fillText(m.kickoff, 72, y + 52);
-          ctx.fillStyle = t.sub;
-          ctx.font = "700 14px Segoe UI";
-          ctx.fillText("WIB", 72, y + 78);
-
-          const cx = W / 2;
-          const compImg = getCachedLogo(resolveLeagueLogo(m.competition));
-          if (compImg) ctx.drawImage(compImg, cx - 24, y + 12, 48, 48);
-
-          const homeUrl = resolveTeamLogo(m.home);
-          const awayUrl = resolveTeamLogo(m.away);
-          const hImg = getCachedLogo(homeUrl);
-          const aImg = getCachedLogo(awayUrl);
-          const nameW = 268;
-
-          drawTeamBlock(ctx, m.home, hImg, cx - 210, y + 18, nameW);
-          drawTeamBlock(ctx, m.away, aImg, cx + 210, y + 18, nameW);
-
-          ctx.fillStyle = t.sub;
-          ctx.font = "900 20px Segoe UI";
-          ctx.textAlign = "center";
-          ctx.fillText("VS", cx, y + 72);
-
-          const tvStr = shortTv(m);
-          ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
-          ctx.font = "900 20px Segoe UI";
-          ctx.textAlign = "right";
-          const tvLines = wrapTeamName(ctx, tvStr, 200, 2);
-          tvLines.forEach((ln, j) => ctx.fillText(ln, W - 60, y + 48 + j * 24));
+          const y = startY + i * (layout.rowH + layout.gap);
+          drawMatchRowPNG(ctx, m, y, layout.rowH, t, t.borders[i % t.borders.length]);
         });
 
-        ctx.fillStyle = t.footerBg;
-        ctx.fillRect(0, H - 96, W, 96);
-        ctx.strokeStyle = t.border;
-        ctx.globalAlpha = 0.25;
+        const footY = H - layout.footerH;
+        const footG = ctx.createLinearGradient(0, footY, 0, H);
+        footG.addColorStop(0, t.footerBg);
+        footG.addColorStop(1, "#000");
+        ctx.fillStyle = footG;
+        ctx.fillRect(0, footY, W, layout.footerH);
+        const accentLine = ctx.createLinearGradient(0, footY, W, footY);
+        accentLine.addColorStop(0, "transparent");
+        accentLine.addColorStop(0.5, t.accent);
+        accentLine.addColorStop(1, "transparent");
+        ctx.strokeStyle = accentLine;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(0, H - 96);
-        ctx.lineTo(W, H - 96);
+        ctx.moveTo(40, footY);
+        ctx.lineTo(W - 40, footY);
         ctx.stroke();
-        ctx.globalAlpha = 1;
+        if (brandImg) {
+          drawBrandLogoCircle(ctx, W / 2, footY + 38, 56, t, brandImg);
+        }
         ctx.fillStyle = t.sub;
-        ctx.font = "bold 22px Segoe UI";
+        ctx.font = "bold 24px 'Segoe UI', sans-serif";
         ctx.textAlign = "center";
         const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
-        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, H - 58 + i * 28));
+        const footerTextY = brandImg ? footY + 72 : footY + 50;
+        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footerTextY + i * 30));
 
         const link = document.createElement("a");
         link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.href = exportCanvasToPNG(canvas);
         link.click();
 
         const loaded = urls.filter((u) => getCachedLogo(u)).length;
@@ -997,20 +1394,22 @@
 
     $("#btn-refresh").addEventListener("click", fetchSchedule);
     $("#btn-download").addEventListener("click", downloadPNG);
-    $("#btn-today").addEventListener("click", () => {
-      selectedDate = todayISO();
-      datePicker.value = selectedDate;
-      renderMatches(selectedDate);
-    });
-    datePicker.addEventListener("change", (e) => renderMatches(e.target.value));
+    $("#btn-today").addEventListener("click", () => setSelectedDate(todayISO()));
+    datePicker.addEventListener("change", (e) => setSelectedDate(e.target.value));
     $("#file-import").addEventListener("change", (e) => {
       const f = e.target.files[0];
       if (f) importHtmlFile(f);
       e.target.value = "";
     });
 
+    loadSettings();
+    setupBrandLogoPreview();
+    datePicker.value = selectedDate;
+    $("#view-header").textContent = inputHeader.value.toUpperCase();
+    $("#view-footer").textContent = inputFooter.value;
     buildThemePicker();
     applyThemePreview(currentTheme);
+    updateBgWatermark();
     fetchSchedule();
   </script>
 </body>
