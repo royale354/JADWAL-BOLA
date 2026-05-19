@@ -291,11 +291,12 @@
       background: linear-gradient(90deg, transparent, var(--t-accent, #22c55e), transparent);
     }
     .banner .date-label {
-      font-size: 0.72rem;
+      font-size: 0.88rem;
       color: var(--t-sub, #94a3b8);
-      margin-top: 6px;
-      font-weight: 700;
+      margin-top: 8px;
+      font-weight: 800;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .match-container {
@@ -1227,8 +1228,11 @@
       const dateStr = formatDateID(selectedDate).toUpperCase();
       const pad = 28;
       const barY = 16;
-      const barH = brandImg ? 136 : 108;
+      const cx = W / 2;
       const barW = W - pad * 2;
+      const logoSz = brandImg ? 84 : 0;
+      const barH = brandImg ? 188 : 118;
+      let y = barY + 18;
 
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.45)";
@@ -1240,20 +1244,32 @@
       drawRoundRect(ctx, pad, barY, barW, barH, 26, hg, t.accent, 3);
       ctx.restore();
 
-      const textX = brandImg ? pad + 124 : W / 2;
-      ctx.textAlign = brandImg ? "left" : "center";
-      if (brandImg) drawBrandLogoCircle(ctx, pad + 68, barY + barH / 2, 92, t, brandImg);
+      ctx.textAlign = "center";
+
+      if (brandImg) {
+        drawBrandLogoCircle(ctx, cx, y + logoSz / 2, logoSz, t, brandImg);
+        y = barY + 18 + logoSz + 14;
+      } else {
+        y = barY + 28;
+      }
 
       ctx.save();
       ctx.shadowColor = t.accentGlow || t.accent;
       ctx.shadowBlur = 20;
       ctx.fillStyle = t.text;
-      ctx.font = "900 50px 'Segoe UI', 'Arial Black', sans-serif";
-      ctx.fillText(title, textX, barY + (brandImg ? 54 : 50));
+      ctx.font = "900 48px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.fillText(title, cx, y);
       ctx.restore();
-      ctx.fillStyle = t.sub;
-      ctx.font = "bold 24px 'Segoe UI', sans-serif";
-      ctx.fillText(dateStr, textX, barY + (brandImg ? 96 : 88));
+
+      y += 44;
+      ctx.font = "bold 34px 'Segoe UI', sans-serif";
+      const dateW = ctx.measureText(dateStr).width;
+      const pillW = Math.min(dateW + 40, barW - 32);
+      const pillH = 46;
+      const pillX = cx - pillW / 2;
+      drawRoundRect(ctx, pillX, y - 6, pillW, pillH, 23, t.timeBg || t.bg, t.accent, 1.5);
+      ctx.fillStyle = t.text;
+      ctx.fillText(dateStr, cx, y + 28);
 
       return barY + barH + 14;
     }
