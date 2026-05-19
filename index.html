@@ -256,8 +256,8 @@
       background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
     }
     .brand-logo {
-      width: 76px;
-      height: 76px;
+      width: 84px;
+      height: 84px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
@@ -275,7 +275,7 @@
       border: 1px solid var(--t-border, #334155);
     }
     .banner h2 {
-      font-size: 1.15rem;
+      font-size: 1.22rem;
       font-weight: 900;
       color: var(--t-text, #fff);
       letter-spacing: 0.06em;
@@ -310,15 +310,15 @@
 
     .sim-card {
       background: var(--t-card, #111625);
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid var(--t-border, #1e2942);
-      border-left: 3px solid var(--t-accent, #22c55e);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-      padding: 8px 10px 6px;
+      border-left: 4px solid var(--t-accent, #22c55e);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      padding: 10px 12px 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      font-size: 0.7rem;
+      gap: 8px;
+      font-size: 0.75rem;
     }
     .sim-main {
       display: flex;
@@ -332,16 +332,17 @@
       color: var(--t-accent, #22c55e);
       background: var(--t-time-bg, #070a13);
       border: 1px solid var(--t-border, #1e2942);
-      padding: 6px 7px;
-      border-radius: 8px;
-      font-size: 0.7rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.82rem;
       line-height: 1.15;
       text-align: center;
-      min-width: 42px;
+      min-width: 48px;
+      box-shadow: 0 0 14px var(--t-accent-glow, transparent);
     }
     .sim-time small {
       display: block;
-      font-size: 0.5rem;
+      font-size: 0.55rem;
       color: var(--t-sub, #64748b);
       font-weight: 700;
     }
@@ -363,15 +364,16 @@
       flex-direction: row-reverse;
     }
     .team-block img {
-      width: 28px;
-      height: 28px;
+      width: 34px;
+      height: 34px;
       object-fit: contain;
       flex-shrink: 0;
     }
+    .team-block { gap: 8px; }
     .team-name {
       font-weight: 700;
-      font-size: 0.6rem;
-      line-height: 1.2;
+      font-size: 0.68rem;
+      line-height: 1.25;
       word-break: break-word;
       color: var(--t-text, #fff);
     }
@@ -379,26 +381,36 @@
     .team-block.away .team-name { text-align: right; }
     .vs-label {
       flex-shrink: 0;
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--t-accent, #22c55e);
       color: #fff;
-      font-size: 0.5rem;
+      font-size: 0.58rem;
       font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
     }
     .sim-tv {
       color: var(--t-tv, #fbbf24);
       font-weight: 800;
-      font-size: 0.58rem;
+      font-size: 0.65rem;
       text-align: center;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 6px;
-      padding: 4px 6px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      padding: 6px 8px;
       word-break: break-word;
+    }
+    .sim-league {
+      font-size: 0.5rem;
+      font-weight: 800;
+      color: var(--t-accent, #22c55e);
+      text-align: right;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.9;
     }
 
     .watermark-footer {
@@ -922,8 +934,8 @@
         const tvStr = shortTv(m);
         const homeUrl = resolveTeamLogo(m.home);
         const awayUrl = resolveTeamLogo(m.away);
-        const borderColor = getTheme().borders[i % getTheme().borders.length];
-        return `<div class="sim-card" style="border-left-color:${borderColor}">
+        return `<div class="sim-card">
+          ${m.competition ? `<div class="sim-league">${escapeHtml(m.competition)}</div>` : ""}
           <div class="sim-main">
             <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
             <span class="sim-teams">
@@ -1003,6 +1015,7 @@
 
     const PNG_W = 1080;
     const PNG_H = 1920;
+    const PNG_MAX_MATCHES = 7;
 
     function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
       const rad = Math.min(r, w / 2, h / 2);
@@ -1117,30 +1130,46 @@
       return lines.slice(0, maxLines);
     }
 
+    function drawLeagueChip(ctx, rightX, y, text, t) {
+      if (!text) return;
+      const label = text.length > 26 ? text.slice(0, 24) + "…" : text;
+      ctx.font = "bold 17px 'Segoe UI', sans-serif";
+      const chipW = Math.min(ctx.measureText(label).width + 24, 300);
+      const chipH = 30;
+      const chipX = rightX - chipW;
+      drawRoundRect(ctx, chipX, y, chipW, chipH, 15, t.timeBg || t.card, t.accent, 1);
+      ctx.fillStyle = t.accent;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, chipX + chipW / 2, y + chipH / 2);
+      ctx.textBaseline = "alphabetic";
+    }
+
     function drawTeamSide(ctx, name, logo, x, y, w, h, logoSz, t, side) {
-      const fontPx = Math.max(17, Math.min(24, Math.round(logoSz * 0.42)));
-      const lineH = fontPx + 5;
+      const fontPx = Math.max(22, Math.min(30, Math.round(logoSz * 0.44)));
+      const lineH = fontPx + 6;
+      const gap = 18;
       const ly = y + (h - logoSz) / 2;
       if (side === "home") {
-        const lx = x + 6;
+        const lx = x + 8;
         if (logo) ctx.drawImage(logo, lx, ly, logoSz, logoSz);
         ctx.fillStyle = t.text;
         ctx.font = `bold ${fontPx}px 'Segoe UI', sans-serif`;
         ctx.textAlign = "left";
-        const nameX = lx + logoSz + 12;
-        const nameW = w - logoSz - 16;
+        const nameX = lx + logoSz + gap;
+        const nameW = w - logoSz - gap - 12;
         const lines = wrapTeamName(ctx, name, nameW, 2);
         const blockH = lines.length * lineH;
         let ty = y + (h - blockH) / 2 + fontPx;
         lines.forEach((ln) => { ctx.fillText(ln, nameX, ty); ty += lineH; });
       } else {
-        const lx = x + w - logoSz - 6;
+        const lx = x + w - logoSz - 8;
         if (logo) ctx.drawImage(logo, lx, ly, logoSz, logoSz);
         ctx.fillStyle = t.text;
         ctx.font = `bold ${fontPx}px 'Segoe UI', sans-serif`;
         ctx.textAlign = "right";
-        const nameX = lx - 10;
-        const nameW = w - logoSz - 16;
+        const nameX = lx - 12;
+        const nameW = w - logoSz - gap - 12;
         const lines = wrapTeamName(ctx, name, nameW, 2);
         const blockH = lines.length * lineH;
         let ty = y + (h - blockH) / 2 + fontPx;
@@ -1149,13 +1178,17 @@
     }
 
     function drawVsBadge(ctx, cx, cy, t) {
-      const r = 22;
+      const r = 30;
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || t.accent;
+      ctx.shadowBlur = 16;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fillStyle = t.accent;
       ctx.fill();
+      ctx.restore();
       ctx.fillStyle = t.bg;
-      ctx.font = "900 16px 'Segoe UI', sans-serif";
+      ctx.font = "900 22px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("VS", cx, cy + 1);
@@ -1163,9 +1196,12 @@
     }
 
     function drawTvBar(ctx, x, y, w, h, tvStr, t, isFree) {
-      drawRoundRect(ctx, x, y, w, h, h / 2, "rgba(0,0,0,0.35)", null);
+      const bg = ctx.createLinearGradient(x, y, x + w, y);
+      bg.addColorStop(0, "rgba(0,0,0,0.45)");
+      bg.addColorStop(1, "rgba(0,0,0,0.55)");
+      drawRoundRect(ctx, x, y, w, h, h / 2, bg, t.accent, 1);
       ctx.fillStyle = isFree ? t.tvFree : t.tv;
-      ctx.font = "bold 22px 'Segoe UI', sans-serif";
+      ctx.font = "bold 28px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const lines = wrapTeamName(ctx, "📺  " + tvStr, w - 20, 1);
@@ -1189,28 +1225,37 @@
     function drawHeaderPNG(ctx, W, t, brandImg) {
       const title = (inputHeader.value || "JADWAL BOLA").toUpperCase();
       const dateStr = formatDateID(selectedDate).toUpperCase();
-      const pad = 36;
-      const barY = 20;
-      const barH = brandImg ? 118 : 96;
+      const pad = 28;
+      const barY = 16;
+      const barH = brandImg ? 136 : 108;
       const barW = W - pad * 2;
 
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.45)";
+      ctx.shadowBlur = 24;
+      ctx.shadowOffsetY = 8;
       const hg = ctx.createLinearGradient(pad, barY, pad + barW, barY + barH);
       hg.addColorStop(0, t.cardHi || t.card);
       hg.addColorStop(1, t.card);
-      drawRoundRect(ctx, pad, barY, barW, barH, 22, hg, t.accent, 2);
+      drawRoundRect(ctx, pad, barY, barW, barH, 26, hg, t.accent, 3);
+      ctx.restore();
 
-      const textX = brandImg ? pad + 108 : W / 2;
+      const textX = brandImg ? pad + 124 : W / 2;
       ctx.textAlign = brandImg ? "left" : "center";
-      if (brandImg) drawBrandLogoCircle(ctx, pad + 58, barY + barH / 2, 76, t, brandImg);
+      if (brandImg) drawBrandLogoCircle(ctx, pad + 68, barY + barH / 2, 92, t, brandImg);
 
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || t.accent;
+      ctx.shadowBlur = 20;
       ctx.fillStyle = t.text;
-      ctx.font = "900 42px 'Segoe UI', 'Arial Black', sans-serif";
-      ctx.fillText(title, textX, barY + (brandImg ? 48 : 44));
+      ctx.font = "900 50px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.fillText(title, textX, barY + (brandImg ? 54 : 50));
+      ctx.restore();
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 20px 'Segoe UI', sans-serif";
-      ctx.fillText(dateStr, textX, barY + (brandImg ? 82 : 78));
+      ctx.font = "bold 24px 'Segoe UI', sans-serif";
+      ctx.fillText(dateStr, textX, barY + (brandImg ? 96 : 88));
 
-      return barY + barH + 18;
+      return barY + barH + 14;
     }
 
     function getMatchesForDate(iso) {
@@ -1221,58 +1266,72 @@
     }
 
     function computePngLayout(matchCount, headerEnd, footerH) {
-      const gap = 12;
-      const n = Math.max(1, Math.min(Number(matchCount) || 0, 10));
+      const gap = 14;
+      const n = Math.max(1, Math.min(Number(matchCount) || 0, PNG_MAX_MATCHES));
       const listTop = headerEnd;
       const listBottom = PNG_H - footerH;
       const avail = listBottom - listTop;
       let rowH = Math.floor((avail - gap * (n - 1)) / n);
-      rowH = Math.min(168, Math.max(108, rowH));
+      rowH = Math.min(248, Math.max(128, rowH));
       while (n > 0 && listTop + n * rowH + (n - 1) * gap > listBottom) rowH--;
       return { footerH, headerEnd: listTop, gap, rowH, n, listBottom };
     }
 
-    function drawMatchRowPNG(ctx, m, y, rowH, t, accentCol) {
-      const pad = 32;
+    function drawMatchRowPNG(ctx, m, y, rowH, t) {
+      const pad = 24;
       const cardX = pad;
       const cardW = PNG_W - pad * 2;
-      const tvH = 38;
-      const mainH = rowH - tvH - 10;
+      const tvH = 50;
+      const mainH = rowH - tvH - 14;
+      const accent = t.accent;
 
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 22;
+      ctx.shadowOffsetY = 10;
       const cg = ctx.createLinearGradient(cardX, y, cardX + cardW, y + rowH);
       cg.addColorStop(0, t.cardHi || t.card);
       cg.addColorStop(1, t.card);
-      drawRoundRect(ctx, cardX, y, cardW, rowH, 18, cg, accentCol, 2);
-      ctx.fillStyle = accentCol;
-      ctx.fillRect(cardX, y + 8, 5, rowH - 16);
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 22, cg, accent, 2.5);
+      ctx.restore();
 
-      const timeW = 76;
-      const timeX = cardX + 14;
-      const timeY = y + (mainH - 64) / 2 + 4;
-      drawRoundRect(ctx, timeX, timeY, timeW, 64, 14, t.timeBg || t.bg, accentCol, 1.5);
-      ctx.fillStyle = t.accent;
-      ctx.font = "900 28px 'Segoe UI', sans-serif";
+      ctx.fillStyle = accent;
+      ctx.fillRect(cardX, y + 10, 6, rowH - 20);
+
+      if (m.competition) drawLeagueChip(ctx, cardX + cardW - 10, y + 12, m.competition, t);
+
+      const timeW = 96;
+      const timeBoxH = 80;
+      const timeX = cardX + 16;
+      const timeY = y + 12 + (mainH - timeBoxH) / 2;
+      ctx.save();
+      ctx.shadowColor = t.accentGlow || accent;
+      ctx.shadowBlur = 12;
+      drawRoundRect(ctx, timeX, timeY, timeW, timeBoxH, 16, t.timeBg || t.bg, accent, 2);
+      ctx.restore();
+      ctx.fillStyle = accent;
+      ctx.font = "900 34px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(m.kickoff, timeX + timeW / 2, timeY + 36);
+      ctx.fillText(m.kickoff, timeX + timeW / 2, timeY + 44);
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 13px 'Segoe UI', sans-serif";
-      ctx.fillText("WIB", timeX + timeW / 2, timeY + 54);
+      ctx.font = "bold 16px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, timeY + 66);
 
-      const contentX = cardX + timeW + 22;
-      const contentW = cardW - timeW - 30;
+      const contentX = cardX + timeW + 26;
+      const contentW = cardW - timeW - 36;
       const mid = contentX + contentW / 2;
-      const halfW = (contentW - 56) / 2;
-      const teamY = y + 8;
-      const logoSz = Math.min(50, Math.max(40, mainH - 16));
+      const halfW = (contentW - 72) / 2;
+      const teamY = y + 12;
+      const teamH = mainH - 8;
+      const logoSz = Math.min(64, Math.max(52, teamH - 12));
 
       const hImg = getCachedLogo(resolveTeamLogo(m.home));
       const aImg = getCachedLogo(resolveTeamLogo(m.away));
-      drawTeamSide(ctx, m.home, hImg, contentX, teamY, halfW, mainH - 8, logoSz, t, "home");
-      drawTeamSide(ctx, m.away, aImg, mid + 28, teamY, halfW, mainH - 8, logoSz, t, "away");
-      drawVsBadge(ctx, mid, teamY + (mainH - 8) / 2, t);
+      drawTeamSide(ctx, m.home, hImg, contentX, teamY, halfW, teamH, logoSz, t, "home");
+      drawTeamSide(ctx, m.away, aImg, mid + 36, teamY, halfW, teamH, logoSz, t, "away");
+      drawVsBadge(ctx, mid, teamY + teamH / 2, t);
 
-      const tvStr = shortTv(m);
-      drawTvBar(ctx, contentX, y + rowH - tvH - 6, contentW, tvH, tvStr, t, !!(m.tvFree || []).length);
+      drawTvBar(ctx, contentX, y + rowH - tvH - 8, contentW, tvH, shortTv(m), t, !!(m.tvFree || []).length);
     }
 
     async function downloadPNG() {
@@ -1285,7 +1344,7 @@
       try {
         await loadStaticLogos();
         const t = getTheme();
-        const dataMatches = matches.slice(0, 10);
+        const dataMatches = matches.slice(0, PNG_MAX_MATCHES);
         const urls = [...new Set(
           dataMatches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
         )];
@@ -1303,12 +1362,12 @@
         drawThemeBackground(ctx, W, H, t);
         drawBackgroundWatermark(ctx, W, H, t);
         const headerEnd = drawHeaderPNG(ctx, W, t, brandImg);
-        const footerH = brandImg ? 100 : 82;
+        const footerH = brandImg ? 108 : 88;
         const layout = computePngLayout(dataMatches.length, headerEnd, footerH);
 
         dataMatches.forEach((m, i) => {
           const y = layout.headerEnd + i * (layout.rowH + layout.gap);
-          drawMatchRowPNG(ctx, m, y, layout.rowH, t, t.borders[i % t.borders.length]);
+          drawMatchRowPNG(ctx, m, y, layout.rowH, t);
         });
 
         const footY = layout.listBottom;
@@ -1328,10 +1387,10 @@
         ctx.lineTo(W - 40, footY);
         ctx.stroke();
         if (brandImg) {
-          drawBrandLogoCircle(ctx, W / 2, footY + 38, 56, t, brandImg);
+          drawBrandLogoCircle(ctx, W / 2, footY + 42, 64, t, brandImg);
         }
         ctx.fillStyle = t.sub;
-        ctx.font = "bold 24px 'Segoe UI', sans-serif";
+        ctx.font = "bold 26px 'Segoe UI', sans-serif";
         ctx.textAlign = "center";
         const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
         const footerTextY = brandImg ? footY + 72 : footY + 50;
@@ -1343,7 +1402,7 @@
         link.click();
 
         const loaded = urls.filter((u) => getCachedLogo(u)).length;
-        const extra = matches.length > 10 ? ` (maks. 10 dari ${matches.length})` : "";
+        const extra = matches.length > PNG_MAX_MATCHES ? ` (maks. ${PNG_MAX_MATCHES} dari ${matches.length})` : "";
         setStatus(`✓ PNG "${t.name}": ${dataMatches.length} pertandingan${extra} · logo ${loaded}/${urls.length}`, "success");
       } catch (err) {
         setStatus(`Gagal ekspor: ${err.message}`, "error");
