@@ -310,89 +310,95 @@
 
     .sim-card {
       background: var(--t-card, #111625);
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid var(--t-border, #1e2942);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      padding: 8px 10px;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      grid-template-rows: auto auto;
-      gap: 6px 10px;
-      align-items: center;
+      border-left: 3px solid var(--t-accent, #22c55e);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      padding: 8px 10px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       font-size: 0.7rem;
     }
+    .sim-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
     .sim-time {
-      grid-row: 1 / 3;
-      align-self: center;
+      flex-shrink: 0;
       font-weight: 800;
       color: var(--t-accent, #22c55e);
       background: var(--t-time-bg, #070a13);
       border: 1px solid var(--t-border, #1e2942);
-      padding: 6px 8px;
-      border-radius: 10px;
-      box-shadow: 0 0 12px var(--t-accent-glow, transparent);
-      font-size: 0.72rem;
-      line-height: 1.2;
+      padding: 6px 7px;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      line-height: 1.15;
       text-align: center;
-      min-width: 44px;
+      min-width: 42px;
     }
     .sim-time small {
       display: block;
-      font-size: 0.55rem;
+      font-size: 0.5rem;
       color: var(--t-sub, #64748b);
       font-weight: 700;
     }
     .sim-teams {
-      grid-column: 2;
+      flex: 1;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
-      color: var(--t-text, #fff);
+      gap: 4px;
       min-width: 0;
     }
     .team-block {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 0;
-      flex: 1 1 0;
+      gap: 5px;
+      flex: 1;
       min-width: 0;
     }
+    .team-block.away {
+      flex-direction: row-reverse;
+    }
     .team-block img {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       object-fit: contain;
       flex-shrink: 0;
     }
     .team-name {
       font-weight: 700;
-      font-size: 0.68rem;
+      font-size: 0.6rem;
       line-height: 1.2;
-      text-align: center;
       word-break: break-word;
-      hyphens: auto;
-      max-width: 100%;
-      margin-top: 7px;
+      color: var(--t-text, #fff);
     }
+    .team-block.home .team-name { text-align: left; }
+    .team-block.away .team-name { text-align: right; }
     .vs-label {
-      color: var(--t-sub, #64748b);
-      font-size: 0.58rem;
-      font-weight: 800;
       flex-shrink: 0;
-      padding: 0 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--t-accent, #22c55e);
+      color: #fff;
+      font-size: 0.5rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .sim-tv {
-      grid-column: 2;
-      grid-row: 2;
       color: var(--t-tv, #fbbf24);
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.58rem;
-      line-height: 1.25;
       text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 6px;
+      padding: 4px 6px;
       word-break: break-word;
-      padding-top: 2px;
-      border-top: 1px solid var(--t-border, #1e2942);
     }
 
     .watermark-footer {
@@ -917,20 +923,22 @@
         const homeUrl = resolveTeamLogo(m.home);
         const awayUrl = resolveTeamLogo(m.away);
         const borderColor = getTheme().borders[i % getTheme().borders.length];
-        return `<div class="sim-card" style="border-left:3px solid ${borderColor}">
-          <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
-          <span class="sim-teams">
-            <span class="team-block">
+        return `<div class="sim-card" style="border-left-color:${borderColor}">
+          <div class="sim-main">
+            <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
+            <span class="sim-teams">
+              <span class="team-block home">
               ${logoTag(homeUrl, m.home)}
               <span class="team-name">${escapeHtml(m.home)}</span>
             </span>
             <span class="vs-label">VS</span>
-            <span class="team-block">
+              <span class="team-block away">
               ${logoTag(awayUrl, m.away)}
               <span class="team-name">${escapeHtml(m.away)}</span>
             </span>
           </span>
-          <span class="sim-tv">${escapeHtml(tvStr)}</span>
+          </div>
+          <span class="sim-tv">📺 ${escapeHtml(tvStr)}</span>
         </div>`;
       }).join("");
 
@@ -1015,15 +1023,10 @@
 
     function drawDecoStadium(ctx, W, H, t) {
       const g = ctx.createLinearGradient(0, 0, 0, H);
-      g.addColorStop(0, t.bg2); g.addColorStop(0.45, t.bg); g.addColorStop(1, t.bg2);
+      g.addColorStop(0, t.bg2); g.addColorStop(0.5, t.bg); g.addColorStop(1, t.bg2);
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = "rgba(74,222,128,0.04)";
-      for (let i = 0; i < 14; i++) ctx.fillRect(0, i * (H / 14), W, H / 28);
-      ctx.strokeStyle = "rgba(255,255,255,0.07)"; ctx.lineWidth = 3;
-      const cy = H * 0.42;
-      ctx.beginPath(); ctx.arc(W / 2, cy, 200, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(50, cy); ctx.lineTo(W - 50, cy); ctx.stroke();
-      ctx.strokeRect(50, cy - 140, W - 100, 280);
+      ctx.fillStyle = "rgba(74,222,128,0.035)";
+      for (let i = 0; i < 20; i++) ctx.fillRect(0, i * (H / 20), W, H / 40);
     }
 
     function drawDecoCyber(ctx, W, H, t) {
@@ -1086,28 +1089,6 @@
       ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
     }
 
-    function pngLogoSize(rowH) {
-      const tvZone = 56;
-      const teamsH = rowH - tvZone - 14;
-      const nameBlock = 2 * 28;
-      const gap = 22;
-      return Math.round(Math.min(78, Math.max(56, teamsH - nameBlock - gap)));
-    }
-
-    function pngNameGap(logoSize) {
-      return Math.max(20, Math.round(logoSize * 0.34));
-    }
-
-    function drawLogoRing(ctx, x, y, size, t) {
-      const r = size / 2 + 10;
-      const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
-      g.addColorStop(0, t.cardHi || t.card); g.addColorStop(1, t.border);
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = g; ctx.fill();
-      ctx.strokeStyle = t.accent; ctx.globalAlpha = 0.35; ctx.lineWidth = 2; ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-
     function wrapTeamName(ctx, text, maxW, maxLines) {
       const words = text.split(/\s+/);
       const lines = [];
@@ -1136,20 +1117,60 @@
       return lines.slice(0, maxLines);
     }
 
-    function drawTeamBlock(ctx, name, logo, xCenter, logoY, maxW, logoSize, t) {
-      const sz = logoSize || 64;
-      const gap = pngNameGap(sz);
-      const fontPx = Math.round(sz * 0.42);
-      const lineH = Math.round(fontPx * 1.2);
-      drawLogoRing(ctx, xCenter, logoY + sz / 2, sz, t);
-      if (logo) ctx.drawImage(logo, xCenter - sz / 2, logoY, sz, sz);
-      const textY = logoY + sz + gap;
-      ctx.fillStyle = t.text;
-      ctx.font = `bold ${fontPx}px 'Segoe UI', system-ui, sans-serif`;
+    function drawTeamSide(ctx, name, logo, x, y, w, h, logoSz, t, side) {
+      const fontPx = Math.max(17, Math.min(24, Math.round(logoSz * 0.42)));
+      const lineH = fontPx + 5;
+      const ly = y + (h - logoSz) / 2;
+      if (side === "home") {
+        const lx = x + 6;
+        if (logo) ctx.drawImage(logo, lx, ly, logoSz, logoSz);
+        ctx.fillStyle = t.text;
+        ctx.font = `bold ${fontPx}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = "left";
+        const nameX = lx + logoSz + 12;
+        const nameW = w - logoSz - 16;
+        const lines = wrapTeamName(ctx, name, nameW, 2);
+        const blockH = lines.length * lineH;
+        let ty = y + (h - blockH) / 2 + fontPx;
+        lines.forEach((ln) => { ctx.fillText(ln, nameX, ty); ty += lineH; });
+      } else {
+        const lx = x + w - logoSz - 6;
+        if (logo) ctx.drawImage(logo, lx, ly, logoSz, logoSz);
+        ctx.fillStyle = t.text;
+        ctx.font = `bold ${fontPx}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = "right";
+        const nameX = lx - 10;
+        const nameW = w - logoSz - 16;
+        const lines = wrapTeamName(ctx, name, nameW, 2);
+        const blockH = lines.length * lineH;
+        let ty = y + (h - blockH) / 2 + fontPx;
+        lines.forEach((ln) => { ctx.fillText(ln, nameX, ty); ty += lineH; });
+      }
+    }
+
+    function drawVsBadge(ctx, cx, cy, t) {
+      const r = 22;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = t.accent;
+      ctx.fill();
+      ctx.fillStyle = t.bg;
+      ctx.font = "900 16px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      const lines = wrapTeamName(ctx, name, maxW, 2);
-      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * lineH));
-      return textY + lines.length * lineH;
+      ctx.textBaseline = "middle";
+      ctx.fillText("VS", cx, cy + 1);
+      ctx.textBaseline = "alphabetic";
+    }
+
+    function drawTvBar(ctx, x, y, w, h, tvStr, t, isFree) {
+      drawRoundRect(ctx, x, y, w, h, h / 2, "rgba(0,0,0,0.35)", null);
+      ctx.fillStyle = isFree ? t.tvFree : t.tv;
+      ctx.font = "bold 22px 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const lines = wrapTeamName(ctx, "📺  " + tvStr, w - 20, 1);
+      ctx.fillText(lines[0] || tvStr, x + w / 2, y + h / 2 + 1);
+      ctx.textBaseline = "alphabetic";
     }
 
     function drawBackgroundWatermark(ctx, W, H, t) {
@@ -1166,51 +1187,30 @@
     }
 
     function drawHeaderPNG(ctx, W, t, brandImg) {
-      const title = (inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase();
+      const title = (inputHeader.value || "JADWAL BOLA").toUpperCase();
       const dateStr = formatDateID(selectedDate).toUpperCase();
+      const pad = 36;
+      const barY = 20;
+      const barH = brandImg ? 118 : 96;
+      const barW = W - pad * 2;
 
-      let titleY = 108;
-      if (brandImg) {
-        const sz = 104;
-        drawBrandLogoCircle(ctx, W / 2, 14 + sz / 2, sz, t, brandImg);
-        titleY = 14 + sz + 32;
-      }
+      const hg = ctx.createLinearGradient(pad, barY, pad + barW, barY + barH);
+      hg.addColorStop(0, t.cardHi || t.card);
+      hg.addColorStop(1, t.card);
+      drawRoundRect(ctx, pad, barY, barW, barH, 22, hg, t.accent, 2);
 
-      const barW = 220;
-      const barG = ctx.createLinearGradient(W / 2 - barW, 0, W / 2 + barW, 0);
-      barG.addColorStop(0, "transparent");
-      barG.addColorStop(0.5, t.accent);
-      barG.addColorStop(1, "transparent");
-      ctx.fillStyle = barG;
-      ctx.fillRect(W / 2 - barW, titleY + 42, barW * 2, 4);
+      const textX = brandImg ? pad + 108 : W / 2;
+      ctx.textAlign = brandImg ? "left" : "center";
+      if (brandImg) drawBrandLogoCircle(ctx, pad + 58, barY + barH / 2, 76, t, brandImg);
 
-      ctx.save();
-      ctx.shadowColor = t.accentGlow || t.accent;
-      ctx.shadowBlur = 24;
       ctx.fillStyle = t.text;
-      ctx.font = "900 46px 'Segoe UI', 'Arial Black', sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(title, W / 2, titleY);
-      ctx.restore();
-
-      const pillW = Math.min(ctx.measureText(dateStr).width + 48, W - 100);
-      const dateY = titleY + 52;
-      drawRoundRect(ctx, W / 2 - pillW / 2, dateY, pillW, 40, 20, t.cardHi || t.card, t.border, 1.5);
+      ctx.font = "900 42px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.fillText(title, textX, barY + (brandImg ? 48 : 44));
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 21px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(dateStr, W / 2, dateY + 27);
+      ctx.font = "bold 20px 'Segoe UI', sans-serif";
+      ctx.fillText(dateStr, textX, barY + (brandImg ? 82 : 78));
 
-      const lineY = dateY + 58;
-      ctx.strokeStyle = t.border;
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(48, lineY);
-      ctx.lineTo(W - 48, lineY);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-      return lineY + 16;
+      return barY + barH + 18;
     }
 
     function getMatchesForDate(iso) {
@@ -1221,91 +1221,58 @@
     }
 
     function computePngLayout(matchCount, headerEnd, footerH) {
-      const gap = 10;
+      const gap = 12;
       const n = Math.max(1, Math.min(Number(matchCount) || 0, 10));
-      const listTop = Math.max(200, headerEnd);
+      const listTop = headerEnd;
       const listBottom = PNG_H - footerH;
       const avail = listBottom - listTop;
       let rowH = Math.floor((avail - gap * (n - 1)) / n);
-      rowH = Math.min(185, Math.max(96, rowH));
-      while (n > 0 && listTop + n * rowH + (n - 1) * gap > listBottom) {
-        rowH--;
-      }
+      rowH = Math.min(168, Math.max(108, rowH));
+      while (n > 0 && listTop + n * rowH + (n - 1) * gap > listBottom) rowH--;
       return { footerH, headerEnd: listTop, gap, rowH, n, listBottom };
     }
 
-    function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
-      const W = PNG_W;
-      const cardX = 24;
-      const cardW = W - 48;
+    function drawMatchRowPNG(ctx, m, y, rowH, t, accentCol) {
+      const pad = 32;
+      const cardX = pad;
+      const cardW = PNG_W - pad * 2;
+      const tvH = 38;
+      const mainH = rowH - tvH - 10;
 
-      ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.5)";
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetY = 8;
-      drawRoundRect(ctx, cardX, y, cardW, rowH, 26, t.card, null);
-      ctx.restore();
+      const cg = ctx.createLinearGradient(cardX, y, cardX + cardW, y + rowH);
+      cg.addColorStop(0, t.cardHi || t.card);
+      cg.addColorStop(1, t.card);
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 18, cg, accentCol, 2);
+      ctx.fillStyle = accentCol;
+      ctx.fillRect(cardX, y + 8, 5, rowH - 16);
 
-      ctx.fillStyle = borderCol;
-      ctx.fillRect(cardX, y + 10, 7, rowH - 20);
-
+      const timeW = 76;
       const timeX = cardX + 14;
-      const timeW = 94;
-      const timeH = rowH - 16;
-      drawRoundRect(ctx, timeX, y + 8, timeW, timeH, 18, t.timeBg || t.bg, borderCol, 2.5);
+      const timeY = y + (mainH - 64) / 2 + 4;
+      drawRoundRect(ctx, timeX, timeY, timeW, 64, 14, t.timeBg || t.bg, accentCol, 1.5);
       ctx.fillStyle = t.accent;
-      ctx.font = "900 34px 'Segoe UI', sans-serif";
+      ctx.font = "900 28px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.4);
+      ctx.fillText(m.kickoff, timeX + timeW / 2, timeY + 36);
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 15px 'Segoe UI', sans-serif";
-      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.57);
+      ctx.font = "bold 13px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, timeY + 54);
 
-      const contentX = cardX + 116;
-      const contentW = cardW - 124;
-      const cx = contentX + contentW / 2;
-      const homeCx = contentX + contentW * 0.24;
-      const awayCx = contentX + contentW * 0.76;
-      const nameW = Math.floor(contentW * 0.46);
-      const teamsTop = y + 10;
-      const logoSize = pngLogoSize(rowH);
+      const contentX = cardX + timeW + 22;
+      const contentW = cardW - timeW - 30;
+      const mid = contentX + contentW / 2;
+      const halfW = (contentW - 56) / 2;
+      const teamY = y + 8;
+      const logoSz = Math.min(50, Math.max(40, mainH - 16));
 
       const hImg = getCachedLogo(resolveTeamLogo(m.home));
       const aImg = getCachedLogo(resolveTeamLogo(m.away));
-      drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize, t);
-      drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize, t);
-
-      const vsY = teamsTop + logoSize / 2 + 4;
-      const vsPadW = 44;
-      const vsG = ctx.createLinearGradient(cx - vsPadW, vsY, cx + vsPadW, vsY);
-      vsG.addColorStop(0, "transparent");
-      vsG.addColorStop(0.5, t.accent);
-      vsG.addColorStop(1, "transparent");
-      ctx.fillStyle = vsG;
-      ctx.fillRect(cx - vsPadW - 4, vsY - 16, vsPadW * 2 + 8, 32);
-      ctx.fillStyle = t.text;
-      ctx.font = "900 20px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("VS", cx, vsY + 7);
-
-      const divY = y + rowH - 50;
-      const divG = ctx.createLinearGradient(contentX, 0, contentX + contentW, 0);
-      divG.addColorStop(0, "transparent");
-      divG.addColorStop(0.5, t.border);
-      divG.addColorStop(1, "transparent");
-      ctx.strokeStyle = divG;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(contentX + 4, divY);
-      ctx.lineTo(contentX + contentW - 4, divY);
-      ctx.stroke();
+      drawTeamSide(ctx, m.home, hImg, contentX, teamY, halfW, mainH - 8, logoSz, t, "home");
+      drawTeamSide(ctx, m.away, aImg, mid + 28, teamY, halfW, mainH - 8, logoSz, t, "away");
+      drawVsBadge(ctx, mid, teamY + (mainH - 8) / 2, t);
 
       const tvStr = shortTv(m);
-      ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
-      ctx.font = "900 24px 'Segoe UI', sans-serif";
-      ctx.textAlign = "center";
-      const tvLines = wrapTeamName(ctx, tvStr, contentW - 8, 2);
-      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 28 + j * 28));
+      drawTvBar(ctx, contentX, y + rowH - tvH - 6, contentW, tvH, tvStr, t, !!(m.tvFree || []).length);
     }
 
     async function downloadPNG() {
