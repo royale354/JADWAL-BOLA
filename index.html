@@ -398,14 +398,14 @@
 
       // ── TEMA BARU ──────────────────────────────────────
       ice: {
-        name:"❄️ Es Biru", swatch:"linear-gradient(145deg,#bfdbfe 10%,#0ea5e9 60%,#0369a1 100%)",
-        previewBg:"radial-gradient(ellipse at 50% 0%,rgba(14,165,233,0.5),transparent 65%),linear-gradient(180deg,#e0f2fe,#c0e7ff)",
-        decoOverlay:"repeating-linear-gradient(60deg,transparent,transparent 22px,rgba(255,255,255,0.22) 22px,rgba(255,255,255,0.22) 44px)",
-        bg:"#d0eefe",bg2:"#e8f5ff",card:"rgba(255,255,255,0.82)",cardHi:"rgba(255,255,255,0.96)",
-        timeBg:"#bfdbfe",border:"#7dd3fc",text:"#0c2a40",sub:"#0369a1",
-        accent:"#0284c7",accentGlow:"rgba(2,132,199,0.4)",tv:"#7c3aed",tvFree:"#059669",
-        footerBg:"#bae6fd",glow:"rgba(14,165,233,0.3)",glowTop:"rgba(14,165,233,0.25)",glowBottom:"rgba(56,189,248,0.18)",
-        borders:["#0284c7","#38bdf8","#0ea5e9","#7dd3fc"],wm:"rgba(2,132,199,0.07)",deco:"ice",
+        name:"❄️ Es Biru", swatch:"linear-gradient(145deg,#020c18 30%,#0369a1 60%,#38bdf8 100%)",
+        previewBg:"radial-gradient(ellipse at 50% 0%,rgba(56,189,248,0.3),transparent 65%),linear-gradient(180deg,#040f1e,#020c18)",
+        decoOverlay:"repeating-linear-gradient(60deg,transparent,transparent 22px,rgba(56,189,248,0.05) 22px,rgba(56,189,248,0.05) 44px)",
+        bg:"#020c18",bg2:"#040f1e",card:"rgba(4,18,38,0.94)",cardHi:"rgba(6,26,54,0.98)",
+        timeBg:"#031020",border:"#0e4d78",text:"#e0f2fe",sub:"#38bdf8",
+        accent:"#38bdf8",accentGlow:"rgba(56,189,248,0.55)",tv:"#fbbf24",tvFree:"#4ade80",
+        footerBg:"#010810",glow:"rgba(56,189,248,0.35)",glowTop:"rgba(14,165,233,0.28)",glowBottom:"rgba(2,132,199,0.15)",
+        borders:["#38bdf8","#0ea5e9","#7dd3fc","#0284c7"],wm:"rgba(56,189,248,0.045)",deco:"ice",
       },
       dusk: {
         name:"🌆 Dusk", swatch:"linear-gradient(145deg,#1e0a2e 30%,#7c3aed 60%,#f59e0b 100%)",
@@ -817,15 +817,23 @@
         ctx.fillStyle="rgba(59,130,246,0.045)";
         for(let i=0;i<H;i+=100) ctx.fillRect(0,i,W,50);
       } else if (t.deco==="ice") {
-        // Kristal efek — diagonal garis putih samar
-        ctx.strokeStyle="rgba(255,255,255,0.2)"; ctx.lineWidth=1.5;
+        // Kristal efek — hexagon grid samar
+        ctx.strokeStyle="rgba(56,189,248,0.07)"; ctx.lineWidth=1.5;
         for(let i=-H;i<W+H;i+=80){
           ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+H*0.7,H);ctx.stroke();
         }
-        // Glow atas biru
-        const rg=ctx.createRadialGradient(W/2,0,0,W/2,0,700);
-        rg.addColorStop(0,"rgba(14,165,233,0.4)");rg.addColorStop(1,"transparent");
-        ctx.fillStyle=rg;ctx.fillRect(0,0,W,700);
+        ctx.strokeStyle="rgba(56,189,248,0.05)"; ctx.lineWidth=1;
+        for(let i=-H;i<W+H;i+=80){
+          ctx.beginPath();ctx.moveTo(i+40,0);ctx.lineTo(i+40+H*0.7,H);ctx.stroke();
+        }
+        // Glow atas biru terang
+        const rg=ctx.createRadialGradient(W/2,0,0,W/2,0,750);
+        rg.addColorStop(0,"rgba(14,165,233,0.38)");rg.addColorStop(0.5,"rgba(56,189,248,0.12)");rg.addColorStop(1,"transparent");
+        ctx.fillStyle=rg;ctx.fillRect(0,0,W,750);
+        // Glow kiri bawah subtle
+        const rg2=ctx.createRadialGradient(0,H,0,0,H,500);
+        rg2.addColorStop(0,"rgba(2,132,199,0.2)");rg2.addColorStop(1,"transparent");
+        ctx.fillStyle=rg2;ctx.fillRect(0,H-500,W,500);
       } else if (t.deco==="dusk") {
         // Diagonal stripe ungu
         ctx.strokeStyle="rgba(124,58,237,0.08)"; ctx.lineWidth=2;
@@ -1067,12 +1075,14 @@
 
       const tvY = cardY + cardH - TV_H - 10;
       const tvX = cX + STRIPE + 10, tvW = cW - STRIPE - 20;
+      // TV bar: pakai timeBg tema agar konsisten, bukan selalu hitam
+      const tvBase = t.timeBg || t.bg;
       const tvG = ctx.createLinearGradient(tvX,tvY,tvX+tvW,tvY);
-      tvG.addColorStop(0,"rgba(0,0,0,0.55)"); tvG.addColorStop(0.5,"rgba(0,0,0,0.42)"); tvG.addColorStop(1,"rgba(0,0,0,0.55)");
-      drawRR(ctx, tvX, tvY, tvW, TV_H, TV_H/2, tvG, accentColor+"88", 1.5);
+      tvG.addColorStop(0, tvBase+"ee"); tvG.addColorStop(0.5, tvBase+"cc"); tvG.addColorStop(1, tvBase+"ee");
+      drawRR(ctx, tvX, tvY, tvW, TV_H, TV_H/2, tvG, accentColor+"cc", 2);
       const isFree = (m.tvFree||[]).length > 0;
       ctx.fillStyle = isFree ? (t.tvFree||"#4ade80") : (t.tv||"#fbbf24");
-      ctx.font=`700 27px Arial, sans-serif`;
+      ctx.font=`800 27px Arial Black, Arial, sans-serif`;
       ctx.textAlign="center"; ctx.textBaseline="middle";
       ctx.fillText("📺  " + shortTv(m), tvX+tvW/2, tvY+TV_H/2+1);
       ctx.textBaseline="alphabetic";
@@ -1131,26 +1141,40 @@
         const ctx=canvas.getContext("2d");
         ctx.textBaseline="alphabetic";
 
-        drawBg(ctx, W, H, t);
-        drawWatermarkBg(ctx, W, H, t);
-        const headerEnd = drawHeader(ctx, W, t, brandImg);
-
-        const FOOTER_H = brandImg ? 118 : 90;
-        const listTop = headerEnd;
-        const listBottom = H - FOOTER_H;
+        // ── Hitung layout: header dulu di offscreen canvas ──
+        const FOOTER_H = brandImg ? 130 : 100;
         const n = data.length;
-        const GAP = 14;
-        const avail = listBottom - listTop - GAP*(n-1);
+        const GAP = 12;
+        const CARD_MIN = 246;   // minimum konten bisa muat
+        const CARD_MAX = 290;   // maksimum agar tidak terlalu longgar
 
-        let cardH = Math.floor(avail / n);
-        cardH = Math.min(286, Math.max(158, cardH));
-        while(n > 0 && listTop + n*cardH + GAP*(n-1) > listBottom) cardH -= 1;
+        // Ukur headerEnd pakai offscreen supaya main canvas bersih
+        const offC = document.createElement("canvas");
+        offC.width = W; offC.height = H*2;
+        const offX = offC.getContext("2d");
+        const headerEnd = drawHeader(offX, W, t, brandImg);
+
+        const listTop = headerEnd + 10;
+        const availH  = H - listTop - FOOTER_H - GAP*(n-1);
+        let cardH = Math.floor(availH / n);
+        cardH = Math.min(CARD_MAX, Math.max(CARD_MIN, cardH));
+
+        // Kalau masih tidak muat, perbesar canvas secara vertikal
+        const needed = listTop + n*(cardH+GAP) - GAP + FOOTER_H + 20;
+        const finalH = Math.max(H, needed);
+        canvas.height = finalH;
+
+        // Gambar ke canvas utama sekarang ukuran sudah benar
+        drawBg(ctx, W, finalH, t);
+        drawWatermarkBg(ctx, W, finalH, t);
+        drawHeader(ctx, W, t, brandImg);
 
         data.forEach((m, i) => {
           drawMatchRow(ctx, m, listTop + i*(cardH+GAP), cardH, i, t);
         });
 
-        drawFooter(ctx, W, H, listBottom, t, brandImg);
+        const footerY = listTop + n*(cardH+GAP) - GAP + 16;
+        drawFooter(ctx, W, finalH, footerY, t, brandImg);
 
         const a = document.createElement("a");
         a.download = `jadwal-${currentTheme}-${selectedDate}.png`;
