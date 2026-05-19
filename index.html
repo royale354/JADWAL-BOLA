@@ -9,175 +9,475 @@
 
     body {
       font-family: "Segoe UI", system-ui, sans-serif;
-      background: #060913; color: #f1f5f9;
-      min-height: 100vh; padding: 24px 16px 48px;
+      background: #060913;
+      color: #f1f5f9;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
     }
 
-    .toolbar {
-      max-width: 600px; margin: 0 auto 20px;
-      background: #111625; padding: 20px;
-      border-radius: 14px; border: 1px solid #1e293b;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    .app-layout {
+      display: grid;
+      grid-template-columns: minmax(300px, 380px) 1fr;
+      gap: 28px;
+      max-width: 1280px;
+      margin: 0 auto;
+      align-items: start;
     }
 
-    .toolbar h1 { font-size: 1.4rem; font-weight: 800; color: #22c55e; }
-    .toolbar p  { font-size: 0.85rem; color: #94a3b8; margin-bottom: 16px; }
+    @media (max-width: 960px) {
+      .app-layout { grid-template-columns: 1fr; }
+      .preview-panel { justify-content: center; }
+    }
+
+    .sidebar {
+      background: #111625;
+      padding: 22px;
+      border-radius: 14px;
+      border: 1px solid #1e293b;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      position: sticky;
+      top: 16px;
+    }
+
+    .sidebar h1 { font-size: 1.35rem; font-weight: 800; color: #22c55e; }
+    .sidebar > p { font-size: 0.82rem; color: #94a3b8; margin: 6px 0 16px; }
 
     .branding-inputs {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      margin-bottom: 14px; background: #0b0f19;
-      padding: 12px; border-radius: 8px; border: 1px solid #1e2942;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+      background: #0b0f19;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #1e2942;
     }
     .branding-inputs label {
-      display: flex; flex-direction: column;
-      font-size: 0.75rem; color: #64748b; font-weight: 700; gap: 4px;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: 700;
+      gap: 4px;
     }
     .branding-inputs input {
-      background: #111625; border: 1px solid #334155; color: #fff;
-      padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; outline: none;
+      background: #111625;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
     }
-    .branding-inputs label.wide { grid-column: span 2; }
+    .branding-inputs input:focus { border-color: #22c55e; }
 
-    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 14px 0 8px;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .theme-card {
+      cursor: pointer;
+      border: 2px solid #334155;
+      border-radius: 10px;
+      padding: 10px;
+      background: #0b0f19;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .theme-card:hover { transform: translateY(-1px); }
+    .theme-card.active { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e44; }
+    .theme-card input { display: none; }
+    .theme-swatch {
+      height: 28px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .theme-card span {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #cbd5e1;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
 
     input[type="date"] {
-      background: #1e293b; color: #fff; border: 1px solid #334155;
-      padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
-      outline: none; color-scheme: dark;
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      outline: none;
+      color-scheme: dark;
+      width: 100%;
     }
     input[type="file"] { display: none; }
 
     button, .file-label {
-      cursor: pointer; border: none; border-radius: 8px;
-      padding: 9px 16px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
       transition: opacity 0.2s, transform 0.2s;
     }
-    button:hover, .file-label:hover { opacity: 0.9; transform: translateY(-1px); }
+    button:hover, .file-label:hover { opacity: 0.92; transform: translateY(-1px); }
     button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
     .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
-      box-shadow: 0 4px 14px rgba(34,197,94,0.3);
-      width: 100%; margin-top: 6px; padding: 12px; font-size: 0.95rem;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+      width: 100%;
+      margin-top: 10px;
+      padding: 13px;
+      font-size: 0.92rem;
     }
-    .btn-secondary { background: #2563eb; color: #fff; }
-    .btn-ghost     { background: #334155; color: #e2e8f0; }
-    .btn-warn      { background: #475569; color: #fff; }
+    .btn-secondary { background: #2563eb; color: #fff; flex: 1; }
+    .btn-ghost { background: #334155; color: #e2e8f0; flex: 1; }
+    .btn-warn { background: #475569; color: #fff; font-size: 0.8rem; }
 
     .status {
-      max-width: 430px; margin: 0 auto 12px;
-      font-size: 0.85rem; color: #eab308; text-align: center; font-weight: 600;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: #eab308;
+      font-weight: 600;
+      line-height: 1.4;
     }
     .status.success { color: #22c55e; }
-    .status.error   { color: #f87171; }
+    .status.error { color: #f87171; }
+
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
 
     #export-area {
-      max-width: 430px; height: 764px; margin: 0 auto;
-      background: #070a13; border-radius: 24px; overflow: hidden;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.7); border: 2px solid #1e2942;
-      display: flex; flex-direction: column; position: relative;
+      width: 100%;
+      max-width: 430px;
+      aspect-ratio: 9 / 16;
+      max-height: min(82vh, 780px);
+      background: var(--t-bg, #070a13);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.65);
+      border: 2px solid var(--t-border, #1e2942);
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
 
     .preview-msg {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      color: rgba(255,255,255,0.03); font-size: 2.2rem; font-weight: 900;
-      text-align: center; pointer-events: none; width: 90%; letter-spacing: 2px;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.03);
+      font-size: 1.8rem;
+      font-weight: 900;
+      text-align: center;
+      pointer-events: none;
+      letter-spacing: 2px;
     }
 
-    .banner { padding: 24px 20px 10px; text-align: center; flex-shrink: 0; }
+    .banner {
+      padding: 20px 16px 8px;
+      text-align: center;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
+    }
     .banner h2 {
-      font-size: 1.4rem; font-weight: 900; color: #fff;
-      letter-spacing: 0.05em; text-transform: uppercase;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--t-text, #fff);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.2;
     }
     .banner .date-label {
-      font-size: 0.85rem; color: #94a3b8; margin-top: 4px;
-      font-weight: 700; text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--t-sub, #94a3b8);
+      margin-top: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .match-container {
-      padding: 10px 16px; display: flex; flex-direction: column;
-      gap: 8px; flex: 1; overflow-y: auto;
+      padding: 8px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
     }
 
     .sim-card {
-      background: #111625; border-radius: 50px; border: 1px solid #1e2942;
-      padding: 8px 12px; display: flex; align-items: center;
-      justify-content: space-between; font-size: 0.72rem; gap: 6px;
+      background: var(--t-card, #111625);
+      border-radius: 14px;
+      border: 1px solid var(--t-border, #1e2942);
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto;
+      gap: 6px 10px;
+      align-items: center;
+      font-size: 0.7rem;
     }
     .sim-time {
-      font-weight: 800; color: #22c55e; background: #070a13;
-      padding: 2px 8px; border-radius: 20px; flex-shrink: 0;
+      grid-row: 1 / 3;
+      align-self: center;
+      font-weight: 800;
+      color: var(--t-accent, #22c55e);
+      background: var(--t-bg, #070a13);
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      line-height: 1.2;
+      text-align: center;
+      min-width: 44px;
+    }
+    .sim-time small {
+      display: block;
+      font-size: 0.55rem;
+      color: var(--t-sub, #64748b);
+      font-weight: 700;
     }
     .sim-teams {
-      font-weight: 700; display: flex; gap: 4px; align-items: center;
-      color: #fff; flex: 1; justify-content: center; min-width: 0;
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--t-text, #fff);
+      min-width: 0;
     }
-    .sim-teams .team-name {
-      max-width: 58px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    .team-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1 1 0;
+      min-width: 0;
     }
-    .sim-teams .vs-label { color: #64748b; font-size: 0.6rem; font-weight: 800; flex-shrink: 0; }
-    .sim-teams img {
-      width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
+    .team-block img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .team-name {
+      font-weight: 700;
+      font-size: 0.62rem;
+      line-height: 1.15;
+      text-align: center;
+      word-break: break-word;
+      hyphens: auto;
+      max-width: 100%;
+    }
+    .vs-label {
+      color: var(--t-sub, #64748b);
+      font-size: 0.58rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      padding: 0 2px;
     }
     .sim-tv {
-      color: #fbbf24; font-weight: 600; font-size: 0.65rem;
-      max-width: 72px; white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis; text-align: right; flex-shrink: 0;
+      grid-column: 2;
+      grid-row: 2;
+      color: var(--t-tv, #fbbf24);
+      font-weight: 700;
+      font-size: 0.58rem;
+      line-height: 1.25;
+      text-align: center;
+      word-break: break-word;
+      padding-top: 2px;
+      border-top: 1px solid var(--t-border, #1e2942);
     }
 
     .watermark-footer {
-      background: #000; padding: 12px; text-align: center;
-      font-size: 0.75rem; color: #94a3b8; font-weight: 700;
-      border-top: 1px solid #111625; flex-shrink: 0;
+      background: var(--t-footer-bg, #000);
+      padding: 10px 12px;
+      text-align: center;
+      font-size: 0.62rem;
+      color: var(--t-sub, #94a3b8);
+      font-weight: 700;
+      border-top: 1px solid var(--t-border, #111625);
+      flex-shrink: 0;
+      line-height: 1.3;
     }
   </style>
 </head>
 <body>
 
-  <div class="toolbar">
-    <h1>⚽ Generator Jadwal Bola TikTok</h1>
-    <p>Desain Premium Kapsul Glow &amp; logo klub otomatis</p>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <h1>⚽ Generator Jadwal Bola</h1>
+      <p>Input kiri · Preview kanan · Pilih tema PNG</p>
 
-    <div class="branding-inputs">
-      <label>JUDUL ATAS (HEADER)
-        <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
-      </label>
-      <label>NAMA WATERMARK (ANTI-MALING)
-        <input type="text" id="input-wm" value="CORNERKIICK" />
-      </label>
-      <label class="wide">BAR SOSIAL MEDIA (FOOTER)
-        <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
-      </label>
-    </div>
+      <div class="branding-inputs">
+        <label>JUDUL ATAS (HEADER)
+          <input type="text" id="input-header" value="KREATOR JADWAL BOLA" />
+        </label>
+        <label>NAMA WATERMARK
+          <input type="text" id="input-wm" value="CORNERKIICK" />
+        </label>
+        <label>BAR SOSIAL MEDIA (FOOTER)
+          <input type="text" id="input-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK" />
+        </label>
+      </div>
 
-    <div class="controls">
+      <p class="section-label">Tema PNG TikTok</p>
+      <div class="theme-grid" id="theme-grid"></div>
+
+      <p class="section-label">Jadwal</p>
       <input type="date" id="date-picker" />
+      <div class="controls" style="margin-top:10px">
+        <button class="btn-ghost" id="btn-today" type="button">Hari Ini</button>
+        <button class="btn-secondary" id="btn-refresh" type="button">↻ Muat</button>
+      </div>
       <input type="file" id="file-import" accept=".html,.htm,text/html" />
-      <button class="btn-ghost" id="btn-today">Hari Ini</button>
-      <button class="btn-secondary" id="btn-refresh">↻ Muat Online</button>
-      <label class="file-label btn-warn" for="file-import">📂 Import HTML</label>
-      <button class="btn-primary" id="btn-download" disabled>⚡ DOWNLOAD PNG TIKTOK 9:16</button>
-    </div>
-  </div>
+      <label class="file-label btn-warn" for="file-import" style="display:block;text-align:center;margin-top:8px">📂 Import HTML</label>
 
-  <div class="status" id="status">Memuat data...</div>
+      <button class="btn-primary" id="btn-download" type="button" disabled>⚡ DOWNLOAD PNG 9:16</button>
+      <div class="status" id="status">Memuat data...</div>
+    </aside>
 
-  <div id="export-area">
-    <div class="preview-msg">PREVIEW LIVE</div>
-    <div class="banner">
-      <h2 id="view-header">KREATOR JADWAL BOLA</h2>
-      <div class="date-label" id="display-date">—</div>
-    </div>
-    <div id="match-list" class="match-container"></div>
-    <div class="watermark-footer" id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+    <main class="preview-panel">
+      <span class="preview-label">Preview live</span>
+      <div id="export-area" data-theme="neon">
+        <div class="preview-msg">PREVIEW</div>
+        <div class="banner">
+          <h2 id="view-header">KREATOR JADWAL BOLA</h2>
+          <div class="date-label" id="display-date">—</div>
+        </div>
+        <div id="match-list" class="match-container"></div>
+        <div class="watermark-footer" id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+      </div>
+    </main>
   </div>
 
   <script>
-    const BULAN_ID = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-    const HARI_ID  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-    const BORDER_COLORS = ["#22c55e","#3b82f6","#eab308","#ca8a04"];
+    const BULAN_ID = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    const HARI_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
-    // Path benar untuk GitHub Pages (mis. /jadwal-bola/)
+    const THEMES = {
+      neon: {
+        name: "Hijau Neon",
+        swatch: "linear-gradient(135deg,#070a13,#22c55e)",
+        bg: "#070a13",
+        card: "#111625",
+        border: "#1e2942",
+        text: "#ffffff",
+        sub: "#94a3b8",
+        accent: "#22c55e",
+        tv: "#fbbf24",
+        tvFree: "#22c55e",
+        footerBg: "#000000",
+        glowTop: "rgba(34,197,94,0.18)",
+        glowBottom: "rgba(234,179,8,0.12)",
+        borders: ["#22c55e", "#3b82f6", "#eab308", "#ca8a04"],
+        wm: "rgba(255,255,255,0.025)",
+      },
+      midnight: {
+        name: "Biru Malam",
+        swatch: "linear-gradient(135deg,#0a1628,#3b82f6)",
+        bg: "#0a1628",
+        card: "#0f1f38",
+        border: "#1e3a5f",
+        text: "#f0f9ff",
+        sub: "#93c5fd",
+        accent: "#60a5fa",
+        tv: "#fcd34d",
+        tvFree: "#34d399",
+        footerBg: "#050d18",
+        glowTop: "rgba(59,130,246,0.22)",
+        glowBottom: "rgba(99,102,241,0.15)",
+        borders: ["#3b82f6", "#6366f1", "#22d3ee", "#818cf8"],
+        wm: "rgba(255,255,255,0.03)",
+      },
+      fire: {
+        name: "Merah Api",
+        swatch: "linear-gradient(135deg,#1a0a0a,#ef4444)",
+        bg: "#120808",
+        card: "#1f1010",
+        border: "#3f1a1a",
+        text: "#fff5f5",
+        sub: "#fca5a5",
+        accent: "#f87171",
+        tv: "#fbbf24",
+        tvFree: "#4ade80",
+        footerBg: "#0a0404",
+        glowTop: "rgba(239,68,68,0.2)",
+        glowBottom: "rgba(249,115,22,0.14)",
+        borders: ["#ef4444", "#f97316", "#eab308", "#dc2626"],
+        wm: "rgba(255,255,255,0.03)",
+      },
+      royal: {
+        name: "Ungu Emas",
+        swatch: "linear-gradient(135deg,#1a1030,#eab308)",
+        bg: "#140c24",
+        card: "#1e1435",
+        border: "#3b2d5c",
+        text: "#faf5ff",
+        sub: "#c4b5fd",
+        accent: "#eab308",
+        tv: "#f0abfc",
+        tvFree: "#a3e635",
+        footerBg: "#0c0618",
+        glowTop: "rgba(234,179,8,0.15)",
+        glowBottom: "rgba(168,85,247,0.18)",
+        borders: ["#eab308", "#a855f7", "#f472b6", "#c084fc"],
+        wm: "rgba(255,255,255,0.028)",
+      },
+      clean: {
+        name: "Putih Bersih",
+        swatch: "linear-gradient(135deg,#f8fafc,#22c55e)",
+        bg: "#f1f5f9",
+        card: "#ffffff",
+        border: "#cbd5e1",
+        text: "#0f172a",
+        sub: "#64748b",
+        accent: "#16a34a",
+        tv: "#b45309",
+        tvFree: "#15803d",
+        footerBg: "#e2e8f0",
+        glowTop: "rgba(34,197,94,0.08)",
+        glowBottom: "rgba(59,130,246,0.06)",
+        borders: ["#22c55e", "#3b82f6", "#eab308", "#16a34a"],
+        wm: "rgba(15,23,42,0.04)",
+      },
+    };
+
+    let currentTheme = "neon";
+
     const BASE = (() => {
       const path = location.pathname;
       if (path.endsWith("/")) return path;
@@ -192,14 +492,15 @@
     const logoCache = {};
 
     const $ = (s) => document.querySelector(s);
-    const datePicker  = $("#date-picker");
-    const statusEl    = $("#status");
-    const matchList   = $("#match-list");
+    const datePicker = $("#date-picker");
+    const statusEl = $("#status");
+    const matchList = $("#match-list");
     const displayDate = $("#display-date");
     const btnDownload = $("#btn-download");
     const inputHeader = $("#input-header");
-    const inputWM     = $("#input-wm");
+    const inputWM = $("#input-wm");
     const inputFooter = $("#input-footer");
+    const exportArea = $("#export-area");
 
     datePicker.value = selectedDate;
     inputHeader.addEventListener("input", () => { $("#view-header").textContent = inputHeader.value.toUpperCase(); });
@@ -216,15 +517,52 @@
     }
 
     function normalizeName(n) {
-      return n
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, " ")
-        .replace(/\s+/g, " ");
+      return n.toLowerCase().trim().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ");
     }
 
     function escapeHtml(s) {
       return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function getTheme() {
+      return THEMES[currentTheme] || THEMES.neon;
+    }
+
+    function applyThemePreview(themeId) {
+      const t = THEMES[themeId] || THEMES.neon;
+      exportArea.dataset.theme = themeId;
+      exportArea.style.setProperty("--t-bg", t.bg);
+      exportArea.style.setProperty("--t-card", t.card);
+      exportArea.style.setProperty("--t-border", t.border);
+      exportArea.style.setProperty("--t-text", t.text);
+      exportArea.style.setProperty("--t-sub", t.sub);
+      exportArea.style.setProperty("--t-accent", t.accent);
+      exportArea.style.setProperty("--t-tv", t.tv);
+      exportArea.style.setProperty("--t-footer-bg", t.footerBg);
+      exportArea.style.setProperty("--t-glow-top", t.glowTop);
+      const previewMsg = exportArea.querySelector(".preview-msg");
+      if (previewMsg) {
+        previewMsg.style.color = themeId === "clean" ? "rgba(15,23,42,0.06)" : "rgba(255,255,255,0.03)";
+      }
+    }
+
+    function buildThemePicker() {
+      const grid = $("#theme-grid");
+      grid.innerHTML = Object.entries(THEMES).map(([id, t]) => `
+        <label class="theme-card ${id === currentTheme ? "active" : ""}" data-theme="${id}">
+          <input type="radio" name="theme" value="${id}" ${id === currentTheme ? "checked" : ""} />
+          <div class="theme-swatch" style="background:${t.swatch}"></div>
+          <span>${t.name}</span>
+        </label>
+      `).join("");
+
+      grid.querySelectorAll(".theme-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          currentTheme = card.dataset.theme;
+          grid.querySelectorAll(".theme-card").forEach((c) => c.classList.toggle("active", c.dataset.theme === currentTheme));
+          applyThemePreview(currentTheme);
+        });
+      });
     }
 
     async function loadStaticLogos() {
@@ -233,13 +571,6 @@
         const res = await fetch(asset("logos.json?v=3"));
         if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
         staticLogos = await res.json();
-        const n = Object.keys(staticLogos.teams || {}).length;
-        console.log("Logo DB:", n, "klub");
-        if (n < 300) {
-          console.warn(
-            "logos.json tampak belum lengkap di server. Push folder assets/logos/ + logos.json terbaru ke GitHub."
-          );
-        }
       } catch (e) {
         console.warn("Gagal muat logos.json:", e);
         staticLogos = { teams: {}, leagues: {} };
@@ -248,18 +579,13 @@
     }
 
     function slugifyName(name) {
-      return name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "") || "unknown";
+      return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "unknown";
     }
 
     function isRemotePath(p) {
       return /^https?:\/\//i.test(p || "");
     }
 
-    /** Path dasar tanpa ekstensi — file bisa .png atau .svg di assets/ */
     function logoBasePath(mapped, folder, name) {
       if (mapped && !isRemotePath(mapped)) {
         return mapped.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
@@ -298,8 +624,7 @@
     }
 
     function resolveLogoPath(pathOrUrl) {
-      if (!pathOrUrl) return null;
-      if (isRemotePath(pathOrUrl)) return null;
+      if (!pathOrUrl || isRemotePath(pathOrUrl)) return null;
       return asset(pathOrUrl);
     }
 
@@ -316,32 +641,20 @@
     }
 
     function logoKey(pathOrUrl) {
-      if (!pathOrUrl) return "";
-      return pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+      return (pathOrUrl || "").replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
     }
 
     function getCachedLogo(pathOrUrl) {
       if (!pathOrUrl) return null;
       const key = logoKey(pathOrUrl);
-      return (
-        logoCache[pathOrUrl] ||
-        logoCache[key] ||
-        logoCache[resolveLogoPath(pathOrUrl)] ||
-        logoCache[resolveLogoPath(key)] ||
-        null
-      );
+      return logoCache[pathOrUrl] || logoCache[key] || logoCache[resolveLogoPath(pathOrUrl)] || logoCache[resolveLogoPath(key)] || null;
     }
 
     function localPathCandidates(pathOrUrl) {
       if (!pathOrUrl || isRemotePath(pathOrUrl)) return [];
       const base = pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
       const exts = [".png", ".svg", ".jpg", ".webp"];
-      const out = [];
-      for (const ext of exts) {
-        const p = base + ext;
-        if (!out.includes(p)) out.push(p);
-      }
-      return out;
+      return exts.map((ext) => base + ext).filter((p, i, a) => a.indexOf(p) === i);
     }
 
     function tryLoadOne(pathOrUrl) {
@@ -366,18 +679,19 @@
       if (!pathOrUrl) return null;
       const cached = getCachedLogo(pathOrUrl);
       if (cached) return cached;
-      const candidates = localPathCandidates(pathOrUrl);
-      for (const c of candidates) {
+      for (const c of localPathCandidates(pathOrUrl)) {
         const img = await tryLoadOne(c);
         if (img) {
           cacheLogo(img, logoKey(pathOrUrl), resolveLogoPath(c));
           return img;
         }
       }
-      if (isRemotePath(pathOrUrl)) {
-        console.warn("Logo URL luar diabaikan (CORS di GitHub Pages):", pathOrUrl);
-      }
       return null;
+    }
+
+    function shortTv(m) {
+      const parts = (m.tvFree || []).concat(m.tvPaid || []);
+      return parts.length ? parts.join(" · ") : (m.tv || "-");
     }
 
     async function renderMatches(iso) {
@@ -386,7 +700,7 @@
       displayDate.textContent = formatDateID(iso);
 
       if (!matches.length) {
-        matchList.innerHTML = `<div style="text-align:center;padding-top:40px;color:#475569;font-size:0.85rem;">Tidak ada jadwal untuk tanggal ini.</div>`;
+        matchList.innerHTML = `<div style="text-align:center;padding:24px 8px;color:var(--t-sub);font-size:0.8rem;">Tidak ada jadwal untuk tanggal ini.</div>`;
         btnDownload.disabled = true;
         return;
       }
@@ -394,36 +708,32 @@
       btnDownload.disabled = false;
       await loadStaticLogos();
 
-      matchList.innerHTML = matches.map((m) => {
-        const tvStr = (m.tvFree || []).concat(m.tvPaid || []).join(" · ") || m.tv || "-";
+      matchList.innerHTML = matches.map((m, i) => {
+        const tvStr = shortTv(m);
         const homeUrl = resolveTeamLogo(m.home);
         const awayUrl = resolveTeamLogo(m.away);
-        return `<div class="sim-card">
-          <span class="sim-time">${escapeHtml(m.kickoff)}</span>
+        const borderColor = getTheme().borders[i % getTheme().borders.length];
+        return `<div class="sim-card" style="border-left:3px solid ${borderColor}">
+          <span class="sim-time">${escapeHtml(m.kickoff)}<small>WIB</small></span>
           <span class="sim-teams">
-            <span class="team-name">${escapeHtml(m.home)}</span>
-            ${logoTag(homeUrl, m.home)}
+            <span class="team-block">
+              ${logoTag(homeUrl, m.home)}
+              <span class="team-name">${escapeHtml(m.home)}</span>
+            </span>
             <span class="vs-label">VS</span>
-            ${logoTag(awayUrl, m.away)}
-            <span class="team-name">${escapeHtml(m.away)}</span>
+            <span class="team-block">
+              ${logoTag(awayUrl, m.away)}
+              <span class="team-name">${escapeHtml(m.away)}</span>
+            </span>
           </span>
           <span class="sim-tv">${escapeHtml(tvStr)}</span>
         </div>`;
       }).join("");
 
       const urls = [...new Set(
-        matches.flatMap((m) => [
-          resolveTeamLogo(m.home),
-          resolveTeamLogo(m.away),
-          resolveLeagueLogo(m.competition),
-        ]).filter(Boolean)
+        matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
       )];
-      Promise.all(urls.map(loadImage)).then((loaded) => {
-        const ok = loaded.filter(Boolean).length;
-        if (ok < urls.length) {
-          console.warn(`Logo: ${ok}/${urls.length} berhasil dimuat untuk canvas`);
-        }
-      });
+      Promise.all(urls.map(loadImage));
     }
 
     async function fetchSchedule() {
@@ -437,8 +747,7 @@
         setStatus(`✓ ${Object.values(allSchedules).flat().length} pertandingan dimuat.`, "success");
         renderMatches(selectedDate);
       } catch (e) {
-        setStatus("Gagal memuat jadwal. Pastikan data/jadwal.json ada di repo, atau Import HTML.", "error");
-        console.error(e);
+        setStatus("Gagal memuat jadwal. Import HTML atau cek data/jadwal.json.", "error");
       }
     }
 
@@ -449,27 +758,27 @@
           const doc = new DOMParser().parseFromString(e.target.result, "text/html");
           const rows = doc.querySelectorAll("table tr");
           if (!rows.length) throw new Error("Tabel jadwal tidak ditemukan.");
-
           let count = 0;
           const fileDate = selectedDate;
-
           rows.forEach((tr) => {
             const cells = [...tr.querySelectorAll("td")].map((td) => td.textContent.trim());
             if (cells.length < 4) return;
             const [kickoff, matchup, competition, tv] = cells;
             if (/kick-off/i.test(kickoff) || !/vs/i.test(matchup)) return;
-
             const parts = matchup.split(/\s+vs\s+/i);
-            const home = (parts[0] || "").trim();
-            const away = (parts[1] || "").trim();
             if (!allSchedules[fileDate]) allSchedules[fileDate] = [];
             allSchedules[fileDate].push({
-              kickoff, matchup, home, away, competition, tv,
-              tvFree: [], tvPaid: [],
+              kickoff,
+              matchup,
+              home: (parts[0] || "").trim(),
+              away: (parts[1] || "").trim(),
+              competition,
+              tv,
+              tvFree: [],
+              tvPaid: [],
             });
             count++;
           });
-
           await loadStaticLogos();
           setStatus(`✓ Import ${count} pertandingan.`, "success");
           renderMatches(selectedDate);
@@ -478,162 +787,6 @@
         }
       };
       reader.readAsText(file, "UTF-8");
-    }
-
-    async function downloadPNG() {
-      const matches = allSchedules[selectedDate] || [];
-      if (!matches.length) return;
-
-      btnDownload.disabled = true;
-      setStatus("Memuat logo untuk PNG...");
-
-      try {
-        await loadStaticLogos();
-
-        const urls = [...new Set(
-          matches.flatMap((m) => [
-            resolveTeamLogo(m.home),
-            resolveTeamLogo(m.away),
-            resolveLeagueLogo(m.competition),
-          ]).filter(Boolean)
-        )];
-        await Promise.all(urls.map(loadImage));
-
-        const W = 1080;
-        const H = 1920;
-        const canvas = document.createElement("canvas");
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext("2d");
-
-        ctx.fillStyle = "#070a13";
-        ctx.fillRect(0, 0, W, H);
-
-        const gr1 = ctx.createRadialGradient(W / 2, 0, 100, W / 2, 0, 800);
-        gr1.addColorStop(0, "rgba(34,197,94,0.18)");
-        gr1.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr1;
-        ctx.fillRect(0, 0, W, 800);
-
-        const gr2 = ctx.createRadialGradient(W / 2, H, 100, W / 2, H, 700);
-        gr2.addColorStop(0, "rgba(234,179,8,0.12)");
-        gr2.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gr2;
-        ctx.fillRect(0, 0, W, H);
-
-        const wmText = (inputWM.value || "CORNERKIICK").toUpperCase();
-        ctx.save();
-        ctx.translate(W / 2, H / 2);
-        ctx.rotate(-Math.PI / 6);
-        ctx.fillStyle = "rgba(255,255,255,0.025)";
-        ctx.font = "black 84px Segoe UI, Impact";
-        ctx.textAlign = "center";
-        [-400, -150, 100, 350].forEach((dy) => ctx.fillText(wmText, 0, dy));
-        ctx.restore();
-
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "900 54px Segoe UI, Arial Black";
-        ctx.textAlign = "center";
-        ctx.fillText((inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase(), W / 2, 140);
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "bold 32px Segoe UI";
-        ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 205);
-
-        ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(100, 245);
-        ctx.lineTo(W - 100, 245);
-        ctx.stroke();
-
-        const dataMatches = matches.slice(0, 10);
-        const rowW = W - 100;
-        const rowH = 114;
-        const gap = 20;
-        let startY = 290;
-
-        dataMatches.forEach((m, i) => {
-          const y = startY + i * (rowH + gap);
-          const cx = W / 2;
-
-          drawRoundRect(ctx, 50, y, rowW, rowH, 57, "#111625", BORDER_COLORS[i % 4], 3);
-
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "900 30px Segoe UI";
-          ctx.textAlign = "left";
-          ctx.fillText(m.kickoff, 95, y + 68);
-          ctx.fillStyle = "rgba(255,255,255,0.4)";
-          ctx.font = "700 14px Segoe UI";
-          ctx.fillText("WIB", 185, y + 66);
-
-          const compUrl = resolveLeagueLogo(m.competition);
-          const compImg = getCachedLogo(compUrl);
-          if (compImg) {
-            ctx.drawImage(compImg, cx - 28, y + 29, 56, 56);
-          } else {
-            ctx.beginPath();
-            ctx.arc(cx, y + 57, 26, 0, 2 * Math.PI);
-            ctx.fillStyle = "#070a13";
-            ctx.fill();
-            ctx.fillStyle = "#475569";
-            ctx.font = "900 13px Segoe UI";
-            ctx.textAlign = "center";
-            ctx.fillText((m.competition || "").slice(0, 3).toUpperCase(), cx, y + 62);
-          }
-
-          const hx = cx - 80;
-          const homeUrl = resolveTeamLogo(m.home);
-          const hImg = getCachedLogo(homeUrl);
-          if (hImg) ctx.drawImage(hImg, hx - 60, y + 27, 60, 60);
-          else drawCircle(ctx, hx - 50, y + 32, 50);
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "700 28px Segoe UI";
-          ctx.textAlign = "right";
-          ctx.fillText(clampText(ctx, m.home, 200), hx - 75, y + 67);
-
-          const ax = cx + 80;
-          const awayUrl = resolveTeamLogo(m.away);
-          const aImg = getCachedLogo(awayUrl);
-          if (aImg) ctx.drawImage(aImg, ax, y + 27, 60, 60);
-          else drawCircle(ctx, ax, y + 32, 50);
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "700 28px Segoe UI";
-          ctx.textAlign = "left";
-          ctx.fillText(clampText(ctx, m.away, 200), ax + 75, y + 67);
-
-          const tvStr = (m.tvFree || []).concat(m.tvPaid || []).join(" · ") || m.tv || "-";
-          ctx.fillStyle = (m.tvFree || []).length ? "#22c55e" : "#fbbf24";
-          ctx.font = "900 22px Segoe UI";
-          ctx.textAlign = "right";
-          ctx.fillText(clampText(ctx, tvStr, 160), W - 95, y + 67);
-        });
-
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, H - 100, W, 100);
-        ctx.strokeStyle = "rgba(255,255,255,0.08)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, H - 100);
-        ctx.lineTo(W, H - 100);
-        ctx.stroke();
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "bold 24px Segoe UI";
-        ctx.textAlign = "center";
-        ctx.fillText(inputFooter.value || "FOLLOW UNTUK JADWAL BOLA TERUPDATE", W / 2, H - 42);
-
-        const link = document.createElement("a");
-        link.download = `jadwal-tiktok-${selectedDate}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-
-        const loaded = urls.filter((u) => getCachedLogo(u)).length;
-        setStatus(`✓ PNG diunduh (${loaded}/${urls.length} logo termuat).`, "success");
-      } catch (err) {
-        setStatus(`Gagal ekspor: ${err.message}`, "error");
-        console.error(err);
-      } finally {
-        btnDownload.disabled = false;
-      }
     }
 
     function drawRoundRect(ctx, x, y, w, h, r, fill, stroke, sw) {
@@ -652,18 +805,189 @@
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = sw || 2; ctx.stroke(); }
     }
 
-    function drawCircle(ctx, x, y, size) {
+    function drawCircle(ctx, x, y, size, fill) {
       ctx.beginPath();
       ctx.arc(x + size / 2, y + size / 2, size / 2, 0, 2 * Math.PI);
-      ctx.fillStyle = "#1e293b";
+      ctx.fillStyle = fill || "#1e293b";
       ctx.fill();
     }
 
-    function clampText(ctx, text, maxW) {
-      if (ctx.measureText(text).width <= maxW) return text;
-      let t = text;
-      while (t.length > 1 && ctx.measureText(t + "…").width > maxW) t = t.slice(0, -1);
-      return t + "…";
+    function wrapTeamName(ctx, text, maxW, maxLines) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = "";
+      for (const w of words) {
+        const test = line ? line + " " + w : w;
+        if (ctx.measureText(test).width <= maxW) {
+          line = test;
+        } else {
+          if (line) lines.push(line);
+          line = w;
+          if (ctx.measureText(line).width > maxW) {
+            let chunk = "";
+            for (const ch of w) {
+              if (ctx.measureText(chunk + ch).width <= maxW) chunk += ch;
+              else {
+                if (chunk) lines.push(chunk);
+                chunk = ch;
+              }
+            }
+            line = chunk;
+          }
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, maxLines);
+    }
+
+    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW) {
+      const logoSize = 52;
+      if (logo) ctx.drawImage(logo, xCenter - logoSize / 2, y, logoSize, logoSize);
+      const textY = y + logoSize + 8;
+      ctx.fillStyle = getTheme().text;
+      ctx.font = "700 22px Segoe UI";
+      ctx.textAlign = "center";
+      const lines = wrapTeamName(ctx, name, maxW, 3);
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 24));
+      return textY + lines.length * 24;
+    }
+
+    async function downloadPNG() {
+      const matches = allSchedules[selectedDate] || [];
+      if (!matches.length) return;
+
+      btnDownload.disabled = true;
+      setStatus("Memuat logo untuk PNG...");
+
+      try {
+        await loadStaticLogos();
+        const t = getTheme();
+        const urls = [...new Set(
+          matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
+        )];
+        await Promise.all(urls.map(loadImage));
+
+        const W = 1080;
+        const H = 1920;
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = t.bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const gr1 = ctx.createRadialGradient(W / 2, 0, 100, W / 2, 0, 800);
+        gr1.addColorStop(0, t.glowTop);
+        gr1.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gr1;
+        ctx.fillRect(0, 0, W, 800);
+
+        const gr2 = ctx.createRadialGradient(W / 2, H, 100, W / 2, H, 700);
+        gr2.addColorStop(0, t.glowBottom);
+        gr2.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gr2;
+        ctx.fillRect(0, 0, W, H);
+
+        const wmText = (inputWM.value || "CORNERKIICK").toUpperCase();
+        ctx.save();
+        ctx.translate(W / 2, H / 2);
+        ctx.rotate(-Math.PI / 6);
+        ctx.fillStyle = t.wm;
+        ctx.font = "black 84px Segoe UI, Impact";
+        ctx.textAlign = "center";
+        [-400, -150, 100, 350].forEach((dy) => ctx.fillText(wmText, 0, dy));
+        ctx.restore();
+
+        ctx.fillStyle = t.text;
+        ctx.font = "900 52px Segoe UI, Arial Black";
+        ctx.textAlign = "center";
+        ctx.fillText((inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase(), W / 2, 130);
+        ctx.fillStyle = t.sub;
+        ctx.font = "bold 30px Segoe UI";
+        ctx.fillText(formatDateID(selectedDate).toUpperCase(), W / 2, 195);
+
+        ctx.strokeStyle = t.border;
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(80, 235);
+        ctx.lineTo(W - 80, 235);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        const dataMatches = matches.slice(0, 10);
+        const rowH = 132;
+        const gap = 16;
+        let startY = 265;
+
+        dataMatches.forEach((m, i) => {
+          const y = startY + i * (rowH + gap);
+          const borderCol = t.borders[i % t.borders.length];
+          drawRoundRect(ctx, 44, y, W - 88, rowH, 22, t.card, borderCol, 3);
+
+          ctx.fillStyle = t.accent;
+          ctx.font = "900 28px Segoe UI";
+          ctx.textAlign = "left";
+          ctx.fillText(m.kickoff, 72, y + 52);
+          ctx.fillStyle = t.sub;
+          ctx.font = "700 14px Segoe UI";
+          ctx.fillText("WIB", 72, y + 78);
+
+          const cx = W / 2;
+          const compImg = getCachedLogo(resolveLeagueLogo(m.competition));
+          if (compImg) ctx.drawImage(compImg, cx - 24, y + 12, 48, 48);
+
+          const homeUrl = resolveTeamLogo(m.home);
+          const awayUrl = resolveTeamLogo(m.away);
+          const hImg = getCachedLogo(homeUrl);
+          const aImg = getCachedLogo(awayUrl);
+          const nameW = 268;
+
+          drawTeamBlock(ctx, m.home, hImg, cx - 210, y + 18, nameW);
+          drawTeamBlock(ctx, m.away, aImg, cx + 210, y + 18, nameW);
+
+          ctx.fillStyle = t.sub;
+          ctx.font = "900 20px Segoe UI";
+          ctx.textAlign = "center";
+          ctx.fillText("VS", cx, y + 72);
+
+          const tvStr = shortTv(m);
+          ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
+          ctx.font = "900 20px Segoe UI";
+          ctx.textAlign = "right";
+          const tvLines = wrapTeamName(ctx, tvStr, 200, 2);
+          tvLines.forEach((ln, j) => ctx.fillText(ln, W - 60, y + 48 + j * 24));
+        });
+
+        ctx.fillStyle = t.footerBg;
+        ctx.fillRect(0, H - 96, W, 96);
+        ctx.strokeStyle = t.border;
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.moveTo(0, H - 96);
+        ctx.lineTo(W, H - 96);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = t.sub;
+        ctx.font = "bold 22px Segoe UI";
+        ctx.textAlign = "center";
+        const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
+        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, H - 58 + i * 28));
+
+        const link = document.createElement("a");
+        link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        const loaded = urls.filter((u) => getCachedLogo(u)).length;
+        setStatus(`✓ PNG tema "${t.name}" diunduh (${loaded}/${urls.length} logo).`, "success");
+      } catch (err) {
+        setStatus(`Gagal ekspor: ${err.message}`, "error");
+        console.error(err);
+      } finally {
+        btnDownload.disabled = false;
+      }
     }
 
     function setStatus(msg, cls = "") {
@@ -685,6 +1009,8 @@
       e.target.value = "";
     });
 
+    buildThemePicker();
+    applyThemePreview(currentTheme);
     fetchSchedule();
   </script>
 </body>
