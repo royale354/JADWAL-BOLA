@@ -230,7 +230,7 @@
     async function loadStaticLogos() {
       if (staticLogos) return staticLogos;
       try {
-        const res = await fetch(asset("logos.json"));
+        const res = await fetch(asset("logos.json?v=2"));
         if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
         staticLogos = await res.json();
         const n = Object.keys(staticLogos.teams || {}).length;
