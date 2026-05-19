@@ -230,7 +230,7 @@
     async function loadStaticLogos() {
       if (staticLogos) return staticLogos;
       try {
-        const res = await fetch(asset("logos.json?v=2"));
+        const res = await fetch(asset("logos.json?v=3"));
         if (!res.ok) throw new Error(`logos.json HTTP ${res.status}`);
         staticLogos = await res.json();
         const n = Object.keys(staticLogos.teams || {}).length;
@@ -259,20 +259,22 @@
       return /^https?:\/\//i.test(p || "");
     }
 
-    /** GitHub Pages: hanya file di repo (assets/). URL luar kena CORS. */
-    function preferLocalAsset(mapped, folder, name) {
-      if (mapped && !isRemotePath(mapped)) return mapped;
-      const slug = slugifyName(name);
-      return `assets/logos/${folder}/${slug}.png`;
+    /** Path dasar tanpa ekstensi — file bisa .png atau .svg di assets/ */
+    function logoBasePath(mapped, folder, name) {
+      if (mapped && !isRemotePath(mapped)) {
+        return mapped.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+      }
+      return `assets/logos/${folder}/${slugifyName(name)}`;
     }
 
     function findBadge(map, name) {
       if (!map || !name) return null;
-      if (map[name]) return map[name];
+      if (map[name] && !isRemotePath(map[name])) return map[name];
       const norm = normalizeName(name);
       let best = null;
       let bestLen = 0;
       for (const [key, url] of Object.entries(map)) {
+        if (isRemotePath(url)) continue;
         const kn = normalizeName(key);
         if (norm === kn) return url;
         if (norm.includes(kn) || kn.includes(norm)) {
@@ -287,12 +289,12 @@
 
     function resolveTeamLogo(name) {
       const mapped = staticLogos ? findBadge(staticLogos.teams, name) : null;
-      return preferLocalAsset(mapped, "teams", name);
+      return logoBasePath(mapped, "teams", name);
     }
 
     function resolveLeagueLogo(comp) {
       const mapped = staticLogos ? findBadge(staticLogos.leagues, comp) : null;
-      return preferLocalAsset(mapped, "leagues", comp);
+      return logoBasePath(mapped, "leagues", comp);
     }
 
     function resolveLogoPath(pathOrUrl) {
@@ -301,10 +303,11 @@
       return asset(pathOrUrl);
     }
 
-    function logoTag(pathOrUrl, alt) {
-      const src = resolveLogoPath(pathOrUrl);
-      if (!src) return "";
-      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" onerror="this.style.visibility='hidden'">`;
+    function logoTag(basePath, alt) {
+      const urls = localPathCandidates(basePath).map((c) => resolveLogoPath(c)).filter(Boolean);
+      if (!urls.length) return "";
+      const list = JSON.stringify(urls);
+      return `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(alt)}" loading="lazy" data-logos='${list.replace(/'/g, "&#39;")}' onerror="(function(el){var u=JSON.parse(el.dataset.logos);var n=+(el.dataset.i||0)+1;el.dataset.i=n;if(n<u.length)el.src=u[n];else el.style.visibility='hidden'})(this)">`;
     }
 
     function cacheLogo(img, pathOrUrl, resolvedSrc) {
@@ -312,9 +315,21 @@
       if (resolvedSrc) logoCache[resolvedSrc] = img;
     }
 
+    function logoKey(pathOrUrl) {
+      if (!pathOrUrl) return "";
+      return pathOrUrl.replace(/\.(png|svg|jpg|jpeg|webp)$/i, "");
+    }
+
     function getCachedLogo(pathOrUrl) {
       if (!pathOrUrl) return null;
-      return logoCache[pathOrUrl] || logoCache[resolveLogoPath(pathOrUrl)] || null;
+      const key = logoKey(pathOrUrl);
+      return (
+        logoCache[pathOrUrl] ||
+        logoCache[key] ||
+        logoCache[resolveLogoPath(pathOrUrl)] ||
+        logoCache[resolveLogoPath(key)] ||
+        null
+      );
     }
 
     function localPathCandidates(pathOrUrl) {
@@ -326,7 +341,6 @@
         const p = base + ext;
         if (!out.includes(p)) out.push(p);
       }
-      if (!out.includes(pathOrUrl)) out.unshift(pathOrUrl);
       return out;
     }
 
@@ -340,6 +354,7 @@
         const img = new Image();
         img.onload = () => {
           cacheLogo(img, pathOrUrl, src);
+          cacheLogo(img, logoKey(pathOrUrl), src);
           resolve(img);
         };
         img.onerror = () => resolve(null);
@@ -349,10 +364,15 @@
 
     async function loadImage(pathOrUrl) {
       if (!pathOrUrl) return null;
+      const cached = getCachedLogo(pathOrUrl);
+      if (cached) return cached;
       const candidates = localPathCandidates(pathOrUrl);
       for (const c of candidates) {
         const img = await tryLoadOne(c);
-        if (img) return img;
+        if (img) {
+          cacheLogo(img, logoKey(pathOrUrl), resolveLogoPath(c));
+          return img;
+        }
       }
       if (isRemotePath(pathOrUrl)) {
         console.warn("Logo URL luar diabaikan (CORS di GitHub Pages):", pathOrUrl);
