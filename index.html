@@ -250,10 +250,29 @@
     }
 
     .banner {
-      padding: 20px 16px 10px;
+      padding: 16px 16px 10px;
       text-align: center;
       flex-shrink: 0;
       background: linear-gradient(180deg, var(--t-glow-top, rgba(34, 197, 94, 0.12)) 0%, transparent 100%);
+    }
+    .brand-logo {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 10px;
+      border: 2px solid var(--t-accent, #22c55e);
+      box-shadow: 0 4px 24px var(--t-accent-glow, rgba(34, 197, 94, 0.4));
+    }
+    .brand-logo-footer {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+      border: 1px solid var(--t-border, #334155);
     }
     .banner h2 {
       font-size: 1.15rem;
@@ -336,24 +355,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 0;
       flex: 1 1 0;
       min-width: 0;
     }
     .team-block img {
-      width: 26px;
-      height: 26px;
+      width: 32px;
+      height: 32px;
       object-fit: contain;
       flex-shrink: 0;
     }
     .team-name {
       font-weight: 700;
-      font-size: 0.62rem;
-      line-height: 1.15;
+      font-size: 0.68rem;
+      line-height: 1.2;
       text-align: center;
       word-break: break-word;
       hyphens: auto;
       max-width: 100%;
+      margin-top: 7px;
     }
     .vs-label {
       color: var(--t-sub, #64748b);
@@ -429,12 +449,16 @@
         <div class="bg-watermark" id="bg-watermark" aria-hidden="true"></div>
         <div class="preview-msg">PREVIEW</div>
         <div class="banner">
+          <img class="brand-logo" id="brand-logo" src="" alt="CORNERKIICK" />
           <h2 id="view-header">KREATOR JADWAL BOLA</h2>
           <div class="title-bar"></div>
           <div class="date-label" id="display-date">—</div>
         </div>
         <div id="match-list" class="match-container"></div>
-        <div class="watermark-footer" id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+        <div class="watermark-footer">
+          <img class="brand-logo-footer" id="brand-logo-footer" src="" alt="CORNERKIICK" />
+          <div id="view-footer">🎵 CORNERKIICK  |  📸 CORNERKIICK  |  📺 CORNERKIICK</div>
+        </div>
       </div>
     </main>
   </div>
@@ -544,6 +568,12 @@
       return slash > 0 ? path.slice(0, slash + 1) : "/";
     })();
     const asset = (p) => BASE + p.replace(/^\//, "");
+
+    const BRAND_LOGO_PATHS = [
+      "assets/branding/CORNERKIICK.png",
+      "CORNERKIICK.png",
+    ];
+    let brandLogoImg = null;
 
     let allSchedules = {};
     let selectedDate = todayISO();
@@ -815,6 +845,54 @@
       return null;
     }
 
+    function setupBrandLogoPreview() {
+      const url = asset(BRAND_LOGO_PATHS[0]);
+      const header = $("#brand-logo");
+      const footer = $("#brand-logo-footer");
+      if (header) {
+        header.src = url;
+        header.onerror = () => { header.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+      if (footer) {
+        footer.src = url;
+        footer.onerror = () => { footer.src = asset(BRAND_LOGO_PATHS[1]); };
+      }
+    }
+
+    async function loadBrandLogo() {
+      if (brandLogoImg) return brandLogoImg;
+      for (const p of BRAND_LOGO_PATHS) {
+        for (const c of localPathCandidates(p)) {
+          const img = await tryLoadOne(c);
+          if (img) {
+            brandLogoImg = img;
+            return img;
+          }
+        }
+      }
+      return null;
+    }
+
+    function drawBrandLogoCircle(ctx, cx, cy, size, t, img) {
+      if (!img) return;
+      const r = size / 2;
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(img, cx - r, cy - r, size, size);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = t.accent;
+      ctx.lineWidth = 3;
+      ctx.globalAlpha = 0.9;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
     function shortTv(m) {
       const parts = (m.tvFree || []).concat(m.tvPaid || []);
       return parts.length ? parts.join(" · ") : (m.tv || "-");
@@ -1009,8 +1087,20 @@
       ctx.fillStyle = gr2; ctx.fillRect(0, H - 600, W, 600);
     }
 
+    function pngLogoSize(rowH) {
+      const tvZone = 56;
+      const teamsH = rowH - tvZone - 14;
+      const nameBlock = 2 * 28;
+      const gap = 22;
+      return Math.round(Math.min(78, Math.max(56, teamsH - nameBlock - gap)));
+    }
+
+    function pngNameGap(logoSize) {
+      return Math.max(20, Math.round(logoSize * 0.34));
+    }
+
     function drawLogoRing(ctx, x, y, size, t) {
-      const r = size / 2 + 6;
+      const r = size / 2 + 10;
       const g = ctx.createRadialGradient(x, y, r * 0.3, x, y, r);
       g.addColorStop(0, t.cardHi || t.card); g.addColorStop(1, t.border);
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -1047,16 +1137,20 @@
       return lines.slice(0, maxLines);
     }
 
-    function drawTeamBlock(ctx, name, logo, xCenter, y, maxW, logoSize, t) {
-      const sz = logoSize || 48;
-      drawLogoRing(ctx, xCenter, y + sz / 2, sz, t);
-      if (logo) ctx.drawImage(logo, xCenter - sz / 2, y, sz, sz);
-      const textY = y + sz + 10;
+    function drawTeamBlock(ctx, name, logo, xCenter, logoY, maxW, logoSize, t) {
+      const sz = logoSize || 64;
+      const gap = pngNameGap(sz);
+      const fontPx = Math.round(sz * 0.42);
+      const lineH = Math.round(fontPx * 1.2);
+      drawLogoRing(ctx, xCenter, logoY + sz / 2, sz, t);
+      if (logo) ctx.drawImage(logo, xCenter - sz / 2, logoY, sz, sz);
+      const textY = logoY + sz + gap;
       ctx.fillStyle = t.text;
-      ctx.font = "bold 21px 'Segoe UI', system-ui, sans-serif";
+      ctx.font = `bold ${fontPx}px 'Segoe UI', system-ui, sans-serif`;
       ctx.textAlign = "center";
-      const lines = wrapTeamName(ctx, name, maxW, 3);
-      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * 24));
+      const lines = wrapTeamName(ctx, name, maxW, 2);
+      lines.forEach((ln, i) => ctx.fillText(ln, xCenter, textY + i * lineH));
+      return textY + lines.length * lineH;
     }
 
     function drawBackgroundWatermark(ctx, W, H, t) {
@@ -1072,101 +1166,118 @@
       ctx.restore();
     }
 
-    function drawHeaderPNG(ctx, W, t) {
+    function drawHeaderPNG(ctx, W, t, brandImg) {
       const title = (inputHeader.value || "KREATOR JADWAL BOLA").toUpperCase();
       const dateStr = formatDateID(selectedDate).toUpperCase();
 
-      const barW = 200;
+      let titleY = 108;
+      if (brandImg) {
+        const sz = 104;
+        drawBrandLogoCircle(ctx, W / 2, 14 + sz / 2, sz, t, brandImg);
+        titleY = 14 + sz + 32;
+      }
+
+      const barW = 220;
       const barG = ctx.createLinearGradient(W / 2 - barW, 0, W / 2 + barW, 0);
       barG.addColorStop(0, "transparent");
       barG.addColorStop(0.5, t.accent);
       barG.addColorStop(1, "transparent");
       ctx.fillStyle = barG;
-      ctx.fillRect(W / 2 - barW, 168, barW * 2, 4);
+      ctx.fillRect(W / 2 - barW, titleY + 42, barW * 2, 4);
 
       ctx.save();
       ctx.shadowColor = t.accentGlow || t.accent;
-      ctx.shadowBlur = 28;
+      ctx.shadowBlur = 24;
       ctx.fillStyle = t.text;
-      ctx.font = "900 54px 'Segoe UI', 'Arial Black', sans-serif";
+      ctx.font = "900 46px 'Segoe UI', 'Arial Black', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(title, W / 2, 128);
+      ctx.fillText(title, W / 2, titleY);
       ctx.restore();
 
-      const pillW = Math.min(ctx.measureText(dateStr).width + 56, W - 120);
-      drawRoundRect(ctx, W / 2 - pillW / 2, 182, pillW, 44, 22, t.cardHi || t.card, t.border, 1.5);
+      const pillW = Math.min(ctx.measureText(dateStr).width + 48, W - 100);
+      const dateY = titleY + 52;
+      drawRoundRect(ctx, W / 2 - pillW / 2, dateY, pillW, 40, 20, t.cardHi || t.card, t.border, 1.5);
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 22px 'Segoe UI', sans-serif";
+      ctx.font = "bold 21px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(dateStr, W / 2, 212);
+      ctx.fillText(dateStr, W / 2, dateY + 27);
 
+      const lineY = dateY + 58;
       ctx.strokeStyle = t.border;
       ctx.globalAlpha = 0.4;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(64, 248);
-      ctx.lineTo(W - 64, 248);
+      ctx.moveTo(48, lineY);
+      ctx.lineTo(W - 48, lineY);
       ctx.stroke();
       ctx.globalAlpha = 1;
     }
 
+    function computePngLayout(matchCount, hasBrandLogo) {
+      const footerH = hasBrandLogo ? 108 : 86;
+      const headerEnd = hasBrandLogo ? 278 : 222;
+      const gap = 11;
+      const n = Math.min(matchCount, 10);
+      const avail = PNG_H - footerH - headerEnd;
+      const rowH = Math.max(152, Math.min(220, Math.floor((avail - gap * Math.max(0, n - 1)) / n)));
+      return { footerH, headerEnd, gap, rowH, n };
+    }
+
     function drawMatchRowPNG(ctx, m, y, rowH, t, borderCol) {
       const W = PNG_W;
-      const cardX = 40;
-      const cardW = W - 80;
+      const cardX = 24;
+      const cardW = W - 48;
 
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.5)";
       ctx.shadowBlur = 20;
       ctx.shadowOffsetY = 8;
-      drawRoundRect(ctx, cardX, y, cardW, rowH, 24, t.card, null);
+      drawRoundRect(ctx, cardX, y, cardW, rowH, 26, t.card, null);
       ctx.restore();
 
-      const stripe = ctx.createLinearGradient(cardX, y, cardX + 8, y);
-      stripe.addColorStop(0, borderCol);
-      stripe.addColorStop(1, "transparent");
-      ctx.fillStyle = stripe;
-      ctx.fillRect(cardX, y + 8, 6, rowH - 16);
+      ctx.fillStyle = borderCol;
+      ctx.fillRect(cardX, y + 10, 7, rowH - 20);
 
-      const timeX = cardX + 18;
-      const timeW = 82;
-      const timeH = rowH - 20;
-      drawRoundRect(ctx, timeX, y + 10, timeW, timeH, 16, t.timeBg || t.bg, borderCol, 2);
+      const timeX = cardX + 14;
+      const timeW = 94;
+      const timeH = rowH - 16;
+      drawRoundRect(ctx, timeX, y + 8, timeW, timeH, 18, t.timeBg || t.bg, borderCol, 2.5);
       ctx.fillStyle = t.accent;
-      ctx.font = "900 30px 'Segoe UI', sans-serif";
+      ctx.font = "900 34px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.42);
+      ctx.fillText(m.kickoff, timeX + timeW / 2, y + rowH * 0.4);
       ctx.fillStyle = t.sub;
-      ctx.font = "bold 13px 'Segoe UI', sans-serif";
-      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.58);
+      ctx.font = "bold 15px 'Segoe UI', sans-serif";
+      ctx.fillText("WIB", timeX + timeW / 2, y + rowH * 0.57);
 
-      const contentX = cardX + 108;
-      const contentW = cardW - 118;
+      const contentX = cardX + 116;
+      const contentW = cardW - 124;
       const cx = contentX + contentW / 2;
-      const homeCx = contentX + contentW * 0.26;
-      const awayCx = contentX + contentW * 0.74;
-      const nameW = Math.floor(contentW * 0.44);
-      const teamsTop = y + 8;
-      const logoSize = rowH > 142 ? 50 : 44;
+      const homeCx = contentX + contentW * 0.24;
+      const awayCx = contentX + contentW * 0.76;
+      const nameW = Math.floor(contentW * 0.46);
+      const teamsTop = y + 10;
+      const logoSize = pngLogoSize(rowH);
 
       const hImg = getCachedLogo(resolveTeamLogo(m.home));
       const aImg = getCachedLogo(resolveTeamLogo(m.away));
       drawTeamBlock(ctx, m.home, hImg, homeCx, teamsTop, nameW, logoSize, t);
       drawTeamBlock(ctx, m.away, aImg, awayCx, teamsTop, nameW, logoSize, t);
 
-      const vsY = teamsTop + logoSize + 8;
-      const vsG = ctx.createLinearGradient(cx - 28, vsY, cx + 28, vsY);
+      const vsY = teamsTop + logoSize / 2 + 4;
+      const vsPadW = 44;
+      const vsG = ctx.createLinearGradient(cx - vsPadW, vsY, cx + vsPadW, vsY);
       vsG.addColorStop(0, "transparent");
       vsG.addColorStop(0.5, t.accent);
       vsG.addColorStop(1, "transparent");
       ctx.fillStyle = vsG;
-      ctx.fillRect(cx - 32, vsY - 14, 64, 28);
+      ctx.fillRect(cx - vsPadW - 4, vsY - 16, vsPadW * 2 + 8, 32);
       ctx.fillStyle = t.text;
-      ctx.font = "900 17px 'Segoe UI', sans-serif";
+      ctx.font = "900 20px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("VS", cx, vsY + 5);
+      ctx.fillText("VS", cx, vsY + 7);
 
-      const divY = y + rowH - 44;
+      const divY = y + rowH - 50;
       const divG = ctx.createLinearGradient(contentX, 0, contentX + contentW, 0);
       divG.addColorStop(0, "transparent");
       divG.addColorStop(0.5, t.border);
@@ -1180,10 +1291,10 @@
 
       const tvStr = shortTv(m);
       ctx.fillStyle = (m.tvFree || []).length ? t.tvFree : t.tv;
-      ctx.font = "900 20px 'Segoe UI', sans-serif";
+      ctx.font = "900 24px 'Segoe UI', sans-serif";
       ctx.textAlign = "center";
-      const tvLines = wrapTeamName(ctx, tvStr, contentW - 12, 2);
-      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 24 + j * 24));
+      const tvLines = wrapTeamName(ctx, tvStr, contentW - 8, 2);
+      tvLines.forEach((ln, j) => ctx.fillText(ln, cx, divY + 28 + j * 28));
     }
 
     function exportCanvasToPNG(sourceCanvas) {
@@ -1211,6 +1322,7 @@
           matches.flatMap((m) => [resolveTeamLogo(m.home), resolveTeamLogo(m.away), resolveLeagueLogo(m.competition)]).filter(Boolean)
         )];
         await Promise.all(urls.map(loadImage));
+        const brandImg = await loadBrandLogo();
 
         const W = PNG_W;
         const H = PNG_H;
@@ -1223,27 +1335,23 @@
 
         drawThemeBackground(ctx, W, H, t);
         drawBackgroundWatermark(ctx, W, H, t);
-        drawHeaderPNG(ctx, W, t);
+        drawHeaderPNG(ctx, W, t, brandImg);
 
-        const footerH = 100;
-        const headerEnd = 262;
         const dataMatches = matches.slice(0, 10);
-        const gap = 14;
-        const avail = H - footerH - headerEnd;
-        const rowH = Math.max(132, Math.min(160, Math.floor((avail - gap * (dataMatches.length - 1)) / dataMatches.length)));
-        const startY = headerEnd;
+        const layout = computePngLayout(dataMatches.length, !!brandImg);
+        const startY = layout.headerEnd;
 
         dataMatches.forEach((m, i) => {
-          const y = startY + i * (rowH + gap);
-          drawMatchRowPNG(ctx, m, y, rowH, t, t.borders[i % t.borders.length]);
+          const y = startY + i * (layout.rowH + layout.gap);
+          drawMatchRowPNG(ctx, m, y, layout.rowH, t, t.borders[i % t.borders.length]);
         });
 
-        const footY = H - footerH;
+        const footY = H - layout.footerH;
         const footG = ctx.createLinearGradient(0, footY, 0, H);
         footG.addColorStop(0, t.footerBg);
         footG.addColorStop(1, "#000");
         ctx.fillStyle = footG;
-        ctx.fillRect(0, footY, W, footerH);
+        ctx.fillRect(0, footY, W, layout.footerH);
         const accentLine = ctx.createLinearGradient(0, footY, W, footY);
         accentLine.addColorStop(0, "transparent");
         accentLine.addColorStop(0.5, t.accent);
@@ -1254,11 +1362,15 @@
         ctx.moveTo(40, footY);
         ctx.lineTo(W - 40, footY);
         ctx.stroke();
+        if (brandImg) {
+          drawBrandLogoCircle(ctx, W / 2, footY + 38, 56, t, brandImg);
+        }
         ctx.fillStyle = t.sub;
-        ctx.font = "bold 22px 'Segoe UI', sans-serif";
+        ctx.font = "bold 24px 'Segoe UI', sans-serif";
         ctx.textAlign = "center";
         const footerLines = wrapTeamName(ctx, inputFooter.value || "", W - 80, 2);
-        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footY + 48 + i * 28));
+        const footerTextY = brandImg ? footY + 72 : footY + 50;
+        footerLines.forEach((ln, i) => ctx.fillText(ln, W / 2, footerTextY + i * 30));
 
         const link = document.createElement("a");
         link.download = `jadwal-tiktok-${currentTheme}-${selectedDate}.png`;
@@ -1291,6 +1403,7 @@
     });
 
     loadSettings();
+    setupBrandLogoPreview();
     datePicker.value = selectedDate;
     $("#view-header").textContent = inputHeader.value.toUpperCase();
     $("#view-footer").textContent = inputFooter.value;
