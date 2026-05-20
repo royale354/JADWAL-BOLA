@@ -176,6 +176,14 @@ input[type=date]{color-scheme:dark}
     </div>
 
     <div id="opt-video" style="margin-top:8px;display:none;flex-direction:column;gap:6px">
+      <div class="field"><label>Preset cepat</label>
+        <select id="sel-preset">
+          <option value="custom" selected>Custom (manual)</option>
+          <option value="dramatic">🎭 Dramatis</option>
+          <option value="energetic">⚡ Enerjik</option>
+          <option value="minimal">✨ Minimalis</option>
+        </select>
+      </div>
       <div class="field"><label>Durasi tiap pertandingan muncul (detik)</label>
         <select id="sel-dur">
           <option value="2">2 detik</option>
@@ -192,6 +200,30 @@ input[type=date]{color-scheme:dark}
           <option value="drop">Drop dari atas</option>
         </select>
       </div>
+      <div class="field"><label>🔊 Sound efek</label>
+        <select id="sel-sound">
+          <option value="none">Tanpa suara</option>
+          <option value="whoosh" selected>Whoosh — slide masuk</option>
+          <option value="drumhit">Drum hit — tegas</option>
+          <option value="whistle">Peluit — sporty</option>
+          <option value="swoosh_tick">Swoosh + tick</option>
+          <option value="stadium">Stadium crowd</option>
+        </select>
+      </div>
+      <div class="field"><label>Volume suara</label>
+        <input type="range" id="sel-volume" min="0" max="100" value="70" style="accent-color:var(--acc)"/>
+      </div>
+      <div class="field"><label>🎵 Backsound</label>
+        <select id="sel-bgm">
+          <option value="none" selected>Tanpa backsound</option>
+          <option value="anthem">Sport Anthem</option>
+          <option value="trap">Trap Beat</option>
+          <option value="ambient">Ambient Pulse</option>
+        </select>
+      </div>
+      <div class="field"><label>Volume backsound</label>
+        <input type="range" id="sel-bgm-volume" min="0" max="100" value="35" style="accent-color:var(--acc)"/>
+      </div>
       <div class="field"><label>Format output</label>
         <select id="sel-fmt">
           <option value="webm">WebM (Chrome/Edge)</option>
@@ -205,7 +237,7 @@ input[type=date]{color-scheme:dark}
         <div class="vpbar-wrap"><div class="vpbar" id="vpbar"></div></div>
       </div>
       <div style="font-size:0.64rem;color:var(--muted);line-height:1.5">
-        Pertandingan muncul 1 per 1 dari atas · Build-up seperti PowerPoint · 1080×1920 · TikTok ready<br/>
+        Pertandingan muncul 1 per 1 · Sound efek tiap baris muncul · 1080×1920 · TikTok ready<br/>
         <span style="color:#f59e0b">💡 WebM bisa langsung upload ke TikTok/Reels</span>
       </div>
     </div>
@@ -368,6 +400,7 @@ let staticLogos=null, logoCache={};
 let currentTheme="purple", exportMode="png", previewMode="png";
 let previewPage=0;
 let vidAF=null, vidPlaying=false, vidSlideIdx=0, vidFrameStart=null, vidBrand=null;
+let previewBgmNode=null;
 
 const $=s=>document.querySelector(s);
 const cv=$("#cv"), ctx=cv.getContext("2d");
@@ -397,6 +430,23 @@ function getT(){return THEMES[currentTheme]||THEMES.purple}
 function perPage(){return parseInt($("#sel-perpage").value)||7}
 function setStatus(msg,cls=""){statusEl.className="sbar"+(cls?" "+cls:"");statusEl.textContent=msg}
 function easeOut(t){return 1-Math.pow(1-t,3)}
+
+const VIDEO_PRESETS={
+  dramatic:{dur:"4",anim:"drop",sound:"whistle",volume:"75",bgm:"anthem",bgmVolume:"38"},
+  energetic:{dur:"3",anim:"slide",sound:"drumhit",volume:"78",bgm:"trap",bgmVolume:"42"},
+  minimal:{dur:"2",anim:"fade",sound:"swoosh_tick",volume:"58",bgm:"ambient",bgmVolume:"30"},
+};
+
+function applyVideoPreset(id){
+  const p=VIDEO_PRESETS[id];
+  if(!p) return;
+  $("#sel-dur").value=p.dur;
+  $("#sel-anim").value=p.anim;
+  $("#sel-sound").value=p.sound;
+  $("#sel-volume").value=p.volume;
+  $("#sel-bgm").value=p.bgm;
+  $("#sel-bgm-volume").value=p.bgmVolume;
+}
 
 // ═══════════════════════════════════════════
 // LOGO LOADING
@@ -908,9 +958,11 @@ const ANIM_DUR = 0.4; // detik animasi masuk per baris
 
 async function startVideoPreview() {
   if (vidAF) cancelAnimationFrame(vidAF);
+  stopPreviewBgm();
   vidPlaying = true;
   vidFrameStart = null;
   vidBrand = await loadBrand();
+  await startPreviewBgm($("#sel-bgm").value, parseInt($("#sel-bgm-volume").value) || 35);
   const t = getT();
   const holdDur = parseInt($("#sel-dur").value) || 3; // detik tiap baris ditahan
   const n = allMatches.length;
@@ -918,6 +970,7 @@ async function startVideoPreview() {
 
   // Total durasi: setiap baris = ANIM_DUR + holdDur, lalu hold akhir 2 detik, lalu loop
   const totalDur = n * (ANIM_DUR + holdDur) + 2.0;
+  let lastSoundIdx = -1;
 
   function frame(ts) {
     if (!vidPlaying) return;
@@ -934,14 +987,12 @@ async function startVideoPreview() {
       const slotDur = ANIM_DUR + holdDur;
       if (t2 <= 0) break;
       if (t2 < ANIM_DUR) {
-        // Baris i sedang animasi masuk
         animIdx = i;
         animProg = t2 / ANIM_DUR;
         break;
       }
       t2 -= ANIM_DUR;
       if (t2 < holdDur) {
-        // Baris i sudah visible, hold
         visibleCount = i + 1;
         animIdx = i + 1;
         animProg = 0;
@@ -953,8 +1004,17 @@ async function startVideoPreview() {
       animProg = 0;
     }
 
-    // Jika semua sudah muncul, hold semua
     if (visibleCount >= n) { visibleCount = n; animIdx = n; animProg = 0; }
+
+    // Play sound saat baris baru mulai animasi masuk
+    if (animIdx !== lastSoundIdx && animProg < 0.08 && animIdx < n) {
+      lastSoundIdx = animIdx;
+      const sType = $("#sel-sound").value;
+      const sVol  = parseInt($("#sel-volume").value) || 70;
+      playPreviewSound(sType, sVol);
+    }
+    // Reset lastSoundIdx saat loop ulang
+    if (elapsed < 0.1) lastSoundIdx = -1;
 
     vidSlideIdx = Math.max(0, visibleCount - 1);
 
@@ -967,6 +1027,7 @@ async function startVideoPreview() {
 
 function stopVideoPreview(){
   vidPlaying=false;
+  stopPreviewBgm();
   if(vidAF){cancelAnimationFrame(vidAF);vidAF=null;}
 }
 
@@ -1100,6 +1161,228 @@ async function downloadPNG(){
 }
 
 // ═══════════════════════════════════════════
+// AUDIO ENGINE — Web Audio API
+// Generate sound efek tanpa file eksternal
+// ═══════════════════════════════════════════
+
+let _audioCtx = null;
+function getAudioCtx(){
+  if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return _audioCtx;
+}
+
+// Render sound ke AudioBuffer (offline, untuk mixing ke video)
+async function renderSoundBuffer(type, volume=0.7, sampleRate=44100){
+  const dur = 0.6; // detik
+  const frames = Math.ceil(sampleRate * dur);
+  const offCtx = new OfflineAudioContext(2, frames, sampleRate);
+  const vol = volume / 100;
+
+  if(type === "whoosh"){
+    // Whoosh: noise + highpass sweep
+    const buf = offCtx.createBuffer(1, frames, sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<frames;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/frames,1.5);
+    const src = offCtx.createBufferSource(); src.buffer = buf;
+    const hp = offCtx.createBiquadFilter(); hp.type="highpass";
+    hp.frequency.setValueAtTime(200, 0);
+    hp.frequency.linearRampToValueAtTime(3000, 0.25);
+    const gain = offCtx.createGain(); gain.gain.setValueAtTime(vol*1.2,0); gain.gain.linearRampToValueAtTime(0,dur);
+    src.connect(hp); hp.connect(gain); gain.connect(offCtx.destination);
+    src.start(0);
+
+  } else if(type === "drumhit"){
+    // Kick drum: sine sweep down + noise transient
+    const osc = offCtx.createOscillator(); osc.type="sine";
+    osc.frequency.setValueAtTime(180,0); osc.frequency.exponentialRampToValueAtTime(40,0.15);
+    const g1 = offCtx.createGain(); g1.gain.setValueAtTime(vol*1.5,0); g1.gain.exponentialRampToValueAtTime(0.001,0.35);
+    osc.connect(g1); g1.connect(offCtx.destination); osc.start(0); osc.stop(0.35);
+    // Snare transient
+    const nbuf = offCtx.createBuffer(1,Math.ceil(sampleRate*0.08),sampleRate);
+    const nd = nbuf.getChannelData(0);
+    for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1);
+    const nsrc = offCtx.createBufferSource(); nsrc.buffer=nbuf;
+    const nhp = offCtx.createBiquadFilter(); nhp.type="bandpass"; nhp.frequency.value=2000; nhp.Q.value=0.8;
+    const ng = offCtx.createGain(); ng.gain.setValueAtTime(vol*0.6,0); ng.gain.exponentialRampToValueAtTime(0.001,0.08);
+    nsrc.connect(nhp); nhp.connect(ng); ng.connect(offCtx.destination); nsrc.start(0);
+
+  } else if(type === "whistle"){
+    // Peluit: sine wave pitch up-down
+    const osc = offCtx.createOscillator(); osc.type="sine";
+    osc.frequency.setValueAtTime(1800,0);
+    osc.frequency.linearRampToValueAtTime(2400,0.1);
+    osc.frequency.linearRampToValueAtTime(2000,0.3);
+    osc.frequency.linearRampToValueAtTime(1600,0.5);
+    const g = offCtx.createGain(); g.gain.setValueAtTime(0,0); g.gain.linearRampToValueAtTime(vol*0.8,0.02);
+    g.gain.setValueAtTime(vol*0.8,0.4); g.gain.linearRampToValueAtTime(0,0.55);
+    // Vibrato
+    const vib = offCtx.createOscillator(); vib.frequency.value=8;
+    const vibG = offCtx.createGain(); vibG.gain.value=30;
+    vib.connect(vibG); vibG.connect(osc.frequency);
+    osc.connect(g); g.connect(offCtx.destination);
+    osc.start(0); osc.stop(0.55); vib.start(0); vib.stop(0.55);
+
+  } else if(type === "swoosh_tick"){
+    // Swoosh singkat
+    const nbuf = offCtx.createBuffer(1,Math.ceil(sampleRate*0.25),sampleRate);
+    const nd = nbuf.getChannelData(0);
+    for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1)*Math.pow(1-i/nd.length,2);
+    const nsrc = offCtx.createBufferSource(); nsrc.buffer=nbuf;
+    const hp = offCtx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=800;
+    const ng = offCtx.createGain(); ng.gain.setValueAtTime(vol*0.9,0); ng.gain.linearRampToValueAtTime(0,0.25);
+    nsrc.connect(hp); hp.connect(ng); ng.connect(offCtx.destination); nsrc.start(0);
+    // Tick klik
+    const osc2 = offCtx.createOscillator(); osc2.type="square"; osc2.frequency.value=1200;
+    const g2 = offCtx.createGain(); g2.gain.setValueAtTime(vol*0.5,0.22); g2.gain.exponentialRampToValueAtTime(0.001,0.28);
+    osc2.connect(g2); g2.connect(offCtx.destination); osc2.start(0.22); osc2.stop(0.28);
+
+  } else if(type === "stadium"){
+    // Stadium crowd: filtered noise burst
+    const nbuf = offCtx.createBuffer(2, frames, sampleRate);
+    for(let ch=0;ch<2;ch++){
+      const d=nbuf.getChannelData(ch);
+      for(let i=0;i<frames;i++) d[i]=(Math.random()*2-1);
+    }
+    const nsrc = offCtx.createBufferSource(); nsrc.buffer=nbuf;
+    const lp = offCtx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=800;
+    const bp = offCtx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=400; bp.Q.value=0.5;
+    const g = offCtx.createGain();
+    g.gain.setValueAtTime(0,0); g.gain.linearRampToValueAtTime(vol*0.6,0.1);
+    g.gain.setValueAtTime(vol*0.6,0.3); g.gain.linearRampToValueAtTime(0,dur);
+    nsrc.connect(lp); lp.connect(bp); bp.connect(g); g.connect(offCtx.destination); nsrc.start(0);
+
+  } else {
+    return null; // none
+  }
+
+  const rendered = await offCtx.startRendering();
+  return rendered;
+}
+
+// Play sound di preview (real-time)
+async function playPreviewSound(type, volume){
+  if(type==="none") return;
+  try{
+    const actx = getAudioCtx();
+    if(actx.state==="suspended") await actx.resume();
+    const buf = await renderSoundBuffer(type, volume, actx.sampleRate);
+    if(!buf) return;
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.connect(actx.destination);
+    src.start();
+  } catch(e){ console.warn("Audio preview error:", e); }
+}
+
+async function renderBgmLoopBuffer(type, volume=35, sampleRate=44100){
+  if(type==="none") return null;
+  const dur=8.0;
+  const frames=Math.ceil(sampleRate*dur);
+  const offCtx=new OfflineAudioContext(2,frames,sampleRate);
+  const vol=Math.max(0,Math.min(1,volume/100));
+
+  function addTone(freq,start,len,gainMul=1,wave="sine"){
+    const osc=offCtx.createOscillator();
+    const g=offCtx.createGain();
+    osc.type=wave; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,start);
+    g.gain.linearRampToValueAtTime(vol*gainMul,start+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+len);
+    osc.connect(g); g.connect(offCtx.destination);
+    osc.start(start); osc.stop(start+len+0.02);
+  }
+
+  if(type==="anthem"){
+    const chords=[[220,277,330],[247,311,370],[196,247,294],[220,277,330]];
+    for(let bar=0;bar<4;bar++){
+      const t0=bar*2.0;
+      for(const f of chords[bar]) addTone(f,t0,1.8,0.07,"triangle");
+      addTone(chords[bar][0]/2,t0,0.9,0.055,"sine");
+      addTone(chords[bar][0]/2,t0+1.0,0.9,0.055,"sine");
+    }
+  }else if(type==="trap"){
+    for(let i=0;i<32;i++){
+      const t0=i*0.25;
+      if(i%4===0) addTone(55,t0,0.2,0.17,"sine");
+      if(i%2===1) addTone(180+(i%8)*12,t0,0.12,0.055,"square");
+    }
+  }else if(type==="ambient"){
+    const pads=[196,220,247,262];
+    for(let i=0;i<pads.length;i++){
+      const t0=i*2.0;
+      addTone(pads[i],t0,1.95,0.06,"sine");
+      addTone(pads[i]*1.5,t0+0.05,1.85,0.04,"triangle");
+    }
+  }
+
+  return offCtx.startRendering();
+}
+
+async function startPreviewBgm(type,volume){
+  stopPreviewBgm();
+  if(type==="none") return;
+  try{
+    const actx=getAudioCtx();
+    if(actx.state==="suspended") await actx.resume();
+    const buf=await renderBgmLoopBuffer(type,volume,actx.sampleRate);
+    if(!buf) return;
+    const src=actx.createBufferSource();
+    src.buffer=buf; src.loop=true;
+    const gain=actx.createGain(); gain.gain.value=1;
+    src.connect(gain); gain.connect(actx.destination);
+    src.start();
+    previewBgmNode={src,gain};
+  }catch(e){console.warn("BGM preview error:",e);}
+}
+
+function stopPreviewBgm(){
+  if(!previewBgmNode) return;
+  try{previewBgmNode.src.stop();}catch(e){}
+  previewBgmNode=null;
+}
+
+// Mix AudioBuffer ke canvas stream (untuk video export)
+// Returns: { audioStream, stopAudio }
+async function createAudioStream(type, volume, sampleRate=44100, bgmType="none", bgmVolume=35){
+  if(type==="none"&&bgmType==="none") return null;
+  try{
+    const actx = new AudioContext({sampleRate});
+    const dest = actx.createMediaStreamDestination();
+    const sfxBus=actx.createGain();
+    const bgmBus=actx.createGain();
+    sfxBus.connect(dest);
+    bgmBus.connect(dest);
+    let buf=null;
+    if(type!=="none") buf=await renderSoundBuffer(type, volume, sampleRate);
+
+    let bgmSrc=null;
+    if(bgmType!=="none"){
+      const bgmBuf=await renderBgmLoopBuffer(bgmType,bgmVolume,sampleRate);
+      if(bgmBuf){
+        bgmSrc=actx.createBufferSource();
+        bgmSrc.buffer=bgmBuf;
+        bgmSrc.loop=true;
+        bgmSrc.connect(bgmBus);
+        bgmSrc.start(0);
+      }
+    }
+    if(actx.state==="suspended") await actx.resume();
+    return { actx, dest, sfxBus, bgmSrc, buf, stream: dest.stream };
+  } catch(e){ console.warn("Audio stream error:", e); return null; }
+}
+
+// Putar 1x sound di AudioContext yang sudah ada
+function playSoundOnce(actx, buf, bus, when=0){
+  if(!buf||!actx||!bus) return;
+  try{
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.connect(bus);
+    src.start(when);
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════
 // DOWNLOAD VIDEO — build-up reveal
 // ═══════════════════════════════════════════
 async function downloadVideo(){
@@ -1136,9 +1419,26 @@ async function downloadVideo(){
 
     const vc=document.createElement("canvas"); vc.width=W; vc.height=H;
     const vctx=vc.getContext("2d");
-    // captureStream dengan FPS yang sama
-    const stream=vc.captureStream(FPS);
-    const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:8_000_000});
+
+    // ── AUDIO SETUP ──
+    const soundType = $("#sel-sound").value;
+    const soundVol  = parseInt($("#sel-volume").value)||70;
+    const bgmType = $("#sel-bgm").value;
+    const bgmVol = parseInt($("#sel-bgm-volume").value)||35;
+    const audioInfo = await createAudioStream(soundType, soundVol, 44100, bgmType, bgmVol);
+
+    // Gabungkan stream video + audio
+    const videoStream = vc.captureStream(FPS);
+    let combinedStream = videoStream;
+    if(audioInfo){
+      const allTracks = [
+        ...videoStream.getVideoTracks(),
+        ...audioInfo.stream.getAudioTracks()
+      ];
+      combinedStream = new MediaStream(allTracks);
+    }
+
+    const rec=new MediaRecorder(combinedStream,{mimeType:mime, videoBitsPerSecond:8_000_000});
     const chunks=[];
     rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
     rec.start();
@@ -1146,14 +1446,17 @@ async function downloadVideo(){
     // Helper: render 1 frame lalu tunggu interval agar recorder sempat capture
     async function renderFrame(visCount, animIdx, animProg){
       await renderBuildUp(vctx, t, brand, visCount, animIdx, animProg);
-      // Tunggu tepat 1 frame duration agar MediaRecorder capture frame ini
       await new Promise(r=>setTimeout(r, MS_PER_FRAME));
     }
 
     let frame=0;
 
     for(let i=0; i<n; i++){
-      // Animasi masuk baris ke-i
+      // Animasi masuk baris ke-i — putar sound di awal animasi
+      if(audioInfo && i < n && audioInfo.buf){
+        const when = audioInfo.actx.currentTime;
+        playSoundOnce(audioInfo.actx, audioInfo.buf, audioInfo.sfxBus, when);
+      }
       for(let f=0; f<animFrames; f++){
         await renderFrame(i, i, f/animFrames);
         frame++;
@@ -1184,6 +1487,10 @@ async function downloadVideo(){
 
     rec.stop();
     await new Promise(r=>rec.onstop=r);
+    if(audioInfo){
+      try{if(audioInfo.bgmSrc)audioInfo.bgmSrc.stop();}catch(e){}
+      audioInfo.actx.close();
+    }
 
     const blob=new Blob(chunks,{type:mime});
     const ext=mime.startsWith("video/mp4")?"mp4":"webm";
@@ -1194,7 +1501,9 @@ async function downloadVideo(){
     setTimeout(()=>URL.revokeObjectURL(url),8000);
 
     const durSec=((n*(ANIM_DUR+holdDur)+2.5)).toFixed(1);
-    setStatus(`✓ Video ${ext.toUpperCase()} · ${n} pertandingan · ~${durSec}s didownload`,"ok");
+    const soundLabel = soundType!=="none" ? ` · 🔊 ${soundType}` : "";
+    const bgmLabel = bgmType!=="none" ? ` · 🎵 ${bgmType}` : "";
+    setStatus(`✓ Video ${ext.toUpperCase()} · ${n} pertandingan · ~${durSec}s${soundLabel}${bgmLabel} didownload`,"ok");
   }catch(e){
     setStatus(`Gagal render video: ${e.message}`,"err"); console.error(e);
   }finally{
@@ -1303,6 +1612,11 @@ $("#btn-prev-vid").addEventListener("click",async()=>{
 });
 
 $("#file-import").addEventListener("change",e=>{const f=e.target.files[0];if(f)importHtmlFile(f);e.target.value="";});
+["#sel-bgm","#sel-bgm-volume"].forEach(sel=>{
+  $(sel).addEventListener("input",()=>{
+    if(previewMode==="video"&&vidPlaying) startVideoPreview();
+  });
+});
 
 // ── INIT ──
 loadSettings();
