@@ -1,1457 +1,1043 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CORNERKIICK — Generator Konten Jadwal Bola</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@600;700&display=swap');
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --sidebar-bg: #0d1117;
-      --panel-bg: #161b22;
-      --border: #30363d;
-      --accent: #58a6ff;
-      --accent2: #3fb950;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --danger: #f85149;
-      --warn: #d29922;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: #010409;
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* ── LAYOUT ── */
-    .app {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      min-height: 100vh;
-    }
-    @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
-    }
-
-    /* ── SIDEBAR ── */
-    .sidebar {
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--border);
-      padding: 20px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      max-height: 100vh;
-      position: sticky;
-      top: 0;
-    }
-
-    .logo-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo-row img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-    .logo-row .brand { font-family: 'Oswald', sans-serif; font-size: 1.1rem; color: #fff; letter-spacing: 1px; }
-    .logo-row .brand span { color: var(--accent2); }
-
-    .section-title {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 4px; }
-    .field label { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
-    .field input, .field select {
-      background: var(--panel-bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 0.84rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .field input:focus, .field select:focus { border-color: var(--accent); }
-    input[type="date"] { color-scheme: dark; }
-    input[type="file"] { display: none; }
-
-    /* ── THEME PICKER ── */
-    .theme-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-    }
-    .theme-btn {
-      cursor: pointer;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 4px 6px;
-      background: var(--panel-bg);
-      transition: border-color 0.2s, transform 0.15s;
-      text-align: center;
-    }
-    .theme-btn:hover { transform: translateY(-2px); border-color: #484f58; }
-    .theme-btn.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)44; }
-    .theme-swatch { height: 22px; border-radius: 5px; margin-bottom: 5px; }
-    .theme-btn span { font-size: 0.65rem; font-weight: 700; color: var(--muted); display: block; }
-
-    /* ── BUTTONS ── */
-    .btn {
-      cursor: pointer; border: none; border-radius: 8px;
-      padding: 10px 14px; font-size: 0.84rem; font-weight: 700;
-      font-family: inherit; transition: opacity 0.2s, transform 0.15s;
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    .btn-green { background: linear-gradient(135deg,#238636,#2ea043); color: #fff; }
-    .btn-blue  { background: linear-gradient(135deg,#1f6feb,#388bfd); color: #fff; }
-    .btn-purple{ background: linear-gradient(135deg,#6e40c9,#a371f7); color: #fff; }
-    .btn-ghost { background: var(--panel-bg); color: var(--text); border: 1px solid var(--border); }
-    .btn-warn  { background: #21262d; color: var(--muted); border: 1px solid var(--border); font-size: 0.78rem; }
-    .btn-row { display: flex; gap: 8px; }
-    .btn-row .btn { flex: 1; }
-    .btn-full { width: 100%; }
-
-    .status-bar {
-      font-size: 0.78rem; font-weight: 600; padding: 8px 10px;
-      border-radius: 8px; background: var(--panel-bg);
-      border: 1px solid var(--border); color: var(--muted);
-      line-height: 1.4; min-height: 36px;
-    }
-    .status-bar.ok  { color: var(--accent2); border-color: #2ea04344; }
-    .status-bar.err { color: var(--danger);  border-color: #f8514944; }
-    .status-bar.loading { color: var(--warn); border-color: #d2992244; }
-
-    /* ── EXPORT TYPE TABS ── */
-    .export-tabs {
-      display: flex; gap: 6px; background: var(--panel-bg);
-      border: 1px solid var(--border); border-radius: 10px; padding: 4px;
-    }
-    .export-tab {
-      flex: 1; cursor: pointer; border: none; border-radius: 7px;
-      padding: 8px 6px; font-size: 0.75rem; font-weight: 700;
-      font-family: inherit; background: transparent; color: var(--muted);
-      transition: background 0.2s, color 0.2s;
-    }
-    .export-tab.active { background: var(--accent); color: #fff; }
-
-    /* ── MAIN CONTENT ── */
-    .main {
-      display: flex;
-      flex-direction: column;
-      background: #0d1117;
-      min-height: 100vh;
-    }
-
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 24px; border-bottom: 1px solid var(--border);
-      background: var(--sidebar-bg);
-    }
-    .topbar-title { font-size: 0.85rem; font-weight: 700; color: var(--muted); }
-    .match-count-badge {
-      background: var(--accent)22; color: var(--accent);
-      border: 1px solid var(--accent)44; border-radius: 20px;
-      padding: 3px 10px; font-size: 0.72rem; font-weight: 700;
-    }
-
-    /* ── PREVIEW CANVAS AREA ── */
-    .preview-wrap {
-      flex: 1; display: flex; align-items: flex-start; justify-content: center;
-      padding: 24px; gap: 24px; flex-wrap: wrap;
-    }
-
-    .canvas-frame {
-      position: relative;
-      width: 270px;
-      flex-shrink: 0;
-    }
-    .canvas-frame canvas {
-      width: 100%; border-radius: 18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      display: block;
-    }
-    .canvas-nav {
-      display: flex; align-items: center; justify-content: center;
-      gap: 10px; margin-top: 10px;
-    }
-    .canvas-nav button {
-      background: var(--panel-bg); border: 1px solid var(--border);
-      color: var(--text); border-radius: 8px; padding: 6px 14px;
-      cursor: pointer; font-size: 0.8rem; font-weight: 700;
-      font-family: inherit; transition: background 0.2s;
-    }
-    .canvas-nav button:hover { background: #21262d; }
-    .canvas-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
-    .canvas-nav .page-info { font-size: 0.78rem; color: var(--muted); font-weight: 600; min-width: 60px; text-align: center; }
-
-    /* ── MATCH LIST PANEL ── */
-    .match-panel {
-      flex: 1; min-width: 280px; max-width: 480px;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .match-panel-title {
-      font-size: 0.72rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .match-item {
-      background: var(--panel-bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 12px;
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.8rem; cursor: pointer; transition: border-color 0.2s;
-    }
-    .match-item:hover { border-color: #484f58; }
-    .match-item.active { border-color: var(--accent); background: var(--accent)0d; }
-    .match-item .mi-time {
-      font-weight: 800; color: var(--accent); font-size: 0.82rem;
-      min-width: 38px; text-align: center;
-    }
-    .match-item .mi-teams { flex: 1; font-weight: 700; color: var(--text); line-height: 1.3; }
-    .match-item .mi-comp { font-size: 0.68rem; color: var(--muted); }
-    .match-item .mi-tv { font-size: 0.68rem; color: var(--warn); font-weight: 600; }
-    .match-item .mi-logo { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
-  </style>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CORNERKIICK — Jadwal Bola Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sb:#0a0c10;--sb2:#111318;--border:#1e2330;
+  --acc:#e8b84b;--acc2:#4caf7d;--txt:#f0f2f5;--muted:#6b7280;
+  --danger:#e05252;--info:#5b9cf6;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:#070810;color:var(--txt);min-height:100vh;display:flex;flex-direction:column}
+input[type=file]{display:none}
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--sb);border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar-logo{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--acc)}
+.topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--acc)}
+.topbar-brand span{color:#fff}
+.topbar-sep{flex:1}
+.topbar-date{font-size:0.78rem;font-weight:600;color:var(--muted)}
+/* ── LAYOUT ── */
+.workspace{display:grid;grid-template-columns:300px 1fr;flex:1;min-height:0;overflow:hidden}
+@media(max-width:860px){.workspace{grid-template-columns:1fr;overflow:visible}}
+/* ── SIDEBAR ── */
+.sidebar{background:var(--sb);border-right:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:calc(100vh - 58px)}
+.sec-label{font-size:0.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:0.7rem;color:var(--muted);font-weight:600}
+.field input,.field select{background:var(--sb2);border:1px solid var(--border);color:var(--txt);padding:7px 10px;border-radius:7px;font-size:0.82rem;font-family:inherit;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--acc)}
+input[type=date]{color-scheme:dark}
+/* ── THEME GRID ── */
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.t-card{cursor:pointer;border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s,transform .15s}
+.t-card:hover{transform:translateY(-2px);border-color:#2e3545}
+.t-card.on{border-color:var(--acc)}
+.t-swatch{height:36px}
+.t-name{font-size:0.68rem;font-weight:700;color:var(--muted);padding:5px 7px;background:var(--sb2)}
+/* ── BUTTONS ── */
+.btn{cursor:pointer;border:none;border-radius:8px;padding:9px 14px;font-size:0.82rem;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s,transform .15s}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.btn-gold{background:linear-gradient(135deg,#c8922a,#e8b84b);color:#0a0800}
+.btn-green{background:linear-gradient(135deg,#2d7a4f,#4caf7d);color:#fff}
+.btn-blue{background:linear-gradient(135deg,#2a4a8a,#5b9cf6);color:#fff}
+.btn-ghost{background:var(--sb2);color:var(--txt);border:1px solid var(--border)}
+.btn-sm{padding:7px 12px;font-size:0.78rem}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:7px}
+.btn-row .btn{flex:1}
+/* ── EXPORT TABS ── */
+.exp-tabs{display:flex;background:var(--sb2);border:1px solid var(--border);border-radius:9px;padding:3px;gap:3px}
+.exp-tab{flex:1;cursor:pointer;border:none;border-radius:7px;padding:8px 6px;font-size:0.75rem;font-weight:700;font-family:inherit;background:transparent;color:var(--muted);transition:background .2s,color .2s}
+.exp-tab.on{background:var(--acc);color:#0a0800}
+/* ── STATUS ── */
+.status{font-size:0.75rem;font-weight:600;padding:8px 10px;border-radius:7px;background:var(--sb2);border:1px solid var(--border);color:var(--muted);line-height:1.5;min-height:34px}
+.status.ok{color:var(--acc2);border-color:#2d7a4f44}
+.status.err{color:var(--danger);border-color:#e0525244}
+.status.loading{color:var(--acc);border-color:#c8922a44}
+/* ── MAIN AREA ── */
+.main{display:flex;flex-direction:column;overflow:hidden;background:#070810}
+/* ── PREVIEW TABS ── */
+.prev-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--sb);flex-shrink:0}
+.prev-tab{cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:0.8rem;font-weight:700;padding:11px 20px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.prev-tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+/* ── PREVIEW BODY ── */
+.prev-body{flex:1;display:flex;gap:20px;padding:20px;overflow:auto;align-items:flex-start;justify-content:center}
+/* ── CANVAS WRAPPER ── */
+.canvas-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
+.canvas-shell{position:relative;width:240px;border-radius:16px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.7)}
+.canvas-shell canvas{display:block;width:100%}
+.canvas-nav{display:flex;align-items:center;gap:8px}
+.nav-btn{cursor:pointer;background:var(--sb2);border:1px solid var(--border);color:var(--txt);border-radius:7px;padding:5px 14px;font-size:0.82rem;font-weight:700;font-family:inherit;transition:background .2s}
+.nav-btn:hover{background:#1e2330}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.page-lbl{font-size:0.75rem;color:var(--muted);font-weight:600;min-width:52px;text-align:center}
+/* ── VIDEO PREVIEW OVERLAY ── */
+.vid-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border-radius:16px;cursor:pointer;transition:opacity .2s}
+.vid-overlay:hover{background:rgba(0,0,0,.4)}
+.vid-play{width:52px;height:52px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.vid-play svg{width:22px;height:22px;fill:#0a0800;margin-left:3px}
+/* ── MATCH LIST PANEL ── */
+.match-panel{flex:1;min-width:260px;max-width:440px;display:flex;flex-direction:column;gap:6px}
+.mp-title{font-size:0.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.mi{background:var(--sb2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:border-color .2s}
+.mi:hover{border-color:#2e3545}
+.mi.on{border-color:var(--acc);background:#e8b84b0d}
+.mi-time{font-weight:800;color:var(--acc);font-size:0.8rem;min-width:36px;text-align:center}
+.mi-logo{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.mi-info{flex:1;min-width:0}
+.mi-teams{font-weight:700;font-size:0.8rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi-meta{font-size:0.67rem;color:var(--muted);margin-top:1px}
+.mi-tv{color:#e8b84b}
+/* ── VIDEO PROGRESS ── */
+.vid-progress{width:100%;background:var(--sb2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;display:none;flex-direction:column;gap:6px}
+.vid-progress.show{display:flex}
+.vp-bar-wrap{background:#1e2330;border-radius:99px;height:6px;overflow:hidden}
+.vp-bar{height:100%;background:linear-gradient(90deg,#c8922a,#e8b84b);border-radius:99px;width:0%;transition:width .1s}
+.vp-label{font-size:0.72rem;color:var(--muted);font-weight:600}
+</style>
 </head>
 <body>
-<div class="app">
 
-  <!-- ══════════════ SIDEBAR ══════════════ -->
-  <aside class="sidebar">
+<!-- TOPBAR -->
+<header class="topbar">
+  <img class="topbar-logo" id="brand-img" src="assets/branding/CORNERKIICK.png" onerror="this.src='CORNERKIICK.png'" alt="logo"/>
+  <div class="topbar-brand">CORNER<span>KIICK</span></div>
+  <div class="topbar-sep"></div>
+  <span class="topbar-date" id="topbar-date">—</span>
+</header>
 
-    <div class="logo-row">
-      <img id="brand-img" src="assets/branding/CORNERKIICK.png" onerror="this.src='CORNERKIICK.png'" alt="logo" />
-      <div class="brand">CORNER<span>KIICK</span></div>
+<div class="workspace">
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+
+  <!-- Branding -->
+  <div>
+    <div class="sec-label">Branding</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div class="field"><label>Judul Header</label><input id="inp-header" value="JADWAL BOLA HARI INI"/></div>
+      <div class="field"><label>Username TikTok</label><input id="inp-tiktok" value="@CORNERKIICK" placeholder="@username"/></div>
+      <div class="field"><label>Footer Sosmed</label><input id="inp-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK"/></div>
+    </div>
+  </div>
+
+  <!-- Tema -->
+  <div>
+    <div class="sec-label">Tema</div>
+    <div class="theme-grid" id="theme-grid"></div>
+  </div>
+
+  <!-- Jadwal -->
+  <div>
+    <div class="sec-label">Jadwal</div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <div class="field"><label>Tanggal</label><input type="date" id="date-picker"/></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" id="btn-today">Hari Ini</button>
+        <button class="btn btn-blue btn-sm" id="btn-refresh">↻ Muat</button>
+      </div>
+      <input type="file" id="file-import" accept=".html,.htm"/>
+      <label class="btn btn-ghost btn-sm btn-full" for="file-import" style="cursor:pointer">📂 Import HTML Goal.com</label>
+    </div>
+  </div>
+
+  <!-- Export -->
+  <div>
+    <div class="sec-label">Export</div>
+    <div class="exp-tabs" id="exp-tabs">
+      <button class="exp-tab on" data-t="png">🖼 PNG</button>
+      <button class="exp-tab" data-t="video">🎬 Video</button>
     </div>
 
-    <!-- Branding -->
-    <div>
-      <div class="section-title">Branding</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="field">
-          <label>Judul Header</label>
-          <input type="text" id="inp-header" value="JADWAL BOLA HARI INI" />
+    <div id="opt-png" style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+      <div class="field"><label>Pertandingan per halaman</label>
+        <select id="sel-perpage">
+          <option value="4">4 per halaman</option>
+          <option value="5" selected>5 per halaman</option>
+          <option value="6">6 per halaman</option>
+        </select>
+      </div>
+      <button class="btn btn-gold btn-full" id="btn-dl-png" disabled>⚡ Download PNG</button>
+    </div>
+
+    <div id="opt-video" style="margin-top:9px;display:none;flex-direction:column;gap:7px">
+      <div class="field"><label>Durasi per slide (detik)</label>
+        <select id="sel-dur">
+          <option value="3">3 detik</option>
+          <option value="4" selected>4 detik</option>
+          <option value="5">5 detik</option>
+          <option value="6">6 detik</option>
+        </select>
+      </div>
+      <div class="field"><label>Animasi masuk</label>
+        <select id="sel-anim">
+          <option value="slide">Slide dari kanan</option>
+          <option value="fade">Fade in</option>
+          <option value="zoom">Zoom in</option>
+          <option value="wipe">Wipe bawah ke atas</option>
+        </select>
+      </div>
+      <button class="btn btn-gold btn-full" id="btn-preview-vid">▶ Preview Video</button>
+      <button class="btn btn-green btn-full" id="btn-dl-video" disabled>🎬 Render & Download</button>
+      <div class="vid-progress" id="vid-progress">
+        <div class="vp-label" id="vp-label">Merender...</div>
+        <div class="vp-bar-wrap"><div class="vp-bar" id="vp-bar"></div></div>
+      </div>
+      <div style="font-size:0.67rem;color:var(--muted);line-height:1.5">1 slide per pertandingan · 1080×1920 · TikTok/Reels ready</div>
+    </div>
+  </div>
+
+  <div class="status" id="status">Memuat jadwal...</div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <!-- Preview mode tabs -->
+  <div class="prev-tabs">
+    <button class="prev-tab on" data-m="png">🖼 Preview PNG</button>
+    <button class="prev-tab" data-m="video">🎬 Preview Video</button>
+  </div>
+
+  <div class="prev-body" id="prev-body">
+    <!-- Canvas -->
+    <div class="canvas-wrap">
+      <div class="canvas-shell" id="canvas-shell">
+        <canvas id="cv" width="1080" height="1920"></canvas>
+        <!-- Video play overlay (hidden by default) -->
+        <div class="vid-overlay" id="vid-overlay" style="display:none">
+          <div class="vid-play">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
         </div>
-        <div class="field">
-          <label>Username TikTok</label>
-          <input type="text" id="inp-tiktok" value="@CORNERKIICK" placeholder="@username" />
-        </div>
-        <div class="field">
-          <label>Footer Sosmed</label>
-          <input type="text" id="inp-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK" />
-        </div>
+      </div>
+      <div class="canvas-nav" id="canvas-nav">
+        <button class="nav-btn" id="nav-prev" disabled>‹</button>
+        <span class="page-lbl" id="page-lbl">— / —</span>
+        <button class="nav-btn" id="nav-next" disabled>›</button>
       </div>
     </div>
 
-    <!-- Tema -->
-    <div>
-      <div class="section-title">Tema</div>
-      <div class="theme-grid" id="theme-grid"></div>
+    <!-- Match list -->
+    <div class="match-panel">
+      <div class="mp-title">Daftar Pertandingan</div>
+      <div id="match-list"></div>
     </div>
-
-    <!-- Jadwal -->
-    <div>
-      <div class="section-title">Jadwal</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="field">
-          <label>Tanggal</label>
-          <input type="date" id="date-picker" />
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" id="btn-today">Hari Ini</button>
-          <button class="btn btn-blue"  id="btn-refresh">↻ Muat</button>
-        </div>
-        <input type="file" id="file-import" accept=".html,.htm" />
-        <label class="btn btn-warn btn-full" for="file-import" style="cursor:pointer">📂 Import HTML Goal.com</label>
-      </div>
-    </div>
-
-    <!-- Export -->
-    <div>
-      <div class="section-title">Export</div>
-      <div class="export-tabs" id="export-tabs">
-        <button class="export-tab active" data-type="png">🖼 PNG</button>
-        <button class="export-tab" data-type="video">🎬 Video</button>
-      </div>
-
-      <!-- PNG options -->
-      <div id="opt-png" style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
-        <div class="field">
-          <label>Maks. pertandingan per halaman</label>
-          <select id="sel-perpage">
-            <option value="4">4 per halaman</option>
-            <option value="5" selected>5 per halaman</option>
-            <option value="6">6 per halaman</option>
-          </select>
-        </div>
-        <button class="btn btn-green btn-full" id="btn-dl-png" disabled>⚡ Download PNG</button>
-      </div>
-
-      <!-- Video options -->
-      <div id="opt-video" style="margin-top:10px;display:none;flex-direction:column;gap:8px">
-        <div class="field">
-          <label>Durasi per slide (detik)</label>
-          <select id="sel-duration">
-            <option value="3">3 detik</option>
-            <option value="4" selected>4 detik</option>
-            <option value="5">5 detik</option>
-            <option value="6">6 detik</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Animasi masuk</label>
-          <select id="sel-anim">
-            <option value="slide">Slide dari kanan</option>
-            <option value="fade">Fade in</option>
-            <option value="zoom">Zoom in</option>
-            <option value="flip">Flip vertikal</option>
-          </select>
-        </div>
-        <button class="btn btn-purple btn-full" id="btn-dl-video" disabled>🎬 Render & Download MP4</button>
-        <div style="font-size:0.68rem;color:var(--muted);line-height:1.5">
-          Video 1080×1920 (9:16) · Setiap pertandingan = 1 slide animasi · Cocok untuk TikTok / Reels
-        </div>
-      </div>
-    </div>
-
-    <div class="status-bar" id="status">Memuat data jadwal...</div>
-  </aside>
-
-  <!-- ══════════════ MAIN ══════════════ -->
-  <main class="main">
-    <div class="topbar">
-      <span class="topbar-title" id="topbar-date">Pilih tanggal</span>
-      <span class="match-count-badge" id="match-badge">0 pertandingan</span>
-    </div>
-
-    <div class="preview-wrap">
-      <!-- Canvas preview -->
-      <div class="canvas-frame">
-        <canvas id="preview-canvas" width="1080" height="1920"></canvas>
-        <div class="canvas-nav">
-          <button id="nav-prev" disabled>‹</button>
-          <span class="page-info" id="page-info">— / —</span>
-          <button id="nav-next" disabled>›</button>
-        </div>
-      </div>
-
-      <!-- Match list -->
-      <div class="match-panel">
-        <div class="match-panel-title">Daftar Pertandingan</div>
-        <div id="match-list"></div>
-      </div>
-    </div>
-  </main>
-
+  </div>
+</main>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  CONSTANTS & STATE
-// ═══════════════════════════════════════════════════════
-const BULAN = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-const HARI  = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-const W = 1080, H = 1920;
-const FREE_KW = ["sctv","indosiar","rcti","mnctv","gtv","antv","tvone","tv one","kompas tv","inews","tvri","trans tv","trans7","trans 7","metro tv","net tv","net."];
+// ═══════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════
+const W=1080,H=1920;
+const BULAN=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const HARI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+const FREE_KW=["sctv","indosiar","rcti","mnctv","gtv","antv","tvone","tv one","kompas tv","inews","tvri","trans tv","trans7","trans 7","metro tv","net tv","net."];
 
-let allSchedules = {};
-let selectedDate  = todayISO();
-let staticLogos   = null;
-let logoCache     = {};
-let currentTheme  = "dark";
-let exportType    = "png";
-let previewPage   = 0;   // halaman yang sedang ditampilkan di preview
-let allMatches    = [];  // semua match untuk tanggal terpilih
-
-const $ = s => document.querySelector(s);
-const inpHeader  = $("#inp-header");
-const inpTiktok  = $("#inp-tiktok");
-const inpFooter  = $("#inp-footer");
-const datePicker = $("#date-picker");
-const statusEl   = $("#status");
-const matchList  = $("#match-list");
-const previewCanvas = $("#preview-canvas");
-const ctx        = previewCanvas.getContext("2d");
-const btnDlPng   = $("#btn-dl-png");
-const btnDlVideo = $("#btn-dl-video");
-const navPrev    = $("#nav-prev");
-const navNext    = $("#nav-next");
-const pageInfo   = $("#page-info");
-
-// ═══════════════════════════════════════════════════════
-//  THEMES — 6 tema baru yang lebih premium
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// THEMES — elegan, tidak neon
+// ═══════════════════════════════════════════════════
 const THEMES = {
-  dark: {
-    name:"🌑 Dark Pro", swatch:"linear-gradient(135deg,#0d1117 40%,#58a6ff)",
-    bg:"#0d1117", bg2:"#161b22", card:"#161b22", cardBorder:"#30363d",
-    accent:"#58a6ff", accent2:"#3fb950", accentGlow:"rgba(88,166,255,0.5)",
-    text:"#e6edf3", sub:"#8b949e", tv:"#f0883e", tvFree:"#3fb950",
-    time:"#58a6ff", timeBg:"#0d1117", footer:"#010409",
-    borderLeft:["#58a6ff","#3fb950","#f0883e","#a371f7","#ff7b72"],
+  classic: {
+    name:"⚽ Classic Dark",
+    swatch:"linear-gradient(135deg,#0a0c10 50%,#e8b84b)",
+    bg:"#0a0c10", bg2:"#111318", card:"#14181f", cardBorder:"#1e2a3a",
+    accent:"#e8b84b", accentDim:"rgba(232,184,75,.15)",
+    text:"#f0f2f5", sub:"#8892a0", tv:"#e8b84b", tvFree:"#4caf7d",
+    timeBg:"#0a0c10", footer:"#060709",
+    stripe:["#e8b84b","#4caf7d","#5b9cf6","#e05252","#a78bfa"],
   },
-  neon: {
-    name:"⚡ Neon Night", swatch:"linear-gradient(135deg,#050510 40%,#00f5ff)",
-    bg:"#050510", bg2:"#0a0a20", card:"#0d0d22", cardBorder:"#1a1a40",
-    accent:"#00f5ff", accent2:"#39ff14", accentGlow:"rgba(0,245,255,0.6)",
-    text:"#e0f7ff", sub:"#7ecfdf", tv:"#ff6bff", tvFree:"#39ff14",
-    time:"#00f5ff", timeBg:"#050510", footer:"#020208",
-    borderLeft:["#00f5ff","#39ff14","#ff6bff","#ffea00","#ff4d4d"],
+  slate: {
+    name:"🌙 Midnight Slate",
+    swatch:"linear-gradient(135deg,#0f1117 50%,#5b9cf6)",
+    bg:"#0f1117", bg2:"#161b26", card:"#1a2030", cardBorder:"#243050",
+    accent:"#5b9cf6", accentDim:"rgba(91,156,246,.15)",
+    text:"#e8edf5", sub:"#7a8899", tv:"#f0c060", tvFree:"#56c87a",
+    timeBg:"#0f1117", footer:"#080a10",
+    stripe:["#5b9cf6","#56c87a","#f0c060","#e07070","#c084fc"],
   },
-  fire: {
-    name:"🔥 Fire FC", swatch:"linear-gradient(135deg,#0a0202 40%,#ff4500)",
-    bg:"#0a0202", bg2:"#1a0505", card:"#1a0808", cardBorder:"#4a1010",
-    accent:"#ff4500", accent2:"#ff8c00", accentGlow:"rgba(255,69,0,0.6)",
-    text:"#fff5f0", sub:"#cc8877", tv:"#ffd700", tvFree:"#7fff00",
-    time:"#ff6030", timeBg:"#0a0202", footer:"#050101",
-    borderLeft:["#ff4500","#ff8c00","#ffd700","#ff1493","#ff6347"],
+  carbon: {
+    name:"🖤 Carbon",
+    swatch:"linear-gradient(135deg,#111 50%,#888)",
+    bg:"#111111", bg2:"#1a1a1a", card:"#1e1e1e", cardBorder:"#2e2e2e",
+    accent:"#d4d4d4", accentDim:"rgba(212,212,212,.12)",
+    text:"#f5f5f5", sub:"#888", tv:"#d4d4d4", tvFree:"#6dbf8a",
+    timeBg:"#111", footer:"#0a0a0a",
+    stripe:["#d4d4d4","#6dbf8a","#f0c060","#e07070","#a0a0ff"],
   },
-  gold: {
-    name:"🏆 Gold Cup", swatch:"linear-gradient(135deg,#0c0804 40%,#ffd700)",
-    bg:"#0c0804", bg2:"#1a1408", card:"#1a1408", cardBorder:"#5a4010",
-    accent:"#ffd700", accent2:"#ffa500", accentGlow:"rgba(255,215,0,0.55)",
-    text:"#fffbf0", sub:"#c8a060", tv:"#ffd700", tvFree:"#90ee90",
-    time:"#ffd700", timeBg:"#0c0804", footer:"#060402",
-    borderLeft:["#ffd700","#ffa500","#ff8c00","#daa520","#b8860b"],
-  },
-  purple: {
-    name:"💜 Royal", swatch:"linear-gradient(135deg,#0a0515 40%,#a371f7)",
-    bg:"#0a0515", bg2:"#130a25", card:"#130a25", cardBorder:"#2d1b55",
-    accent:"#a371f7", accent2:"#79c0ff", accentGlow:"rgba(163,113,247,0.55)",
-    text:"#f0e8ff", sub:"#9070c0", tv:"#f0883e", tvFree:"#56d364",
-    time:"#a371f7", timeBg:"#0a0515", footer:"#050210",
-    borderLeft:["#a371f7","#79c0ff","#f0883e","#ff7b72","#56d364"],
-  },
-  green: {
-    name:"🌿 Lapangan", swatch:"linear-gradient(135deg,#061208 40%,#00c853)",
-    bg:"#061208", bg2:"#0d2010", card:"#0d2010", cardBorder:"#1a4020",
-    accent:"#00c853", accent2:"#69f0ae", accentGlow:"rgba(0,200,83,0.55)",
-    text:"#f0fff4", sub:"#60a878", tv:"#ffd740", tvFree:"#69f0ae",
-    time:"#00c853", timeBg:"#061208", footer:"#030804",
-    borderLeft:["#00c853","#69f0ae","#ffd740","#40c4ff","#ff6e40"],
+  maroon: {
+    name:"🏆 Maroon Gold",
+    swatch:"linear-gradient(135deg,#1a0808 50%,#c8922a)",
+    bg:"#100808", bg2:"#1a0e0e", card:"#1e1010", cardBorder:"#3a1818",
+    accent:"#c8922a", accentDim:"rgba(200,146,42,.15)",
+    text:"#f5ede0", sub:"#9a7a60", tv:"#f0c060", tvFree:"#6dbf8a",
+    timeBg:"#100808", footer:"#080404",
+    stripe:["#c8922a","#e05252","#f0c060","#6dbf8a","#c084fc"],
   },
 };
 
-// ═══════════════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════════════
-function todayISO() {
-  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
-}
-function formatDateID(iso) {
-  if (!iso) return "—";
-  const [y,m,d] = iso.split("-").map(Number);
-  return `${HARI[new Date(y,m-1,d).getDay()]}, ${d} ${BULAN[m]} ${y}`;
-}
-function esc(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-function slug(n) {
-  return n.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-}
-function normName(n) {
-  return n.toLowerCase().trim().replace(/[^a-z0-9]+/g," ").trim();
-}
-function isRemote(p) { return /^https?:\/\//i.test(p||""); }
-function getBase() {
-  const p = location.pathname;
-  if (p.endsWith("/")) return p;
-  const i = p.lastIndexOf("/");
-  return i > 0 ? p.slice(0,i+1) : "/";
-}
-const BASE = getBase();
-function asset(p) { return BASE + p.replace(/^\//,""); }
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let allSchedules={}, allMatches=[], selectedDate=todayISO();
+let staticLogos=null, logoCache={};
+let currentTheme="classic", exportMode="png", previewMode="png";
+let previewPage=0;
+let vidAnimFrame=null, vidPlaying=false;
 
-function shortTv(m) {
-  const raw = (m.tv||"").trim();
-  if (raw && raw !== "-" && raw !== "TBC") return raw;
-  return [...(m.tvFree||[]),...(m.tvPaid||[])].join(" · ") || "-";
-}
-function isFreeTV(m) {
-  if ((m.tvFree||[]).length) return true;
-  return FREE_KW.some(k => shortTv(m).toLowerCase().includes(k));
-}
-function getTheme() { return THEMES[currentTheme] || THEMES.dark; }
-function perPage() { return parseInt($("#sel-perpage").value) || 5; }
+const $=s=>document.querySelector(s);
+const cv=$("#cv"), ctx=cv.getContext("2d");
+const inpHeader=$("#inp-header"), inpTiktok=$("#inp-tiktok"), inpFooter=$("#inp-footer");
+const datePicker=$("#date-picker"), statusEl=$("#status");
+const matchList=$("#match-list");
+const btnDlPng=$("#btn-dl-png"), btnDlVideo=$("#btn-dl-video");
+const navPrev=$("#nav-prev"), navNext=$("#nav-next"), pageLbl=$("#page-lbl");
+const vidOverlay=$("#vid-overlay"), canvasNav=$("#canvas-nav");
+const vidProgress=$("#vid-progress"), vpBar=$("#vp-bar"), vpLabel=$("#vp-label");
 
-// ═══════════════════════════════════════════════════════
-//  LOGO LOADING
-// ═══════════════════════════════════════════════════════
-async function loadStaticLogos() {
-  if (staticLogos) return staticLogos;
-  try {
-    const r = await fetch(asset("logos.json?v=4"));
-    if (!r.ok) throw new Error();
-    staticLogos = await r.json();
-  } catch { staticLogos = { teams:{}, leagues:{} }; }
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function todayISO(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Jakarta"})}
+function fmtDate(iso){if(!iso)return"—";const[y,m,d]=iso.split("-").map(Number);return`${HARI[new Date(y,m-1,d).getDay()]}, ${d} ${BULAN[m]} ${y}`}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function slug(n){return n.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"x"}
+function normN(n){return n.toLowerCase().trim().replace(/[^a-z0-9]+/g," ").trim()}
+function isRemote(p){return/^https?:\/\//i.test(p||"")}
+function getBase(){const p=location.pathname;if(p.endsWith("/"))return p;const i=p.lastIndexOf("/");return i>0?p.slice(0,i+1):"/"}
+const BASE=getBase();
+function asset(p){return BASE+p.replace(/^\//,"")}
+function shortTv(m){const r=(m.tv||"").trim();if(r&&r!=="-"&&r!=="TBC")return r;return[...(m.tvFree||[]),...(m.tvPaid||[])].join(" · ")||"-"}
+function isFreeTV(m){if((m.tvFree||[]).length)return true;return FREE_KW.some(k=>shortTv(m).toLowerCase().includes(k))}
+function getT(){return THEMES[currentTheme]||THEMES.classic}
+function perPage(){return parseInt($("#sel-perpage").value)||5}
+function setStatus(msg,cls=""){statusEl.className="status"+(cls?" "+cls:"");statusEl.textContent=msg}
+
+// ═══════════════════════════════════════════════════
+// LOGO LOADING
+// ═══════════════════════════════════════════════════
+async function loadStaticLogos(){
+  if(staticLogos)return staticLogos;
+  try{const r=await fetch(asset("logos.json?v=5"));if(!r.ok)throw 0;staticLogos=await r.json();}
+  catch{staticLogos={teams:{},leagues:{}};}
   return staticLogos;
 }
-
-function findBadge(map, name) {
-  if (!map||!name) return null;
-  if (map[name] && !isRemote(map[name])) return map[name];
-  const norm = normName(name);
-  let best = null, bestLen = 0;
-  for (const [k,v] of Object.entries(map)) {
-    if (isRemote(v)) continue;
-    const kn = normName(k);
-    if (norm===kn) return v;
-    if ((norm.includes(kn)||kn.includes(norm)) && k.length>bestLen) { best=v; bestLen=k.length; }
-  }
+function findBadge(map,name){
+  if(!map||!name)return null;
+  if(map[name]&&!isRemote(map[name]))return map[name];
+  const norm=normN(name);let best=null,bl=0;
+  for(const[k,v]of Object.entries(map)){if(isRemote(v))continue;const kn=normN(k);if(norm===kn)return v;if((norm.includes(kn)||kn.includes(norm))&&k.length>bl){best=v;bl=k.length;}}
   return best;
 }
-
-function resolveTeamLogo(name) {
-  const mapped = staticLogos ? findBadge(staticLogos.teams, name) : null;
-  const base = mapped && !isRemote(mapped) ? mapped.replace(/\.(png|svg|jpg|webp)$/i,"")
-                                           : `assets/logos/teams/${slug(name)}`;
-  return base;
+function teamLogoBase(name){const m=staticLogos?findBadge(staticLogos.teams,name):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/teams/${slug(name)}`}
+function leagueLogoBase(comp){const m=staticLogos?findBadge(staticLogos.leagues,comp):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/leagues/${slug(comp)}`}
+function tryLoad(path){
+  const src=asset(path);if(logoCache[src])return Promise.resolve(logoCache[src]);
+  return new Promise(res=>{const img=new Image();img.onload=()=>{logoCache[src]=img;res(img);};img.onerror=()=>res(null);img.src=src;});
 }
-function resolveLeagueLogo(comp) {
-  const mapped = staticLogos ? findBadge(staticLogos.leagues, comp) : null;
-  const base = mapped && !isRemote(mapped) ? mapped.replace(/\.(png|svg|jpg|webp)$/i,"")
-                                           : `assets/logos/leagues/${slug(comp)}`;
-  return base;
-}
-
-function tryLoad(path) {
-  const src = asset(path);
-  const cached = logoCache[src];
-  if (cached) return Promise.resolve(cached);
-  return new Promise(res => {
-    const img = new Image();
-    img.onload = () => { logoCache[src]=img; res(img); };
-    img.onerror = () => res(null);
-    img.src = src;
-  });
-}
-async function loadLogo(basePath) {
-  if (!basePath) return null;
-  const cached = logoCache[basePath];
-  if (cached) return cached;
-  for (const ext of [".png",".svg",".jpg",".webp"]) {
-    const img = await tryLoad(basePath+ext);
-    if (img) { logoCache[basePath]=img; return img; }
-  }
+async function loadLogo(base){
+  if(!base)return null;if(logoCache[base])return logoCache[base];
+  for(const ext of[".png",".svg",".jpg",".webp"]){const img=await tryLoad(base+ext);if(img){logoCache[base]=img;return img;}}
   return null;
 }
-async function preloadMatchLogos(matches) {
-  const paths = [...new Set(matches.flatMap(m=>[resolveTeamLogo(m.home),resolveTeamLogo(m.away),resolveLeagueLogo(m.competition)]).filter(Boolean))];
+function getCached(base){
+  if(!base)return null;if(logoCache[base])return logoCache[base];
+  for(const ext of[".png",".svg",".jpg",".webp"]){const k=asset(base+ext);if(logoCache[k])return logoCache[k];}
+  return null;
+}
+async function preloadAll(matches){
+  const paths=[...new Set(matches.flatMap(m=>[teamLogoBase(m.home),teamLogoBase(m.away),leagueLogoBase(m.competition)]).filter(Boolean))];
   await Promise.all(paths.map(loadLogo));
 }
-function getCached(basePath) {
-  if (!basePath) return null;
-  if (logoCache[basePath]) return logoCache[basePath];
-  for (const ext of [".png",".svg",".jpg",".webp"]) {
-    if (logoCache[asset(basePath+ext)]) return logoCache[asset(basePath+ext)];
-  }
+async function loadBrand(){
+  for(const p of["assets/branding/CORNERKIICK.png","CORNERKIICK.png"]){const img=await tryLoad(p);if(img)return img;}
   return null;
 }
 
-// ═══════════════════════════════════════════════════════
-//  CANVAS DRAWING — BACKGROUND
-// ═══════════════════════════════════════════════════════
-function drawBg(ctx, t) {
-  // Gradient background
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, t.bg2);
-  g.addColorStop(0.5, t.bg);
-  g.addColorStop(1, t.bg2);
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+// ═══════════════════════════════════════════════════
+// CANVAS UTILS
+// ═══════════════════════════════════════════════════
+function rr(c,x,y,w,h,r,fill,stroke,sw){
+  const rad=Math.min(r,w/2,h/2);
+  c.beginPath();c.moveTo(x+rad,y);c.lineTo(x+w-rad,y);c.quadraticCurveTo(x+w,y,x+w,y+rad);
+  c.lineTo(x+w,y+h-rad);c.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+  c.lineTo(x+rad,y+h);c.quadraticCurveTo(x,y+h,x,y+h-rad);c.lineTo(x,y+rad);c.quadraticCurveTo(x,y,x+rad,y);c.closePath();
+  if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=sw||2;c.stroke();}
+}
+function wrapTxt(c,text,maxW,maxL){
+  const words=text.split(/\s+/);const lines=[];let line="";
+  for(const w of words){const t=line?line+" "+w:w;if(c.measureText(t).width<=maxW){line=t;}else{if(line)lines.push(line);line=w;}}
+  if(line)lines.push(line);return lines.slice(0,maxL);
+}
+function circleImg(c,img,cx,cy,r,border){
+  c.save();c.shadowColor="rgba(0,0,0,.6)";c.shadowBlur=20;
+  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.clip();c.drawImage(img,cx-r,cy-r,r*2,r*2);c.restore();
+  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle=border;c.lineWidth=3;c.stroke();
+}
 
-  // Glow top
-  const gt = ctx.createRadialGradient(W/2,0,0,W/2,0,600);
-  gt.addColorStop(0, t.accentGlow.replace("0.5","0.18").replace("0.6","0.18").replace("0.55","0.18"));
-  gt.addColorStop(1,"transparent");
-  ctx.fillStyle = gt;
-  ctx.fillRect(0,0,W,700);
-
-  // Glow bottom
-  const gb = ctx.createRadialGradient(W/2,H,0,W/2,H,500);
-  gb.addColorStop(0, t.accentGlow.replace("0.5","0.12").replace("0.6","0.12").replace("0.55","0.12"));
-  gb.addColorStop(1,"transparent");
-  ctx.fillStyle = gb;
-  ctx.fillRect(0,H-500,W,500);
-
-  // Subtle grid lines
-  ctx.strokeStyle = t.accent + "0a";
-  ctx.lineWidth = 1;
-  for (let x=0; x<W; x+=108) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y=0; y<H; y+=108) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Watermark diagonal text
-  const wm = (inpTiktok.value||"").trim().replace(/^@+/,"");
-  if (wm) {
-    ctx.save();
-    ctx.translate(W/2,H/2);
-    ctx.rotate(-Math.PI/6);
-    ctx.font = "900 72px 'Oswald','Segoe UI',sans-serif";
-    ctx.fillStyle = t.accent + "08";
-    ctx.textAlign = "center";
-    for (let dy=-500; dy<=500; dy+=200) ctx.fillText("@"+wm.toUpperCase(), 0, dy);
-    ctx.restore();
+// ═══════════════════════════════════════════════════
+// DRAW BACKGROUND (shared)
+// ═══════════════════════════════════════════════════
+function drawBg(c,t){
+  const g=c.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,t.bg2);g.addColorStop(.5,t.bg);g.addColorStop(1,t.bg2);
+  c.fillStyle=g;c.fillRect(0,0,W,H);
+  // subtle dot grid
+  c.fillStyle=t.accent+"12";
+  for(let x=60;x<W;x+=90)for(let y=60;y<H;y+=90){c.beginPath();c.arc(x,y,1.5,0,Math.PI*2);c.fill();}
+  // glow top
+  const gt=c.createRadialGradient(W/2,0,0,W/2,0,550);
+  gt.addColorStop(0,t.accent+"22");gt.addColorStop(1,"transparent");
+  c.fillStyle=gt;c.fillRect(0,0,W,600);
+  // watermark
+  const wm=(inpTiktok.value||"").trim().replace(/^@+/,"");
+  if(wm){
+    c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/7);
+    c.font="900 80px 'Bebas Neue','Segoe UI',sans-serif";
+    c.fillStyle=t.accent+"09";c.textAlign="center";
+    for(let dy=-600;dy<=600;dy+=220)c.fillText("@"+wm.toUpperCase(),0,dy);
+    c.restore();
   }
 }
 
-function roundRect(ctx, x,y,w,h,r, fill, stroke, sw) {
-  const rad = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
-  ctx.lineTo(x+w,y+h-rad);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
-  ctx.lineTo(x+rad,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
-  ctx.lineTo(x,y+rad);
-  ctx.quadraticCurveTo(x,y,x+rad,y);
-  ctx.closePath();
-  if (fill) { ctx.fillStyle=fill; ctx.fill(); }
-  if (stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=sw||2; ctx.stroke(); }
+// ═══════════════════════════════════════════════════
+// PNG LAYOUT — multi-match per page
+// ═══════════════════════════════════════════════════
+async function renderPNGPage(c,matches,pageNum,totalPages){
+  const t=getT();
+  const pad=30,gap=12,footH=100;
+  c.clearRect(0,0,W,H);
+  drawBg(c,t);
+
+  const brand=await loadBrand();
+  // ── HEADER ──
+  const hh=brand?200:140;
+  c.save();c.shadowColor="rgba(0,0,0,.5)";c.shadowBlur=30;c.shadowOffsetY=8;
+  const hg=c.createLinearGradient(pad,24,pad+W-pad*2,24+hh);
+  hg.addColorStop(0,t.card+"f0");hg.addColorStop(1,t.bg2+"d0");
+  rr(c,pad,24,W-pad*2,hh,26,hg,t.accent,2.5);c.restore();
+  // top accent line
+  const al=c.createLinearGradient(pad,24,pad+W-pad*2,24);
+  al.addColorStop(0,"transparent");al.addColorStop(.5,t.accent);al.addColorStop(1,"transparent");
+  c.fillStyle=al;c.fillRect(pad+30,24,W-pad*2-60,3);
+
+  let hy=42;
+  if(brand){circleImg(c,brand,W/2,hy+40,40,t.accent);hy+=92;}else{hy+=16;}
+  c.save();c.shadowColor=t.accent+"88";c.shadowBlur=20;
+  c.fillStyle=t.text;c.font="900 54px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
+  c.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(),W/2,hy);c.restore();
+  hy+=10;
+  const ds=fmtDate(selectedDate).toUpperCase();
+  c.font="700 28px 'Inter','Segoe UI',sans-serif";
+  const dw=c.measureText(ds).width;
+  rr(c,W/2-dw/2-20,hy,dw+40,42,21,t.timeBg+"cc",t.accent+"66",1.5);
+  c.fillStyle=t.sub;c.textAlign="center";c.fillText(ds,W/2,hy+29);hy+=42;
+  if(totalPages>1){hy+=6;c.font="600 22px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.fillText(`HALAMAN ${pageNum} / ${totalPages}`,W/2,hy+18);hy+=26;}
+
+  const listTop=24+hh+14;
+  const listBot=H-footH;
+  const n=matches.length;
+  let cardH=Math.floor((listBot-listTop-gap*(n-1))/n);
+  cardH=Math.min(300,Math.max(155,cardH));
+  while(n>0&&listTop+n*cardH+(n-1)*gap>listBot)cardH--;
+
+  for(let i=0;i<n;i++){
+    const cy=listTop+i*(cardH+gap);
+    await drawPNGCard(c,matches[i],pad,cy,W-pad*2,cardH,t,i);
+  }
+
+  // ── FOOTER ──
+  const fg=c.createLinearGradient(0,listBot,0,H);
+  fg.addColorStop(0,t.footer+"f0");fg.addColorStop(1,"#000");
+  c.fillStyle=fg;c.fillRect(0,listBot,W,H-listBot);
+  const fl=c.createLinearGradient(0,listBot,W,listBot);
+  fl.addColorStop(0,"transparent");fl.addColorStop(.5,t.accent);fl.addColorStop(1,"transparent");
+  c.strokeStyle=fl;c.lineWidth=2;c.beginPath();c.moveTo(40,listBot);c.lineTo(W-40,listBot);c.stroke();
+  if(brand){circleImg(c,brand,W/2,listBot+34,28,t.accent);}
+  c.fillStyle=t.sub;c.font="600 24px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
+  const fl2=wrapTxt(c,inpFooter.value||"",W-80,2);
+  fl2.forEach((ln,i)=>c.fillText(ln,W/2,listBot+(brand?72:40)+i*30));
 }
 
-function drawCircleImg(ctx, img, cx,cy,r, borderColor) {
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.6)";
-  ctx.shadowBlur = 20;
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
-  ctx.drawImage(img, cx-r, cy-r, r*2, r*2);
-  ctx.restore();
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle = borderColor; ctx.lineWidth = 3; ctx.stroke();
-}
+async function drawPNGCard(c,m,x,y,cw,ch,t,idx){
+  const stripe=t.stripe[idx%t.stripe.length];
+  const pad=18;
+  c.save();c.shadowColor="rgba(0,0,0,.55)";c.shadowBlur=22;c.shadowOffsetY=8;
+  const cg=c.createLinearGradient(x,y,x+cw,y+ch);
+  cg.addColorStop(0,t.card+"f5");cg.addColorStop(1,t.bg2+"e0");
+  rr(c,x,y,cw,ch,20,cg,t.cardBorder,1.5);c.restore();
+  // left stripe
+  rr(c,x,y+14,6,ch-28,3,stripe);
 
-function wrapText(ctx, text, maxW, maxLines) {
-  const words = text.split(/\s+/);
-  const lines = []; let line = "";
-  for (const w of words) {
-    const test = line ? line+" "+w : w;
-    if (ctx.measureText(test).width <= maxW) { line=test; }
-    else { if (line) lines.push(line); line=w; }
-  }
-  if (line) lines.push(line);
-  return lines.slice(0, maxLines);
-}
-
-// ═══════════════════════════════════════════════════════
-//  CANVAS DRAWING — HEADER
-// ═══════════════════════════════════════════════════════
-async function loadBrandLogo() {
-  for (const p of ["assets/branding/CORNERKIICK.png","CORNERKIICK.png"]) {
-    const img = await tryLoad(p);
-    if (img) return img;
-  }
-  return null;
-}
-
-function drawHeader(ctx, t, brandImg, pageNum, totalPages) {
-  const pad = 32;
-  const cx = W/2;
-  let y = 28;
-
-  // Header card
-  const hh = brandImg ? 210 : 140;
-  const hg = ctx.createLinearGradient(pad,y,pad+W-pad*2,y+hh);
-  hg.addColorStop(0, t.card+"ee");
-  hg.addColorStop(1, t.bg2+"cc");
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.5)";
-  ctx.shadowBlur = 30; ctx.shadowOffsetY = 8;
-  roundRect(ctx, pad, y, W-pad*2, hh, 28, hg, t.accent, 2);
-  ctx.restore();
-
-  // Accent top bar
-  const barG = ctx.createLinearGradient(pad,y,pad+W-pad*2,y);
-  barG.addColorStop(0,"transparent");
-  barG.addColorStop(0.5,t.accent);
-  barG.addColorStop(1,"transparent");
-  ctx.fillStyle = barG;
-  ctx.fillRect(pad+28, y, W-pad*2-56, 3);
-
-  y += 18;
-
-  // Brand logo
-  if (brandImg) {
-    drawCircleImg(ctx, brandImg, cx, y+44, 44, t.accent);
-    y += 100;
-  } else { y += 14; }
-
-  // Title
-  ctx.save();
-  ctx.shadowColor = t.accentGlow;
-  ctx.shadowBlur = 24;
-  ctx.fillStyle = t.text;
-  ctx.font = `900 52px 'Oswald','Segoe UI',sans-serif`;
-  ctx.textAlign = "center";
-  ctx.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(), cx, y);
-  ctx.restore();
-  y += 14;
-
-  // Date pill
-  const dateStr = formatDateID(selectedDate).toUpperCase();
-  ctx.font = "700 30px 'Inter','Segoe UI',sans-serif";
-  const dw = ctx.measureText(dateStr).width;
-  const pw = dw+48, ph = 44;
-  roundRect(ctx, cx-pw/2, y, pw, ph, 22, t.timeBg+"cc", t.accent+"88", 1.5);
-  ctx.fillStyle = t.sub;
-  ctx.textAlign = "center";
-  ctx.fillText(dateStr, cx, y+30);
-  y += ph;
-
-  // Page indicator
-  if (totalPages > 1) {
-    y += 8;
-    ctx.font = "600 22px 'Inter','Segoe UI',sans-serif";
-    ctx.fillStyle = t.sub;
-    ctx.fillText(`HALAMAN ${pageNum} / ${totalPages}`, cx, y+20);
-    y += 28;
+  let iy=y+14;
+  // league
+  if(m.competition){
+    const ll=getCached(leagueLogoBase(m.competition));
+    if(ll){c.drawImage(ll,x+pad+8,iy,24,24);c.font="700 19px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.textAlign="left";c.fillText(m.competition.toUpperCase(),x+pad+38,iy+17);}
+    else{c.font="700 19px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.textAlign="center";c.fillText(m.competition.toUpperCase(),x+cw/2,iy+17);}
+    iy+=30;
   }
 
-  return 28 + hh + 16;
-}
+  // time box
+  const tw=96,th=Math.min(86,ch-(m.competition?50:30)-52);
+  const tx=x+pad+8,ty=iy+(ch-(m.competition?30:0)-th-48)/2;
+  rr(c,tx,ty,tw,th,14,t.timeBg+"cc",stripe,2);
+  c.save();c.shadowColor=stripe;c.shadowBlur=12;
+  c.fillStyle=stripe;c.font=`900 ${Math.min(34,th*.42)}px 'Bebas Neue','Segoe UI',sans-serif`;
+  c.textAlign="center";c.fillText(m.kickoff,tx+tw/2,ty+th*.52);c.restore();
+  c.fillStyle=t.sub;c.font="700 15px 'Inter','Segoe UI',sans-serif";c.fillText("WIB",tx+tw/2,ty+th*.76);
 
-// ═══════════════════════════════════════════════════════
-//  CANVAS DRAWING — MATCH CARD (multi-match per page)
-// ═══════════════════════════════════════════════════════
-function drawMatchCard(ctx, m, x, y, cardW, cardH, t, colorIdx) {
-  const borderColor = t.borderLeft[colorIdx % t.borderLeft.length];
-  const pad = 20;
+  // teams
+  const teamsX=x+pad+tw+16,teamsW=cw-pad-tw-26;
+  const vsSlot=58,colW=(teamsW-vsSlot)/2;
+  const hcx=teamsX+colW/2,acx=teamsX+teamsW-colW/2,midX=teamsX+teamsW/2;
+  const lsz=Math.min(62,Math.max(46,Math.floor((ch-(m.competition?40:20)-56)*.52)));
+  const topy=iy+(ch-(m.competition?30:0)-lsz-48)/2;
 
-  // Card shadow + bg
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.55)";
-  ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
-  const cg = ctx.createLinearGradient(x,y,x+cardW,y+cardH);
-  cg.addColorStop(0, t.card+"f5");
-  cg.addColorStop(1, t.bg2+"e0");
-  roundRect(ctx, x, y, cardW, cardH, 22, cg, t.cardBorder, 1.5);
-  ctx.restore();
+  const hImg=getCached(teamLogoBase(m.home));
+  const aImg=getCached(teamLogoBase(m.away));
+  if(hImg)c.drawImage(hImg,hcx-lsz/2,topy,lsz,lsz);
+  else{rr(c,hcx-lsz/2,topy,lsz,lsz,8,t.card,t.cardBorder,1);c.fillStyle=t.sub;c.font="700 16px sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("?",hcx,topy+lsz/2);c.textBaseline="alphabetic";}
+  if(aImg)c.drawImage(aImg,acx-lsz/2,topy,lsz,lsz);
+  else{rr(c,acx-lsz/2,topy,lsz,lsz,8,t.card,t.cardBorder,1);c.fillStyle=t.sub;c.font="700 16px sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("?",acx,topy+lsz/2);c.textBaseline="alphabetic";}
 
-  // Left accent bar
-  ctx.fillStyle = borderColor;
-  roundRect(ctx, x, y+12, 6, cardH-24, 3, borderColor);
+  const fs=Math.max(17,Math.min(23,Math.floor(colW/5.5)));
+  c.fillStyle=t.text;c.font=`700 ${fs}px 'Inter','Segoe UI',sans-serif`;c.textAlign="center";
+  wrapTxt(c,m.home,colW-6,2).forEach((ln,i)=>c.fillText(ln,hcx,topy+lsz+18+i*22));
+  wrapTxt(c,m.away,colW-6,2).forEach((ln,i)=>c.fillText(ln,acx,topy+lsz+18+i*22));
 
-  // League name
-  let iy = y + 14;
-  if (m.competition) {
-    ctx.font = "700 20px 'Inter','Segoe UI',sans-serif";
-    ctx.fillStyle = t.sub;
-    ctx.textAlign = "center";
-    ctx.fillText(m.competition.toUpperCase(), x+cardW/2, iy+16);
-    iy += 28;
-  }
-
-  // Time box
-  const timeW = 100, timeH = Math.min(90, cardH - (m.competition?60:40));
-  const timeX = x+pad+8, timeY = iy + (cardH - (m.competition?28:0) - timeH - 52)/2;
-  roundRect(ctx, timeX, timeY, timeW, timeH, 14, t.timeBg+"cc", borderColor, 2);
-  ctx.save();
-  ctx.shadowColor = borderColor; ctx.shadowBlur = 12;
-  ctx.fillStyle = borderColor;
-  ctx.font = `900 ${Math.min(36,timeH*0.42)}px 'Oswald','Segoe UI',sans-serif`;
-  ctx.textAlign = "center";
-  ctx.fillText(m.kickoff, timeX+timeW/2, timeY+timeH*0.52);
-  ctx.restore();
-  ctx.fillStyle = t.sub;
-  ctx.font = "700 16px 'Inter','Segoe UI',sans-serif";
-  ctx.fillText("WIB", timeX+timeW/2, timeY+timeH*0.78);
-
-  // Teams area
-  const teamsX = x+pad+timeW+18;
-  const teamsW = cardW - pad - timeW - 28;
-  const vsSlot = 60;
-  const colW = (teamsW - vsSlot) / 2;
-  const homeCx = teamsX + colW/2;
-  const awayCx = teamsX + teamsW - colW/2;
-  const midX   = teamsX + teamsW/2;
-  const logoSz = Math.min(64, Math.max(48, Math.floor((cardH - (m.competition?40:20) - 60) * 0.55)));
-  const teamTopY = iy + (cardH - (m.competition?28:0) - logoSz - 50) / 2;
-
-  // Home logo + name
-  const hImg = getCached(resolveTeamLogo(m.home));
-  if (hImg) ctx.drawImage(hImg, homeCx-logoSz/2, teamTopY, logoSz, logoSz);
-  else {
-    roundRect(ctx, homeCx-logoSz/2, teamTopY, logoSz, logoSz, 8, t.card, t.cardBorder, 1);
-    ctx.fillStyle = t.sub; ctx.font = "700 18px sans-serif"; ctx.textAlign="center";
-    ctx.fillText("?", homeCx, teamTopY+logoSz/2+7);
-  }
-  ctx.fillStyle = t.text;
-  ctx.font = `700 ${Math.max(18,Math.min(24,Math.floor(colW/5)))}px 'Inter','Segoe UI',sans-serif`;
-  ctx.textAlign = "center";
-  const hLines = wrapText(ctx, m.home, colW-8, 2);
-  hLines.forEach((ln,i) => ctx.fillText(ln, homeCx, teamTopY+logoSz+22+i*24));
-
-  // Away logo + name
-  const aImg = getCached(resolveTeamLogo(m.away));
-  if (aImg) ctx.drawImage(aImg, awayCx-logoSz/2, teamTopY, logoSz, logoSz);
-  else {
-    roundRect(ctx, awayCx-logoSz/2, teamTopY, logoSz, logoSz, 8, t.card, t.cardBorder, 1);
-    ctx.fillStyle = t.sub; ctx.font = "700 18px sans-serif"; ctx.textAlign="center";
-    ctx.fillText("?", awayCx, teamTopY+logoSz/2+7);
-  }
-  ctx.fillStyle = t.text;
-  ctx.font = `700 ${Math.max(18,Math.min(24,Math.floor(colW/5)))}px 'Inter','Segoe UI',sans-serif`;
-  ctx.textAlign = "center";
-  const aLines = wrapText(ctx, m.away, colW-8, 2);
-  aLines.forEach((ln,i) => ctx.fillText(ln, awayCx, teamTopY+logoSz+22+i*24));
-
-  // VS badge
-  const vsCy = teamTopY + logoSz/2;
-  ctx.save();
-  ctx.shadowColor = borderColor; ctx.shadowBlur = 18;
-  ctx.beginPath(); ctx.arc(midX, vsCy, 28, 0, Math.PI*2);
-  ctx.fillStyle = borderColor; ctx.fill();
-  ctx.restore();
-  ctx.fillStyle = t.bg;
-  ctx.font = "900 20px 'Oswald','Segoe UI',sans-serif";
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText("VS", midX, vsCy+1);
-  ctx.textBaseline = "alphabetic";
+  // VS
+  const vcy=topy+lsz/2;
+  c.save();c.shadowColor=stripe;c.shadowBlur=16;
+  c.beginPath();c.arc(midX,vcy,26,0,Math.PI*2);c.fillStyle=stripe;c.fill();c.restore();
+  c.fillStyle=t.bg;c.font="900 18px 'Bebas Neue','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText("VS",midX,vcy+1);c.textBaseline="alphabetic";
 
   // TV bar
-  const tvStr = shortTv(m);
-  const tvY = y + cardH - 46;
-  const tvX = x + pad + timeW + 14;
-  const tvW = cardW - pad - timeW - 24;
-  const tvColor = isFreeTV(m) ? t.tvFree : t.tv;
-  roundRect(ctx, tvX, tvY, tvW, 36, 18, "rgba(0,0,0,0.4)", tvColor+"66", 1);
-  ctx.fillStyle = tvColor;
-  ctx.font = "700 22px 'Inter','Segoe UI',sans-serif";
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  const tvLines = wrapText(ctx, "📺  "+tvStr, tvW-20, 1);
-  ctx.fillText(tvLines[0]||tvStr, tvX+tvW/2, tvY+18);
-  ctx.textBaseline = "alphabetic";
+  const tvy=y+ch-44,tvx=x+pad+tw+12,tvw=cw-pad-tw-22;
+  const tvc=isFreeTV(m)?t.tvFree:t.tv;
+  rr(c,tvx,tvy,tvw,34,17,"rgba(0,0,0,.4)",tvc+"66",1);
+  c.fillStyle=tvc;c.font="700 21px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";
+  c.fillText("📺  "+shortTv(m),tvx+tvw/2,tvy+17);c.textBaseline="alphabetic";
 }
 
-// ═══════════════════════════════════════════════════════
-//  CANVAS DRAWING — FOOTER
-// ═══════════════════════════════════════════════════════
-function drawFooter(ctx, t, brandImg, footerY) {
-  // Footer bg
-  const fg = ctx.createLinearGradient(0,footerY,0,H);
-  fg.addColorStop(0, t.footer+"ee");
-  fg.addColorStop(1, "#000");
-  ctx.fillStyle = fg;
-  ctx.fillRect(0, footerY, W, H-footerY);
+// ═══════════════════════════════════════════════════
+// VIDEO SLIDE — 1 pertandingan, full screen, animasi
+// ═══════════════════════════════════════════════════
+async function renderVideoSlide(c,m,t,brand,progress){
+  // progress 0..1 = animasi masuk
+  const anim=$("#sel-anim").value;
+  c.clearRect(0,0,W,H);
+  c.save();
 
-  // Accent line
-  const al = ctx.createLinearGradient(0,footerY,W,footerY);
-  al.addColorStop(0,"transparent"); al.addColorStop(0.5,t.accent); al.addColorStop(1,"transparent");
-  ctx.strokeStyle = al; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(40,footerY); ctx.lineTo(W-40,footerY); ctx.stroke();
-
-  let fy = footerY + 18;
-  if (brandImg) {
-    drawCircleImg(ctx, brandImg, W/2, fy+32, 32, t.accent);
-    fy += 76;
-  } else { fy += 20; }
-
-  ctx.fillStyle = t.sub;
-  ctx.font = "600 26px 'Inter','Segoe UI',sans-serif";
-  ctx.textAlign = "center";
-  const fLines = wrapText(ctx, inpFooter.value||"", W-80, 2);
-  fLines.forEach((ln,i) => ctx.fillText(ln, W/2, fy+i*32));
-}
-
-// ═══════════════════════════════════════════════════════
-//  RENDER PAGE (multi-match layout)
-// ═══════════════════════════════════════════════════════
-async function renderPage(targetCtx, pageMatches, pageNum, totalPages) {
-  const t = getTheme();
-  const n = pageMatches.length;
-  const pad = 28;
-  const gap = 14;
-  const footerH = 110;
-
-  targetCtx.clearRect(0,0,W,H);
-  drawBg(targetCtx, t);
-
-  const brandImg = await loadBrandLogo();
-  const headerEnd = drawHeader(targetCtx, t, brandImg, pageNum, totalPages);
-
-  const listTop = headerEnd;
-  const listBottom = H - footerH;
-  const avail = listBottom - listTop - gap*(n-1);
-  let cardH = Math.floor(avail / n);
-  cardH = Math.min(310, Math.max(160, cardH));
-
-  // Recalculate to fit
-  while (n > 0 && listTop + n*cardH + (n-1)*gap > listBottom) cardH--;
-
-  const cardW = W - pad*2;
-  for (let i=0; i<n; i++) {
-    const cy = listTop + i*(cardH+gap);
-    drawMatchCard(targetCtx, pageMatches[i], pad, cy, cardW, cardH, t, i);
+  // Apply entrance animation transform
+  if(anim==="slide"){
+    const off=(1-easeOut(progress))*W;
+    c.translate(off,0);
+  } else if(anim==="fade"){
+    c.globalAlpha=easeOut(progress);
+  } else if(anim==="zoom"){
+    const s=0.88+0.12*easeOut(progress);
+    c.translate(W/2,H/2);c.scale(s,s);c.translate(-W/2,-H/2);
+    c.globalAlpha=Math.min(1,progress*1.5);
+  } else if(anim==="wipe"){
+    // clip from bottom to top
+    const clipH=H*easeOut(progress);
+    c.beginPath();c.rect(0,H-clipH,W,clipH);c.clip();
   }
 
-  drawFooter(targetCtx, t, brandImg, listBottom);
+  drawBg(c,t);
+
+  const stripe=t.stripe[allMatches.indexOf(m)%t.stripe.length]||t.accent;
+  const pad=36,cx=W/2;
+
+  // ── HEADER COMPACT ──
+  const hh=brand?170:120;
+  c.save();c.shadowColor="rgba(0,0,0,.5)";c.shadowBlur=30;c.shadowOffsetY=8;
+  const hg=c.createLinearGradient(pad,28,pad+W-pad*2,28+hh);
+  hg.addColorStop(0,t.card+"f0");hg.addColorStop(1,t.bg2+"d0");
+  rr(c,pad,28,W-pad*2,hh,26,hg,t.accent,2.5);c.restore();
+  const al=c.createLinearGradient(pad,28,pad+W-pad*2,28);
+  al.addColorStop(0,"transparent");al.addColorStop(.5,t.accent);al.addColorStop(1,"transparent");
+  c.fillStyle=al;c.fillRect(pad+30,28,W-pad*2-60,3);
+
+  let hy=46;
+  if(brand){circleImg(c,brand,cx,hy+32,32,t.accent);hy+=76;}else{hy+=12;}
+  c.save();c.shadowColor=t.accent+"88";c.shadowBlur=18;
+  c.fillStyle=t.text;c.font="900 50px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
+  c.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(),cx,hy);c.restore();
+  hy+=8;
+  c.fillStyle=t.sub;c.font="600 26px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
+  c.fillText(fmtDate(selectedDate).toUpperCase(),cx,hy+22);
+
+  const headerEnd=28+hh+20;
+
+  // ── BIG MATCH CARD ──
+  const cardY=headerEnd,cardH=H-headerEnd-110;
+  const cardW=W-pad*2;
+
+  c.save();c.shadowColor="rgba(0,0,0,.6)";c.shadowBlur=40;c.shadowOffsetY=16;
+  const cg=c.createLinearGradient(pad,cardY,pad+cardW,cardY+cardH);
+  cg.addColorStop(0,t.card+"f8");cg.addColorStop(1,t.bg2+"e8");
+  rr(c,pad,cardY,cardW,cardH,32,cg,stripe,3);c.restore();
+  rr(c,pad,cardY+18,8,cardH-36,4,stripe);
+
+  let cy=cardY+28;
+
+  // League row
+  if(m.competition){
+    const ll=getCached(leagueLogoBase(m.competition));
+    if(ll){c.drawImage(ll,cx-16,cy,32,32);cy+=40;}
+    c.fillStyle=t.sub;c.font="700 28px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
+    c.fillText(m.competition.toUpperCase(),cx,cy+20);cy+=36;
+  }
+  // divider
+  c.strokeStyle=t.cardBorder;c.lineWidth=1;
+  c.beginPath();c.moveTo(pad+50,cy);c.lineTo(pad+cardW-50,cy);c.stroke();cy+=24;
+
+  // Team logos — BIG
+  const lsz=Math.min(200,Math.floor((cardH-cy+cardY-200)*.65));
+  const hcx=pad+cardW*.26,acx=pad+cardW*.74;
+  const hImg=getCached(teamLogoBase(m.home));
+  const aImg=getCached(teamLogoBase(m.away));
+  if(hImg)c.drawImage(hImg,hcx-lsz/2,cy,lsz,lsz);
+  else{rr(c,hcx-lsz/2,cy,lsz,lsz,14,t.card,t.cardBorder,2);}
+  if(aImg)c.drawImage(aImg,acx-lsz/2,cy,lsz,lsz);
+  else{rr(c,acx-lsz/2,cy,lsz,lsz,14,t.card,t.cardBorder,2);}
+
+  // VS badge
+  const vcy=cy+lsz/2;
+  c.save();c.shadowColor=stripe;c.shadowBlur=28;
+  c.beginPath();c.arc(cx,vcy,42,0,Math.PI*2);c.fillStyle=stripe;c.fill();c.restore();
+  c.fillStyle=t.bg;c.font="900 30px 'Bebas Neue','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText("VS",cx,vcy+1);c.textBaseline="alphabetic";
+
+  // Team names
+  const ny=cy+lsz+22;
+  c.fillStyle=t.text;c.font="800 36px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
+  wrapTxt(c,m.home,cardW*.38,2).forEach((ln,i)=>c.fillText(ln,hcx,ny+i*42));
+  wrapTxt(c,m.away,cardW*.38,2).forEach((ln,i)=>c.fillText(ln,acx,ny+i*42));
+
+  // Kickoff pill
+  const kpy=ny+100,kpw=220,kph=76;
+  rr(c,cx-kpw/2,kpy,kpw,kph,20,t.timeBg+"cc",stripe,2.5);
+  c.save();c.shadowColor=stripe;c.shadowBlur=14;
+  c.fillStyle=stripe;c.font="900 48px 'Bebas Neue','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText(m.kickoff,cx,kpy+kph/2-8);c.restore();
+  c.fillStyle=t.sub;c.font="700 22px 'Inter','Segoe UI',sans-serif";c.textBaseline="middle";
+  c.fillText("WIB",cx,kpy+kph/2+18);c.textBaseline="alphabetic";
+
+  // TV bar
+  const tvy=kpy+kph+18,tvw=cardW-60;
+  const tvc=isFreeTV(m)?t.tvFree:t.tv;
+  rr(c,pad+30,tvy,tvw,52,26,"rgba(0,0,0,.45)",tvc+"88",1.5);
+  c.fillStyle=tvc;c.font="700 28px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText("📺  "+shortTv(m),pad+30+tvw/2,tvy+26);c.textBaseline="alphabetic";
+
+  // ── FOOTER ──
+  const footY=H-100;
+  const fg=c.createLinearGradient(0,footY,0,H);
+  fg.addColorStop(0,t.footer+"f0");fg.addColorStop(1,"#000");
+  c.fillStyle=fg;c.fillRect(0,footY,W,H-footY);
+  const fl=c.createLinearGradient(0,footY,W,footY);
+  fl.addColorStop(0,"transparent");fl.addColorStop(.5,t.accent);fl.addColorStop(1,"transparent");
+  c.strokeStyle=fl;c.lineWidth=2;c.beginPath();c.moveTo(40,footY);c.lineTo(W-40,footY);c.stroke();
+  c.fillStyle=t.sub;c.font="600 24px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
+  c.fillText(inpFooter.value||"",cx,footY+52);
+
+  c.restore();
 }
 
-// ═══════════════════════════════════════════════════════
-//  PREVIEW
-// ═══════════════════════════════════════════════════════
-function getPages() {
-  const pp = perPage();
-  const pages = [];
-  for (let i=0; i<allMatches.length; i+=pp) pages.push(allMatches.slice(i,i+pp));
+function easeOut(t){return 1-Math.pow(1-t,3);}
+
+// ═══════════════════════════════════════════════════
+// PREVIEW — PNG mode
+// ═══════════════════════════════════════════════════
+function getPages(){
+  const pp=perPage(),pages=[];
+  for(let i=0;i<allMatches.length;i+=pp)pages.push(allMatches.slice(i,i+pp));
   return pages;
 }
 
-async function updatePreview() {
-  const pages = getPages();
-  if (!pages.length) {
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle = "#0d1117";
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "#30363d";
-    ctx.font = "700 40px 'Inter',sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Tidak ada jadwal", W/2, H/2);
-    pageInfo.textContent = "— / —";
-    navPrev.disabled = navNext.disabled = true;
-    return;
+async function showPNGPreview(){
+  const pages=getPages();
+  if(!pages.length){
+    ctx.clearRect(0,0,W,H);ctx.fillStyle=getT().bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=getT().sub;ctx.font="700 38px 'Inter',sans-serif";ctx.textAlign="center";
+    ctx.fillText("Tidak ada jadwal",W/2,H/2);
+    pageLbl.textContent="— / —";navPrev.disabled=navNext.disabled=true;return;
   }
-  if (previewPage >= pages.length) previewPage = pages.length-1;
-  if (previewPage < 0) previewPage = 0;
-
-  pageInfo.textContent = `${previewPage+1} / ${pages.length}`;
-  navPrev.disabled = previewPage === 0;
-  navNext.disabled = previewPage === pages.length-1;
-
-  await renderPage(ctx, pages[previewPage], previewPage+1, pages.length);
+  if(previewPage>=pages.length)previewPage=pages.length-1;
+  if(previewPage<0)previewPage=0;
+  pageLbl.textContent=`${previewPage+1} / ${pages.length}`;
+  navPrev.disabled=previewPage===0;navNext.disabled=previewPage===pages.length-1;
+  await renderPNGPage(ctx,pages[previewPage],previewPage+1,pages.length);
 }
 
-// ═══════════════════════════════════════════════════════
-//  MATCH LIST SIDEBAR
-// ═══════════════════════════════════════════════════════
-function renderMatchList() {
-  if (!allMatches.length) {
-    matchList.innerHTML = `<div style="color:var(--muted);font-size:0.82rem;padding:12px 0">Tidak ada jadwal untuk tanggal ini.</div>`;
-    return;
+// ═══════════════════════════════════════════════════
+// PREVIEW — VIDEO mode (live animation loop)
+// ═══════════════════════════════════════════════════
+let vidSlideIdx=0,vidFrameStart=null,vidBrand=null;
+const VID_ANIM_DUR=0.5; // detik animasi masuk
+
+async function startVideoPreview(){
+  if(vidAnimFrame)cancelAnimationFrame(vidAnimFrame);
+  vidPlaying=true;
+  vidSlideIdx=0;
+  vidFrameStart=null;
+  vidBrand=await loadBrand();
+  const t=getT();
+  const slideDur=parseInt($("#sel-dur").value)||4;
+
+  function frame(ts){
+    if(!vidPlaying)return;
+    if(!vidFrameStart)vidFrameStart=ts;
+    const elapsed=(ts-vidFrameStart)/1000; // detik
+    const totalDur=slideDur*allMatches.length;
+    const loopTime=elapsed%totalDur;
+    const slideTime=loopTime%slideDur;
+    const slideIdx=Math.floor(loopTime/slideDur)%allMatches.length;
+
+    if(slideIdx!==vidSlideIdx){vidSlideIdx=slideIdx;}
+    const progress=Math.min(1,slideTime/VID_ANIM_DUR);
+    const m=allMatches[vidSlideIdx];
+    renderVideoSlide(ctx,m,t,vidBrand,progress).then(()=>{
+      vidAnimFrame=requestAnimationFrame(frame);
+    });
   }
-  matchList.innerHTML = allMatches.map((m,i) => {
-    const hLogo = resolveTeamLogo(m.home);
-    const aLogo = resolveTeamLogo(m.away);
-    const hImg  = getCached(hLogo);
-    const aImg  = getCached(aLogo);
-    const pp = perPage();
-    const pageIdx = Math.floor(i/pp);
-    return `<div class="match-item ${pageIdx===previewPage?'active':''}" data-page="${pageIdx}" data-idx="${i}">
+  vidAnimFrame=requestAnimationFrame(frame);
+}
+
+function stopVideoPreview(){
+  vidPlaying=false;
+  if(vidAnimFrame){cancelAnimationFrame(vidAnimFrame);vidAnimFrame=null;}
+}
+
+// ═══════════════════════════════════════════════════
+// MATCH LIST
+// ═══════════════════════════════════════════════════
+function renderMatchList(){
+  if(!allMatches.length){
+    matchList.innerHTML=`<div style="color:var(--muted);font-size:.8rem;padding:10px 0">Tidak ada jadwal.</div>`;return;
+  }
+  const pp=perPage();
+  matchList.innerHTML=allMatches.map((m,i)=>{
+    const pg=Math.floor(i/pp);
+    const hImg=getCached(teamLogoBase(m.home));
+    const aImg=getCached(teamLogoBase(m.away));
+    const active=previewMode==="png"?pg===previewPage:i===vidSlideIdx;
+    return`<div class="mi${active?" on":""}" data-pg="${pg}" data-idx="${i}">
       <span class="mi-time">${esc(m.kickoff)}</span>
-      ${hImg?`<img class="mi-logo" src="${hImg.src}" alt="${esc(m.home)}" />`:''}
-      <span style="flex:1;min-width:0">
-        <div class="mi-teams">${esc(m.home)} <span style="color:var(--muted)">vs</span> ${esc(m.away)}</div>
-        <div class="mi-comp">${esc(m.competition||'')} · <span class="mi-tv">${esc(shortTv(m))}</span></div>
+      ${hImg?`<img class="mi-logo" src="${hImg.src}" alt=""/>`:""}
+      <span class="mi-info">
+        <div class="mi-teams">${esc(m.home)} vs ${esc(m.away)}</div>
+        <div class="mi-meta">${esc(m.competition||"")} · <span class="mi-tv">${esc(shortTv(m))}</span></div>
       </span>
-      ${aImg?`<img class="mi-logo" src="${aImg.src}" alt="${esc(m.away)}" />`:''}
+      ${aImg?`<img class="mi-logo" src="${aImg.src}" alt=""/>`:""}
     </div>`;
   }).join("");
 
-  matchList.querySelectorAll(".match-item").forEach(el => {
-    el.addEventListener("click", () => {
-      previewPage = parseInt(el.dataset.page);
-      updatePreview();
-      renderMatchList();
+  matchList.querySelectorAll(".mi").forEach(el=>{
+    el.addEventListener("click",()=>{
+      if(previewMode==="png"){
+        previewPage=parseInt(el.dataset.pg);
+        showPNGPreview();renderMatchList();
+      } else {
+        // jump to slide in video preview
+        vidSlideIdx=parseInt(el.dataset.idx);
+        vidFrameStart=null;
+        renderMatchList();
+      }
     });
   });
 }
 
-// ═══════════════════════════════════════════════════════
-//  SCHEDULE LOADING
-// ═══════════════════════════════════════════════════════
-function getMatchesForDate(iso) {
-  const raw = allSchedules[iso];
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw==="object") return [raw];
-  return [];
+// ═══════════════════════════════════════════════════
+// SCHEDULE LOADING
+// ═══════════════════════════════════════════════════
+function getMatchesForDate(iso){
+  const r=allSchedules[iso];
+  if(Array.isArray(r))return r;if(r&&typeof r==="object")return[r];return[];
 }
 
-async function applyDate(iso) {
-  selectedDate = iso;
-  datePicker.value = iso;
-  $("#topbar-date").textContent = formatDateID(iso);
-  allMatches = getMatchesForDate(iso);
-  $("#match-badge").textContent = `${allMatches.length} pertandingan`;
-  previewPage = 0;
+async function applyDate(iso){
+  selectedDate=iso;datePicker.value=iso;
+  $("#topbar-date").textContent=fmtDate(iso);
+  allMatches=getMatchesForDate(iso);
+  const n=allMatches.length;
+  const pp=perPage(),tp=Math.ceil(n/pp);
+  btnDlPng.textContent=tp>1?`⚡ Download ${tp} PNG`:"⚡ Download PNG";
+  btnDlPng.disabled=!n;btnDlVideo.disabled=!n;
+  previewPage=0;vidSlideIdx=0;
 
-  const pp = perPage();
-  const totalPages = Math.ceil(allMatches.length/pp);
-  if (totalPages > 1) {
-    btnDlPng.textContent = `⚡ Download ${totalPages} PNG`;
+  if(n){
+    setStatus("Memuat logo...","loading");
+    await loadStaticLogos();await preloadAll(allMatches);
+    setStatus(`✓ ${n} pertandingan · ${fmtDate(iso)}`,"ok");
   } else {
-    btnDlPng.textContent = `⚡ Download PNG`;
+    setStatus(`Tidak ada jadwal untuk ${fmtDate(iso)}`);
   }
-  btnDlPng.disabled = !allMatches.length;
-  btnDlVideo.disabled = !allMatches.length;
-
-  if (allMatches.length) {
-    setStatus(`Memuat logo...`, "loading");
-    await loadStaticLogos();
-    await preloadMatchLogos(allMatches);
-    setStatus(`✓ ${allMatches.length} pertandingan · ${formatDateID(iso)}`, "ok");
-  } else {
-    setStatus(`Tidak ada jadwal untuk ${formatDateID(iso)}`, "");
-  }
-
   renderMatchList();
-  await updatePreview();
+  if(previewMode==="png")await showPNGPreview();
+  else await startVideoPreview();
 }
 
-async function fetchSchedule() {
-  setStatus("Memuat jadwal...", "loading");
-  try {
-    const r = await fetch(asset("data/jadwal.json"));
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    allSchedules = data.schedules || {};
+async function fetchSchedule(){
+  setStatus("Memuat jadwal...","loading");
+  try{
+    const r=await fetch(asset("data/jadwal.json"));
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const d=await r.json();allSchedules=d.schedules||{};
     await loadStaticLogos();
-    setStatus(`✓ Data jadwal dimuat`, "ok");
+    setStatus("✓ Data jadwal dimuat","ok");
     await applyDate(selectedDate);
-  } catch(e) {
-    setStatus(`Gagal memuat jadwal. Coba Import HTML.`, "err");
-  }
+  }catch(e){setStatus("Gagal memuat jadwal. Coba Import HTML.","err");}
 }
 
-function importHtmlFile(file) {
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const doc = new DOMParser().parseFromString(e.target.result, "text/html");
-      const rows = doc.querySelectorAll("table tr");
-      if (!rows.length) throw new Error("Tabel tidak ditemukan");
-      let count = 0;
-      if (!allSchedules[selectedDate]) allSchedules[selectedDate] = [];
-      rows.forEach(tr => {
-        const cells = [...tr.querySelectorAll("td")].map(td=>td.textContent.trim());
-        if (cells.length<4) return;
-        const [kickoff,matchup,competition,tv] = cells;
-        if (/kick-off/i.test(kickoff)||!/vs/i.test(matchup)) return;
-        const parts = matchup.split(/\s+vs\s+/i);
-        allSchedules[selectedDate].push({ kickoff, matchup, home:(parts[0]||"").trim(), away:(parts[1]||"").trim(), competition, tv, tvFree:[], tvPaid:[] });
+function importHtmlFile(file){
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const doc=new DOMParser().parseFromString(e.target.result,"text/html");
+      const rows=doc.querySelectorAll("table tr");
+      if(!rows.length)throw new Error("Tabel tidak ditemukan");
+      let count=0;
+      if(!allSchedules[selectedDate])allSchedules[selectedDate]=[];
+      rows.forEach(tr=>{
+        const cells=[...tr.querySelectorAll("td")].map(td=>td.textContent.trim());
+        if(cells.length<4)return;
+        const[kickoff,matchup,competition,tv]=cells;
+        if(/kick-off/i.test(kickoff)||!/vs/i.test(matchup))return;
+        const parts=matchup.split(/\s+vs\s+/i);
+        allSchedules[selectedDate].push({kickoff,matchup,home:(parts[0]||"").trim(),away:(parts[1]||"").trim(),competition,tv,tvFree:[],tvPaid:[]});
         count++;
       });
-      setStatus(`✓ Import ${count} pertandingan`, "ok");
+      setStatus(`✓ Import ${count} pertandingan`,"ok");
       await applyDate(selectedDate);
-    } catch(err) { setStatus(`Gagal import: ${err.message}`, "err"); }
+    }catch(err){setStatus(`Gagal import: ${err.message}`,"err");}
   };
-  reader.readAsText(file, "UTF-8");
+  reader.readAsText(file,"UTF-8");
 }
 
-// ═══════════════════════════════════════════════════════
-//  DOWNLOAD PNG (multi-page)
-// ═══════════════════════════════════════════════════════
-async function downloadPNG() {
-  if (!allMatches.length) return;
-  btnDlPng.disabled = true;
-  const pages = getPages();
-  setStatus(`Membuat ${pages.length} PNG...`, "loading");
-  try {
-    const offscreen = document.createElement("canvas");
-    offscreen.width = W; offscreen.height = H;
-    const octx = offscreen.getContext("2d");
-
-    for (let p=0; p<pages.length; p++) {
-      await renderPage(octx, pages[p], p+1, pages.length);
+// ═══════════════════════════════════════════════════
+// DOWNLOAD PNG
+// ═══════════════════════════════════════════════════
+async function downloadPNG(){
+  if(!allMatches.length)return;
+  btnDlPng.disabled=true;
+  const pages=getPages();
+  setStatus(`Membuat ${pages.length} PNG...`,"loading");
+  try{
+    const oc=document.createElement("canvas");oc.width=W;oc.height=H;
+    const octx=oc.getContext("2d");
+    for(let p=0;p<pages.length;p++){
+      await renderPNGPage(octx,pages[p],p+1,pages.length);
       await new Promise(r=>setTimeout(r,60));
-      const suffix = pages.length>1 ? `-part${p+1}of${pages.length}` : "";
-      const link = document.createElement("a");
-      link.download = `jadwal-${currentTheme}-${selectedDate}${suffix}.png`;
-      link.href = offscreen.toDataURL("image/png");
-      link.click();
-      if (p < pages.length-1) await new Promise(r=>setTimeout(r,350));
+      const suf=pages.length>1?`-part${p+1}of${pages.length}`:"";
+      const a=document.createElement("a");
+      a.download=`jadwal-${currentTheme}-${selectedDate}${suf}.png`;
+      a.href=oc.toDataURL("image/png");a.click();
+      if(p<pages.length-1)await new Promise(r=>setTimeout(r,350));
     }
-    setStatus(`✓ ${pages.length} file PNG didownload`, "ok");
-  } catch(e) {
-    setStatus(`Gagal: ${e.message}`, "err");
-  } finally {
-    btnDlPng.disabled = false;
-  }
+    setStatus(`✓ ${pages.length} PNG didownload`,"ok");
+  }catch(e){setStatus(`Gagal: ${e.message}`,"err");}
+  finally{btnDlPng.disabled=false;}
 }
 
-// ═══════════════════════════════════════════════════════
-//  DOWNLOAD VIDEO — slide per pertandingan
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// DOWNLOAD VIDEO
+// ═══════════════════════════════════════════════════
+async function downloadVideo(){
+  if(!allMatches.length)return;
+  if(!window.MediaRecorder){setStatus("Browser tidak support MediaRecorder. Gunakan Chrome/Edge.","err");return;}
+  const mimes=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
+  const mime=mimes.find(m=>MediaRecorder.isTypeSupported(m))||"video/webm";
 
-// Render 1 slide (1 pertandingan) — layout besar, full screen
-async function renderSlide(targetCtx, m, t, brandImg, progress) {
-  // progress 0..1 untuk animasi
-  const anim = $("#sel-anim").value;
-  targetCtx.clearRect(0,0,W,H);
+  stopVideoPreview();
+  btnDlVideo.disabled=true;btnDlPng.disabled=true;
+  vidProgress.classList.add("show");
+  setStatus("Merender video...","loading");
 
-  targetCtx.save();
-  if (anim === "slide") {
-    const offset = (1-progress) * W;
-    targetCtx.translate(offset, 0);
-  } else if (anim === "fade") {
-    targetCtx.globalAlpha = progress;
-  } else if (anim === "zoom") {
-    const scale = 0.85 + 0.15*progress;
-    targetCtx.translate(W/2, H/2);
-    targetCtx.scale(scale, scale);
-    targetCtx.translate(-W/2, -H/2);
-    targetCtx.globalAlpha = progress;
-  } else if (anim === "flip") {
-    const scaleY = progress < 0.5 ? progress*2 : 1;
-    targetCtx.translate(W/2, H/2);
-    targetCtx.scale(1, scaleY);
-    targetCtx.translate(-W/2, -H/2);
-    targetCtx.globalAlpha = Math.min(1, progress*2);
-  }
+  try{
+    const t=getT();
+    const brand=await loadBrand();
+    const FPS=30,slideDur=parseInt($("#sel-dur").value)||4;
+    const animDur=Math.min(0.5,slideDur*0.2);
+    const animFrames=Math.round(animDur*FPS);
+    const slideFrames=Math.round(slideDur*FPS);
+    const total=allMatches.length*slideFrames+Math.round(0.4*FPS);
 
-  drawBg(targetCtx, t);
+    const vc=document.createElement("canvas");vc.width=W;vc.height=H;
+    const vctx=vc.getContext("2d");
+    const stream=vc.captureStream(FPS);
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8_000_000});
+    const chunks=[];
+    rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    rec.start(100);
 
-  // Header compact
-  const pad = 32, cx = W/2;
-  const hh = brandImg ? 180 : 120;
-  const hg = targetCtx.createLinearGradient(pad,28,pad+W-pad*2,28+hh);
-  hg.addColorStop(0, t.card+"ee"); hg.addColorStop(1, t.bg2+"cc");
-  targetCtx.save();
-  targetCtx.shadowColor="rgba(0,0,0,0.5)"; targetCtx.shadowBlur=30; targetCtx.shadowOffsetY=8;
-  roundRect(targetCtx, pad, 28, W-pad*2, hh, 28, hg, t.accent, 2);
-  targetCtx.restore();
-
-  let hy = 46;
-  if (brandImg) { drawCircleImg(targetCtx, brandImg, cx, hy+36, 36, t.accent); hy += 84; }
-  else { hy += 10; }
-
-  targetCtx.fillStyle = t.text;
-  targetCtx.font = "900 48px 'Oswald','Segoe UI',sans-serif";
-  targetCtx.textAlign = "center";
-  targetCtx.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(), cx, hy);
-  hy += 12;
-  targetCtx.fillStyle = t.sub;
-  targetCtx.font = "700 26px 'Inter','Segoe UI',sans-serif";
-  targetCtx.fillText(formatDateID(selectedDate).toUpperCase(), cx, hy+24);
-
-  const headerEnd = 28 + hh + 20;
-
-  // Big match card — takes most of the screen
-  const cardPad = 28;
-  const cardY = headerEnd;
-  const cardH = H - headerEnd - 120;
-  const cardW = W - cardPad*2;
-  const colorIdx = allMatches.indexOf(m) % t.borderLeft.length;
-  const borderColor = t.borderLeft[colorIdx < 0 ? 0 : colorIdx];
-
-  // Card bg
-  targetCtx.save();
-  targetCtx.shadowColor="rgba(0,0,0,0.6)"; targetCtx.shadowBlur=40; targetCtx.shadowOffsetY=16;
-  const cg = targetCtx.createLinearGradient(cardPad,cardY,cardPad+cardW,cardY+cardH);
-  cg.addColorStop(0, t.card+"f8"); cg.addColorStop(1, t.bg2+"e8");
-  roundRect(targetCtx, cardPad, cardY, cardW, cardH, 32, cg, borderColor, 3);
-  targetCtx.restore();
-
-  // Left accent bar
-  roundRect(targetCtx, cardPad, cardY+16, 8, cardH-32, 4, borderColor);
-
-  // League + competition
-  let cy2 = cardY + 28;
-  if (m.competition) {
-    // League logo
-    const lLogo = getCached(resolveLeagueLogo(m.competition));
-    if (lLogo) {
-      targetCtx.drawImage(lLogo, cx-16, cy2, 32, 32);
-      cy2 += 40;
-    }
-    targetCtx.fillStyle = t.sub;
-    targetCtx.font = "700 28px 'Inter','Segoe UI',sans-serif";
-    targetCtx.textAlign = "center";
-    targetCtx.fillText(m.competition.toUpperCase(), cx, cy2+20);
-    cy2 += 36;
-  }
-
-  // Divider
-  targetCtx.strokeStyle = t.cardBorder; targetCtx.lineWidth = 1;
-  targetCtx.beginPath(); targetCtx.moveTo(cardPad+40, cy2); targetCtx.lineTo(cardPad+cardW-40, cy2); targetCtx.stroke();
-  cy2 += 20;
-
-  // Teams — big logos
-  const logoSz = Math.min(220, Math.floor((cardH - cy2 + cardY - 180) * 0.7));
-  const teamY = cy2;
-  const homeCx = cardPad + cardW*0.25;
-  const awayCx = cardPad + cardW*0.75;
-
-  const hImg = getCached(resolveTeamLogo(m.home));
-  const aImg = getCached(resolveTeamLogo(m.away));
-
-  if (hImg) targetCtx.drawImage(hImg, homeCx-logoSz/2, teamY, logoSz, logoSz);
-  else { roundRect(targetCtx, homeCx-logoSz/2, teamY, logoSz, logoSz, 12, t.card, t.cardBorder, 2); }
-
-  if (aImg) targetCtx.drawImage(aImg, awayCx-logoSz/2, teamY, logoSz, logoSz);
-  else { roundRect(targetCtx, awayCx-logoSz/2, teamY, logoSz, logoSz, 12, t.card, t.cardBorder, 2); }
-
-  // VS badge big
-  const vsCy = teamY + logoSz/2;
-  targetCtx.save();
-  targetCtx.shadowColor=borderColor; targetCtx.shadowBlur=30;
-  targetCtx.beginPath(); targetCtx.arc(cx, vsCy, 44, 0, Math.PI*2);
-  targetCtx.fillStyle = borderColor; targetCtx.fill();
-  targetCtx.restore();
-  targetCtx.fillStyle = t.bg;
-  targetCtx.font = "900 32px 'Oswald','Segoe UI',sans-serif";
-  targetCtx.textAlign="center"; targetCtx.textBaseline="middle";
-  targetCtx.fillText("VS", cx, vsCy+1);
-  targetCtx.textBaseline="alphabetic";
-
-  // Team names
-  const nameY = teamY + logoSz + 20;
-  targetCtx.fillStyle = t.text;
-  targetCtx.font = "800 38px 'Oswald','Segoe UI',sans-serif";
-  targetCtx.textAlign = "center";
-  wrapText(targetCtx, m.home, cardW*0.38, 2).forEach((ln,i) => targetCtx.fillText(ln, homeCx, nameY+i*44));
-  wrapText(targetCtx, m.away, cardW*0.38, 2).forEach((ln,i) => targetCtx.fillText(ln, awayCx, nameY+i*44));
-
-  // Kickoff time — big
-  const timeY2 = nameY + 100;
-  const timeBoxW = 200, timeBoxH = 80;
-  roundRect(targetCtx, cx-timeBoxW/2, timeY2, timeBoxW, timeBoxH, 20, t.timeBg+"cc", borderColor, 2.5);
-  targetCtx.save();
-  targetCtx.shadowColor=borderColor; targetCtx.shadowBlur=16;
-  targetCtx.fillStyle = borderColor;
-  targetCtx.font = "900 52px 'Oswald','Segoe UI',sans-serif";
-  targetCtx.textAlign="center"; targetCtx.textBaseline="middle";
-  targetCtx.fillText(m.kickoff+" WIB", cx, timeY2+timeBoxH/2+2);
-  targetCtx.restore();
-  targetCtx.textBaseline="alphabetic";
-
-  // TV bar
-  const tvStr = shortTv(m);
-  const tvY2 = timeY2 + timeBoxH + 20;
-  const tvW = cardW - 60;
-  const tvColor = isFreeTV(m) ? t.tvFree : t.tv;
-  roundRect(targetCtx, cardPad+30, tvY2, tvW, 52, 26, "rgba(0,0,0,0.45)", tvColor+"88", 1.5);
-  targetCtx.fillStyle = tvColor;
-  targetCtx.font = "700 30px 'Inter','Segoe UI',sans-serif";
-  targetCtx.textAlign="center"; targetCtx.textBaseline="middle";
-  targetCtx.fillText("📺  "+tvStr, cardPad+30+tvW/2, tvY2+26);
-  targetCtx.textBaseline="alphabetic";
-
-  // Footer
-  const footY = H - 100;
-  const fg = targetCtx.createLinearGradient(0,footY,0,H);
-  fg.addColorStop(0,t.footer+"ee"); fg.addColorStop(1,"#000");
-  targetCtx.fillStyle=fg; targetCtx.fillRect(0,footY,W,H-footY);
-  const al = targetCtx.createLinearGradient(0,footY,W,footY);
-  al.addColorStop(0,"transparent"); al.addColorStop(0.5,t.accent); al.addColorStop(1,"transparent");
-  targetCtx.strokeStyle=al; targetCtx.lineWidth=2;
-  targetCtx.beginPath(); targetCtx.moveTo(40,footY); targetCtx.lineTo(W-40,footY); targetCtx.stroke();
-  targetCtx.fillStyle=t.sub;
-  targetCtx.font="600 26px 'Inter','Segoe UI',sans-serif";
-  targetCtx.textAlign="center";
-  targetCtx.fillText(inpFooter.value||"", cx, footY+52);
-
-  targetCtx.restore();
-}
-
-// ═══════════════════════════════════════════════════════
-//  VIDEO RENDER ENGINE
-// ═══════════════════════════════════════════════════════
-async function downloadVideo() {
-  if (!allMatches.length) return;
-
-  // Check MediaRecorder support
-  if (!window.MediaRecorder) {
-    setStatus("Browser tidak mendukung MediaRecorder. Gunakan Chrome/Edge.", "err");
-    return;
-  }
-
-  const mimeTypes = ["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
-  const mimeType = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || "video/webm";
-
-  btnDlVideo.disabled = true;
-  setStatus("Merender video...", "loading");
-
-  try {
-    const t = getTheme();
-    const brandImg = await loadBrandLogo();
-    const FPS = 30;
-    const slideDur = parseInt($("#sel-duration").value) || 4;
-    const animDur = Math.min(0.6, slideDur * 0.25); // animasi masuk = 25% durasi slide
-    const holdDur = slideDur - animDur;
-
-    // Offscreen canvas untuk render
-    const vc = document.createElement("canvas");
-    vc.width = W; vc.height = H;
-    const vctx = vc.getContext("2d");
-
-    const stream = vc.captureStream(FPS);
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
-    const chunks = [];
-    recorder.ondataavailable = e => { if (e.data.size>0) chunks.push(e.data); };
-
-    recorder.start(100);
-
-    const totalMatches = allMatches.length;
-    const totalFrames = Math.round((slideDur * totalMatches + 0.5) * FPS); // +0.5s outro
-    let frame = 0;
-
-    // Render frame by frame
-    for (let mi = 0; mi < totalMatches; mi++) {
-      const m = allMatches[mi];
-      const slideFrames = Math.round(slideDur * FPS);
-      const animFrames  = Math.round(animDur * FPS);
-
-      for (let f = 0; f < slideFrames; f++) {
-        const progress = f < animFrames ? f/animFrames : 1;
-        await renderSlide(vctx, m, t, brandImg, progress);
+    let frame=0;
+    for(let mi=0;mi<allMatches.length;mi++){
+      const m=allMatches[mi];
+      for(let f=0;f<slideFrames;f++){
+        const prog=f<animFrames?f/animFrames:1;
+        await renderVideoSlide(vctx,m,t,brand,prog);
         frame++;
-
-        // Update status setiap 10 frame
-        if (frame % 10 === 0) {
-          const pct = Math.round(frame/totalFrames*100);
-          setStatus(`Merender video... ${pct}% (slide ${mi+1}/${totalMatches})`, "loading");
+        if(frame%8===0){
+          const pct=Math.round(frame/total*100);
+          vpBar.style.width=pct+"%";
+          vpLabel.textContent=`Slide ${mi+1}/${allMatches.length} · ${pct}%`;
+          setStatus(`Merender video... ${pct}%`,"loading");
         }
-
-        // Yield ke browser agar tidak freeze
-        await new Promise(r => setTimeout(r, 0));
+        await new Promise(r=>setTimeout(r,0));
       }
     }
-
-    // Outro frame (fade out)
-    const outroFrames = Math.round(0.5 * FPS);
-    for (let f=0; f<outroFrames; f++) {
-      const alpha = 1 - f/outroFrames;
-      await renderSlide(vctx, allMatches[allMatches.length-1], t, brandImg, 1);
-      vctx.fillStyle = `rgba(0,0,0,${1-alpha})`;
-      vctx.fillRect(0,0,W,H);
-      await new Promise(r => setTimeout(r, 0));
+    // fade out
+    for(let f=0;f<Math.round(0.4*FPS);f++){
+      await renderVideoSlide(vctx,allMatches[allMatches.length-1],t,brand,1);
+      vctx.fillStyle=`rgba(0,0,0,${f/Math.round(0.4*FPS)})`;vctx.fillRect(0,0,W,H);
+      await new Promise(r=>setTimeout(r,0));
     }
 
-    recorder.stop();
-    await new Promise(r => recorder.onstop = r);
-
-    const blob = new Blob(chunks, { type: mimeType });
-    const ext = mimeType.includes("mp4") ? "mp4" : "webm";
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.download = `jadwal-${currentTheme}-${selectedDate}.${ext}`;
-    link.href = url;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-    setStatus(`✓ Video ${ext.toUpperCase()} (${totalMatches} slide) didownload`, "ok");
-  } catch(e) {
-    setStatus(`Gagal render video: ${e.message}`, "err");
-    console.error(e);
-  } finally {
-    btnDlVideo.disabled = false;
+    rec.stop();
+    await new Promise(r=>rec.onstop=r);
+    const blob=new Blob(chunks,{type:mime});
+    const ext=mime.includes("mp4")?"mp4":"webm";
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.download=`jadwal-${currentTheme}-${selectedDate}.${ext}`;
+    a.href=url;a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    setStatus(`✓ Video ${ext.toUpperCase()} (${allMatches.length} slide) didownload`,"ok");
+  }catch(e){setStatus(`Gagal render video: ${e.message}`,"err");console.error(e);}
+  finally{
+    btnDlVideo.disabled=false;btnDlPng.disabled=!allMatches.length;
+    vidProgress.classList.remove("show");vpBar.style.width="0%";
+    // restart preview
+    if(previewMode==="video")startVideoPreview();
   }
 }
 
-// ═══════════════════════════════════════════════════════
-//  THEME PICKER
-// ═══════════════════════════════════════════════════════
-function buildThemePicker() {
-  const grid = $("#theme-grid");
-  grid.innerHTML = Object.entries(THEMES).map(([id,t]) => `
-    <div class="theme-btn ${id===currentTheme?'active':''}" data-id="${id}">
-      <div class="theme-swatch" style="background:${t.swatch}"></div>
-      <span>${t.name}</span>
-    </div>
-  `).join("");
-  grid.querySelectorAll(".theme-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      currentTheme = btn.dataset.id;
-      grid.querySelectorAll(".theme-btn").forEach(b => b.classList.toggle("active", b.dataset.id===currentTheme));
+// ═══════════════════════════════════════════════════
+// THEME PICKER
+// ═══════════════════════════════════════════════════
+function buildThemePicker(){
+  const grid=$("#theme-grid");
+  grid.innerHTML=Object.entries(THEMES).map(([id,t])=>`
+    <div class="t-card${id===currentTheme?" on":""}" data-id="${id}">
+      <div class="t-swatch" style="background:${t.swatch}"></div>
+      <div class="t-name">${t.name}</div>
+    </div>`).join("");
+  grid.querySelectorAll(".t-card").forEach(c=>{
+    c.addEventListener("click",()=>{
+      currentTheme=c.dataset.id;
+      grid.querySelectorAll(".t-card").forEach(x=>x.classList.toggle("on",x.dataset.id===currentTheme));
       saveSettings();
-      updatePreview();
+      if(previewMode==="png")showPNGPreview();else startVideoPreview();
     });
   });
 }
 
-// ═══════════════════════════════════════════════════════
-//  SETTINGS PERSISTENCE
-// ═══════════════════════════════════════════════════════
-const SK = "ck-jadwal-v2";
-function saveSettings() {
-  localStorage.setItem(SK, JSON.stringify({
-    header: inpHeader.value, tiktok: inpTiktok.value, footer: inpFooter.value,
-    theme: currentTheme, date: selectedDate,
-  }));
+// ═══════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════
+const SK="ck-v3";
+function saveSettings(){
+  localStorage.setItem(SK,JSON.stringify({header:inpHeader.value,tiktok:inpTiktok.value,footer:inpFooter.value,theme:currentTheme,date:selectedDate}));
 }
-function loadSettings() {
-  try {
-    const s = JSON.parse(localStorage.getItem(SK)||"{}");
-    if (s.header) inpHeader.value = s.header;
-    if (s.tiktok) inpTiktok.value = s.tiktok;
-    if (s.footer) inpFooter.value = s.footer;
-    if (s.theme && THEMES[s.theme]) currentTheme = s.theme;
-    if (s.date && /^\d{4}-\d{2}-\d{2}$/.test(s.date)) selectedDate = s.date;
-  } catch {}
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SK)||"{}");
+    if(s.header)inpHeader.value=s.header;if(s.tiktok)inpTiktok.value=s.tiktok;
+    if(s.footer)inpFooter.value=s.footer;if(s.theme&&THEMES[s.theme])currentTheme=s.theme;
+    if(s.date&&/^\d{4}-\d{2}-\d{2}$/.test(s.date))selectedDate=s.date;
+  }catch{}
 }
 
-function setStatus(msg, cls="") {
-  statusEl.className = "status-bar" + (cls?" "+cls:"");
-  statusEl.textContent = msg;
-}
-
-// ═══════════════════════════════════════════════════════
-//  EVENT LISTENERS & INIT
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// EVENT LISTENERS
+// ═══════════════════════════════════════════════════
 
 // Export type tabs
-$("#export-tabs").querySelectorAll(".export-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    exportType = tab.dataset.type;
-    $("#export-tabs").querySelectorAll(".export-tab").forEach(t => t.classList.toggle("active", t.dataset.type===exportType));
-    $("#opt-png").style.display   = exportType==="png"   ? "flex" : "none";
-    $("#opt-video").style.display = exportType==="video" ? "flex" : "none";
+$("#exp-tabs").querySelectorAll(".exp-tab").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    exportMode=tab.dataset.t;
+    $("#exp-tabs").querySelectorAll(".exp-tab").forEach(t=>t.classList.toggle("on",t.dataset.t===exportMode));
+    $("#opt-png").style.display=exportMode==="png"?"flex":"none";
+    $("#opt-video").style.display=exportMode==="video"?"flex":"none";
   });
+});
+
+// Preview mode tabs
+$(".prev-tabs").querySelectorAll(".prev-tab").forEach(tab=>{
+  tab.addEventListener("click",async()=>{
+    previewMode=tab.dataset.m;
+    $(".prev-tabs").querySelectorAll(".prev-tab").forEach(t=>t.classList.toggle("on",t.dataset.m===previewMode));
+    canvasNav.style.display=previewMode==="png"?"flex":"none";
+    vidOverlay.style.display=previewMode==="video"?"flex":"none";
+    if(previewMode==="png"){stopVideoPreview();await showPNGPreview();}
+    else{await startVideoPreview();}
+    renderMatchList();
+  });
+});
+
+// Video play/pause overlay
+vidOverlay.addEventListener("click",()=>{
+  if(vidPlaying){stopVideoPreview();vidOverlay.querySelector(".vid-play svg").innerHTML='<path d="M8 5v14l11-7z"/>';}
+  else{startVideoPreview();vidOverlay.querySelector(".vid-play svg").innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';}
 });
 
 // Branding inputs
-[inpHeader, inpTiktok, inpFooter].forEach(el => {
-  el.addEventListener("input", () => { saveSettings(); updatePreview(); });
+[inpHeader,inpTiktok,inpFooter].forEach(el=>{
+  el.addEventListener("input",()=>{saveSettings();if(previewMode==="png")showPNGPreview();});
 });
 
 // Date
-datePicker.addEventListener("change", e => { saveSettings(); applyDate(e.target.value); });
-$("#btn-today").addEventListener("click", () => applyDate(todayISO()));
-$("#btn-refresh").addEventListener("click", fetchSchedule);
+datePicker.addEventListener("change",e=>{saveSettings();applyDate(e.target.value);});
+$("#btn-today").addEventListener("click",()=>applyDate(todayISO()));
+$("#btn-refresh").addEventListener("click",fetchSchedule);
 
-// Per-page change → re-render
-$("#sel-perpage").addEventListener("change", () => {
-  previewPage = 0;
-  const pp = perPage();
-  const totalPages = Math.ceil(allMatches.length/pp);
-  btnDlPng.textContent = totalPages>1 ? `⚡ Download ${totalPages} PNG` : `⚡ Download PNG`;
-  renderMatchList();
-  updatePreview();
+// Per-page
+$("#sel-perpage").addEventListener("change",()=>{
+  previewPage=0;
+  const tp=Math.ceil(allMatches.length/perPage());
+  btnDlPng.textContent=tp>1?`⚡ Download ${tp} PNG`:"⚡ Download PNG";
+  renderMatchList();showPNGPreview();
 });
 
-// Navigation
-navPrev.addEventListener("click", () => { previewPage--; renderMatchList(); updatePreview(); });
-navNext.addEventListener("click", () => { previewPage++; renderMatchList(); updatePreview(); });
+// Nav
+navPrev.addEventListener("click",()=>{previewPage--;renderMatchList();showPNGPreview();});
+navNext.addEventListener("click",()=>{previewPage++;renderMatchList();showPNGPreview();});
 
-// Download buttons
-btnDlPng.addEventListener("click", downloadPNG);
-btnDlVideo.addEventListener("click", downloadVideo);
+// Download
+btnDlPng.addEventListener("click",downloadPNG);
+btnDlVideo.addEventListener("click",downloadVideo);
+
+// Preview video button
+$("#btn-preview-vid").addEventListener("click",async()=>{
+  // Switch to video preview tab
+  previewMode="video";
+  $(".prev-tabs").querySelectorAll(".prev-tab").forEach(t=>t.classList.toggle("on",t.dataset.m==="video"));
+  canvasNav.style.display="none";vidOverlay.style.display="flex";
+  await startVideoPreview();renderMatchList();
+});
 
 // Import
-$("#file-import").addEventListener("change", e => {
-  const f = e.target.files[0];
-  if (f) importHtmlFile(f);
-  e.target.value = "";
-});
+$("#file-import").addEventListener("change",e=>{const f=e.target.files[0];if(f)importHtmlFile(f);e.target.value="";});
 
 // ── INIT ──
 loadSettings();
-datePicker.value = selectedDate;
+datePicker.value=selectedDate;
 buildThemePicker();
+canvasNav.style.display="flex";
+vidOverlay.style.display="none";
 fetchSchedule();
 </script>
 </body>
