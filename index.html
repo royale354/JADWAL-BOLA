@@ -644,11 +644,11 @@ function drawDateRow(c,t,dateStr,y){
 
 async function drawMatchRow(c,t,m,x,y,rowW,rowH){
   const cy=y+rowH/2;
-  const LIGA_W=72;
+  const LIGA_W=90;   // lebih lebar agar logo liga lebih besar
   const TIME_W=108;
   const TV_W=156;
   const LOGO_SZ=Math.min(58,Math.max(48,rowH-28));
-  const LIGA_SZ=52;
+  const LIGA_SZ=Math.min(72,rowH-16);  // logo liga lebih besar, hampir penuh tinggi baris
   const TEAM_W=(rowW-LIGA_W-TIME_W-TV_W)/2;
 
   const xLiga=x;
@@ -661,14 +661,41 @@ async function drawMatchRow(c,t,m,x,y,rowW,rowH){
   // ── ROW BACKGROUND ──
   rr(c, x, y, rowW, rowH, rowH/2, t.rowBg, t.rowBorder, 1);
 
-  // ── LIGA LOGO ──
+  // ── LIGA LOGO — lingkaran putih solid sebagai background agar logo kontras ──
   const lcx = xLiga + LIGA_W/2;
-  rr(c, lcx-LIGA_SZ/2, cy-LIGA_SZ/2, LIGA_SZ, LIGA_SZ, LIGA_SZ/2, t.leagueBg, null);
+  // Background putih solid
+  c.save();
+  c.shadowColor="rgba(0,0,0,0.3)";
+  c.shadowBlur=8;
+  c.beginPath();
+  c.arc(lcx, cy, LIGA_SZ/2, 0, Math.PI*2);
+  c.fillStyle="rgba(255,255,255,0.22)";
+  c.fill();
+  c.restore();
+  // Border tipis
+  c.beginPath();
+  c.arc(lcx, cy, LIGA_SZ/2, 0, Math.PI*2);
+  c.strokeStyle="rgba(255,255,255,0.35)";
+  c.lineWidth=1.5;
+  c.stroke();
+
   const lImg = getCached(leagueBase(m.competition));
-  if(lImg){ drawImg(c, lImg, lcx-LIGA_SZ/2+4, cy-LIGA_SZ/2+4, LIGA_SZ-8, LIGA_SZ-8, 4); }
-  else{
-    c.fillStyle="rgba(255,255,255,0.5)"; c.font="700 22px sans-serif";
-    c.textAlign="center"; c.textBaseline="middle"; c.fillText("⚽",lcx,cy); c.textBaseline="alphabetic";
+  if(lImg){
+    // Gambar logo penuh dalam lingkaran (clip)
+    c.save();
+    c.beginPath();
+    c.arc(lcx, cy, LIGA_SZ/2-2, 0, Math.PI*2);
+    c.clip();
+    c.drawImage(lImg, lcx-LIGA_SZ/2+2, cy-LIGA_SZ/2+2, LIGA_SZ-4, LIGA_SZ-4);
+    c.restore();
+  } else {
+    // Fallback: nama liga singkat
+    const abbr = (m.competition||"?").split(" ").map(w=>w[0]).join("").slice(0,3).toUpperCase();
+    c.fillStyle="rgba(255,255,255,0.8)";
+    c.font=`700 ${Math.max(14,Math.floor(LIGA_SZ*0.28))}px 'Inter',sans-serif`;
+    c.textAlign="center"; c.textBaseline="middle";
+    c.fillText(abbr, lcx, cy);
+    c.textBaseline="alphabetic";
   }
 
   const hImg=getCached(teamBase(m.home));
