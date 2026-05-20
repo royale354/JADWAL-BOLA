@@ -567,8 +567,7 @@ async function renderPNGPage(c,matches,pageNum,totalPages){
   await drawHeader(c,t,brand,pageNum,totalPages);
 
   let curY=HEADER_H+16;
-  drawDateRow(c,t,fmtDate(selectedDate),curY);
-  curY+=DATE_ROW_H+8;
+  // Tanggal sudah ada di header — tidak perlu drawDateRow lagi
 
   for(let i=0;i<matches.length;i++){
     await drawMatchRow(c,t,matches[i],PAD_X,curY,rowW,rowH);
@@ -643,137 +642,178 @@ function drawDateRow(c,t,dateStr,y){
 }
 
 async function drawMatchRow(c,t,m,x,y,rowW,rowH){
-  const cy=y+rowH/2;
-  const LIGA_W=90;   // lebih lebar agar logo liga lebih besar
-  const TIME_W=108;
-  const TV_W=156;
-  const LOGO_SZ=Math.min(58,Math.max(48,rowH-28));
-  const LIGA_SZ=Math.min(72,rowH-16);  // logo liga lebih besar, hampir penuh tinggi baris
-  const TEAM_W=(rowW-LIGA_W-TIME_W-TV_W)/2;
+  const cy = y + rowH/2;
 
-  const xLiga=x;
-  const xHome=x+LIGA_W;
-  const xTime=xHome+TEAM_W;
-  const xAway=xTime+TIME_W;
-  const xTV=xAway+TEAM_W;
-  const tvInfo=getTvDisplay(m);
+  // ── KOLOM (kiri ke kanan) ──
+  // [TIME 90px] [HOME team] [LIGA center] [AWAY team] [TV 150px]
+  const TIME_W  = 90;
+  const TV_W    = 150;
+  const LIGA_W  = 100;  // kolom logo liga di tengah
+  const TEAM_W  = (rowW - TIME_W - LIGA_W - TV_W) / 2;
+
+  const xTime  = x;
+  const xHome  = x + TIME_W;
+  const xLiga  = xHome + TEAM_W;
+  const xAway  = xLiga + LIGA_W;
+  const xTV    = xAway + TEAM_W;
+
+  const LOGO_SZ = Math.min(62, Math.max(50, rowH - 24));
+  const LIGA_SZ = Math.min(60, rowH - 28);
+
+  const tvInfo = getTvDisplay(m);
 
   // ── ROW BACKGROUND ──
-  rr(c, x, y, rowW, rowH, rowH/2, t.rowBg, t.rowBorder, 1);
+  rr(c, x, y, rowW, rowH, 14, t.rowBg, t.rowBorder, 1);
 
-  // ── LIGA LOGO — lingkaran putih solid sebagai background agar logo kontras ──
+  // ══════════════════════════════
+  // 1. JAM — kiri
+  // ══════════════════════════════
+  const tcx = xTime + TIME_W/2;
+  const tbW = 78, tbH = Math.min(56, rowH-16);
+  rr(c, tcx-tbW/2, cy-tbH/2, tbW, tbH, 12, t.timeBg, t.timeBorder, 2);
+  c.fillStyle = t.timeText;
+  c.font = `900 ${Math.min(32,tbH*0.52)}px 'Bebas Neue','Arial Black',sans-serif`;
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(m.kickoff, tcx, cy - tbH*0.1);
+  c.font = `600 14px 'Inter','Segoe UI',sans-serif`;
+  c.fillText("WIB", tcx, cy + tbH*0.3);
+  c.textBaseline = "alphabetic";
+
+  // ══════════════════════════════
+  // 2. TIM HOME — kiri tengah
+  // Logo di kanan kolom (dekat liga), nama di kiri
+  // ══════════════════════════════
+  const hImg = getCached(teamBase(m.home));
+  const hLogoCX = xLiga - LOGO_SZ/2 - 6;  // logo menempel di kiri logo liga
+  const hNameMaxW = TEAM_W - LOGO_SZ - 10;
+  const hNameCX   = xHome + hNameMaxW/2 + 4;
+
+  if(hImg){
+    c.save();
+    c.shadowColor="rgba(0,0,0,0.4)"; c.shadowBlur=8;
+    c.drawImage(hImg, hLogoCX - LOGO_SZ/2, cy - LOGO_SZ/2, LOGO_SZ, LOGO_SZ);
+    c.restore();
+  } else {
+    rr(c, hLogoCX-LOGO_SZ/2, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 8, "rgba(255,255,255,0.08)", "rgba(255,255,255,0.2)", 1);
+    c.fillStyle="rgba(255,255,255,0.4)"; c.font="700 18px sans-serif";
+    c.textAlign="center"; c.textBaseline="middle"; c.fillText("?", hLogoCX, cy); c.textBaseline="alphabetic";
+  }
+
+  c.fillStyle = t.teamText;
+  c.font = `700 ${Math.min(24,Math.max(18,Math.floor(hNameMaxW/6)))}px 'Inter','Segoe UI',sans-serif`;
+  c.textAlign = "center";
+  const hLines = wrapTxt(c, m.home, hNameMaxW, 2);
+  const hLH = Math.min(26, rowH/4);
+  const hStartY = cy - (hLines.length * hLH)/2 + hLH*0.8;
+  hLines.forEach((ln,i) => c.fillText(ln, hNameCX, hStartY + i*hLH));
+
+  // ══════════════════════════════
+  // 3. LOGO LIGA — tengah
+  // Lingkaran logo + nama liga di bawah
+  // ══════════════════════════════
   const lcx = xLiga + LIGA_W/2;
-  // Background putih solid
+  // Nama liga di bawah logo — hitung posisi logo agar ada ruang teks
+  const compName = (m.competition||"").toUpperCase();
+  const hasComp  = compName.length > 0;
+  const ligaLogoY = hasComp ? cy - 8 : cy;  // geser sedikit ke atas jika ada nama
+
+  // Shadow + lingkaran background
   c.save();
-  c.shadowColor="rgba(0,0,0,0.3)";
-  c.shadowBlur=8;
-  c.beginPath();
-  c.arc(lcx, cy, LIGA_SZ/2, 0, Math.PI*2);
-  c.fillStyle="rgba(255,255,255,0.22)";
-  c.fill();
+  c.shadowColor = "rgba(0,0,0,0.5)"; c.shadowBlur = 12;
+  c.beginPath(); c.arc(lcx, ligaLogoY, LIGA_SZ/2, 0, Math.PI*2);
+  c.fillStyle = "rgba(255,255,255,0.18)"; c.fill();
   c.restore();
-  // Border tipis
-  c.beginPath();
-  c.arc(lcx, cy, LIGA_SZ/2, 0, Math.PI*2);
-  c.strokeStyle="rgba(255,255,255,0.35)";
-  c.lineWidth=1.5;
-  c.stroke();
+  c.beginPath(); c.arc(lcx, ligaLogoY, LIGA_SZ/2, 0, Math.PI*2);
+  c.strokeStyle = "rgba(255,255,255,0.4)"; c.lineWidth = 2; c.stroke();
 
   const lImg = getCached(leagueBase(m.competition));
   if(lImg){
-    // Gambar logo penuh dalam lingkaran (clip)
     c.save();
-    c.beginPath();
-    c.arc(lcx, cy, LIGA_SZ/2-2, 0, Math.PI*2);
-    c.clip();
-    c.drawImage(lImg, lcx-LIGA_SZ/2+2, cy-LIGA_SZ/2+2, LIGA_SZ-4, LIGA_SZ-4);
+    c.beginPath(); c.arc(lcx, ligaLogoY, LIGA_SZ/2 - 2, 0, Math.PI*2); c.clip();
+    c.drawImage(lImg, lcx-LIGA_SZ/2+2, ligaLogoY-LIGA_SZ/2+2, LIGA_SZ-4, LIGA_SZ-4);
     c.restore();
   } else {
-    // Fallback: nama liga singkat
-    const abbr = (m.competition||"?").split(" ").map(w=>w[0]).join("").slice(0,3).toUpperCase();
-    c.fillStyle="rgba(255,255,255,0.8)";
-    c.font=`700 ${Math.max(14,Math.floor(LIGA_SZ*0.28))}px 'Inter',sans-serif`;
-    c.textAlign="center"; c.textBaseline="middle";
-    c.fillText(abbr, lcx, cy);
-    c.textBaseline="alphabetic";
+    const abbr = compName.split(" ").map(w=>w[0]).join("").slice(0,3);
+    c.fillStyle = "rgba(255,255,255,0.85)";
+    c.font = `800 ${Math.max(13,Math.floor(LIGA_SZ*0.26))}px 'Bebas Neue',sans-serif`;
+    c.textAlign = "center"; c.textBaseline = "middle";
+    c.fillText(abbr, lcx, ligaLogoY); c.textBaseline = "alphabetic";
   }
 
-  const hImg=getCached(teamBase(m.home));
-  const hLogoX=xTime-LOGO_SZ-10;
-  const hNameMaxW=TEAM_W-LOGO_SZ-16;
-  const hNameCX=xHome+(TEAM_W-LOGO_SZ)/2;
+  // Nama liga di bawah lingkaran
+  if(hasComp){
+    const compY = ligaLogoY + LIGA_SZ/2 + 4;
+    const compMaxW = LIGA_W + 20;
+    c.fillStyle = "rgba(255,255,255,0.65)";
+    c.font = `600 ${Math.min(16,Math.max(12,Math.floor(LIGA_W/8)))}px 'Inter','Segoe UI',sans-serif`;
+    c.textAlign = "center";
+    const cLines = wrapTxt(c, compName, compMaxW, 2);
+    cLines.forEach((ln,i) => c.fillText(ln, lcx, compY + 14 + i*15));
+  }
 
-  if(hImg)drawImg(c,hImg,hLogoX,cy-LOGO_SZ/2,LOGO_SZ,LOGO_SZ,6);
+  // ══════════════════════════════
+  // 4. TIM AWAY — kanan tengah
+  // Logo di kiri kolom (dekat liga), nama di kanan
+  // ══════════════════════════════
+  const aImg = getCached(teamBase(m.away));
+  const aLogoCX = xAway + LOGO_SZ/2 + 6;  // logo menempel di kanan logo liga
+  const aNameMaxW = TEAM_W - LOGO_SZ - 10;
+  const aNameCX   = xAway + LOGO_SZ + 10 + aNameMaxW/2;
 
-  c.fillStyle=t.teamText;
-  c.font="700 24px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";
-  const hLines=wrapTxt(c,m.home,hNameMaxW,2);
-  const hLineH=26;
-  const hStart=cy-((hLines.length*hLineH)-8)/2+20;
-  hLines.forEach((ln,i)=>c.fillText(ln,hNameCX,hStart+i*hLineH));
+  if(aImg){
+    c.save();
+    c.shadowColor="rgba(0,0,0,0.4)"; c.shadowBlur=8;
+    c.drawImage(aImg, aLogoCX - LOGO_SZ/2, cy - LOGO_SZ/2, LOGO_SZ, LOGO_SZ);
+    c.restore();
+  } else {
+    rr(c, aLogoCX-LOGO_SZ/2, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 8, "rgba(255,255,255,0.08)", "rgba(255,255,255,0.2)", 1);
+    c.fillStyle="rgba(255,255,255,0.4)"; c.font="700 18px sans-serif";
+    c.textAlign="center"; c.textBaseline="middle"; c.fillText("?", aLogoCX, cy); c.textBaseline="alphabetic";
+  }
 
-  const tcx=xTime+TIME_W/2;
-  const tbW=100,tbH=54;
-  rr(c,tcx-tbW/2,cy-tbH/2,tbW,tbH,12,t.timeBg,t.timeBorder,2);
-  c.fillStyle=t.timeText;
-  c.font="900 34px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";
-  c.fillText(m.kickoff,tcx,cy-5);
-  c.font="600 16px 'Inter','Segoe UI',sans-serif";
-  c.fillText("WIB",tcx,cy+16);
-  c.textBaseline="alphabetic";
+  c.fillStyle = t.teamText;
+  c.font = `700 ${Math.min(24,Math.max(18,Math.floor(aNameMaxW/6)))}px 'Inter','Segoe UI',sans-serif`;
+  c.textAlign = "center";
+  const aLines = wrapTxt(c, m.away, aNameMaxW, 2);
+  const aLH = Math.min(26, rowH/4);
+  const aStartY = cy - (aLines.length * aLH)/2 + aLH*0.8;
+  aLines.forEach((ln,i) => c.fillText(ln, aNameCX, aStartY + i*aLH));
 
-  const aImg=getCached(teamBase(m.away));
-  const aLogoX=xAway+8;
-  const aNameMaxW=TEAM_W-LOGO_SZ-16;
-  const aNameCX=xAway+LOGO_SZ+(TEAM_W-LOGO_SZ)/2;
-
-  if(aImg)drawImg(c,aImg,aLogoX,cy-LOGO_SZ/2,LOGO_SZ,LOGO_SZ,6);
-
-  c.fillStyle=t.teamText;
-  c.font="700 24px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";
-  const aLines=wrapTxt(c,m.away,aNameMaxW,2);
-  const aLineH=26;
-  const aStart=cy-((aLines.length*aLineH)-8)/2+20;
-  aLines.forEach((ln,i)=>c.fillText(ln,aNameCX,aStart+i*aLineH));
-
-  const tvcx=xTV+TV_W/2;
-  const boxH=Math.min(rowH-12,78);
-  const boxY=cy-boxH/2;
-  const hasFree=tvInfo.tvFree.length>0;
+  // ══════════════════════════════
+  // 5. TV — kanan
+  // ══════════════════════════════
+  const tvcx  = xTV + TV_W/2;
+  const boxH  = Math.min(rowH-12, 80);
+  const boxY  = cy - boxH/2;
+  const hasFree = tvInfo.tvFree.length > 0;
 
   if(hasFree){
-    rr(c,xTV+6,boxY,TV_W-12,boxH,12,"rgba(34,197,94,0.18)","#22c55e",1.5);
-    rr(c,tvcx-36,boxY+4,72,22,11,"#22c55e",null);
-    c.fillStyle="#fff";
-    c.font="800 12px 'Inter',sans-serif";
-    c.textAlign="center";c.textBaseline="middle";
-    c.fillText("GRATIS",tvcx,boxY+15);
+    rr(c, xTV+6, boxY, TV_W-12, boxH, 12, "rgba(34,197,94,0.18)", "#22c55e", 1.5);
+    // Badge GRATIS
+    const bw=70, bh=20;
+    rr(c, tvcx-bw/2, boxY+4, bw, bh, 10, "#22c55e", null);
+    c.fillStyle="#fff"; c.font="800 12px 'Inter',sans-serif";
+    c.textAlign="center"; c.textBaseline="middle";
+    c.fillText("✓ GRATIS", tvcx, boxY+4+bh/2);
     c.textBaseline="alphabetic";
-    c.fillStyle="#4ade80";
-    c.font="700 16px 'Inter',sans-serif";
-    c.textAlign="center";
-    const freeTxt=tvInfo.tvFree.join(" · ");
-    wrapTxt(c,freeTxt,TV_W-16,3).forEach((ln,i)=>{
-      c.fillText(ln,tvcx,boxY+28+i*18);
+    // Nama TV lokal
+    c.fillStyle="#4ade80"; c.font="700 15px 'Inter',sans-serif"; c.textAlign="center";
+    wrapTxt(c, tvInfo.tvFree.join(" · "), TV_W-16, 2).forEach((ln,i)=>{
+      c.fillText(ln, tvcx, boxY+30+i*17);
     });
+    // TV berbayar kecil
     if(tvInfo.tvPaid.length){
-      c.fillStyle="#fbbf24";
-      c.font="600 14px 'Inter',sans-serif";
-      const paidTxt=tvInfo.tvPaid.join(" · ");
-      wrapTxt(c,paidTxt,TV_W-14,2).forEach((ln,i)=>{
-        c.fillText(ln,tvcx,boxY+boxH-22+i*16);
+      c.fillStyle="#fbbf24"; c.font="600 13px 'Inter',sans-serif";
+      wrapTxt(c, tvInfo.tvPaid.join(" · "), TV_W-14, 2).forEach((ln,i)=>{
+        c.fillText(ln, tvcx, boxY+boxH-20+i*15);
       });
     }
-  }else{
-    rr(c,xTV+6,boxY,TV_W-12,boxH,12,t.tvBg,null);
-    c.fillStyle="#fbbf24";
-    c.font="700 17px 'Inter',sans-serif";
-    c.textAlign="center";c.textBaseline="middle";
-    const tvLines=wrapTxt(c,tvInfo.tv||"-",TV_W-16,3);
-    tvLines.forEach((ln,i)=>c.fillText(ln,tvcx,boxY+boxH/2-((tvLines.length-1)*18)/2+i*18));
+  } else {
+    rr(c, xTV+6, boxY, TV_W-12, boxH, 12, t.tvBg, null);
+    c.fillStyle="#fbbf24"; c.font="700 16px 'Inter',sans-serif";
+    c.textAlign="center"; c.textBaseline="middle";
+    const tvLines = wrapTxt(c, tvInfo.tv||"-", TV_W-16, 3);
+    tvLines.forEach((ln,i)=>c.fillText(ln, tvcx, boxY+boxH/2 - ((tvLines.length-1)*18)/2 + i*18));
     c.textBaseline="alphabetic";
   }
 }
@@ -826,11 +866,8 @@ async function renderBuildUp(c, t, brand, visibleCount, animIdx, animProg) {
   // ── HEADER ──
   await drawHeader(c, t, brand, 1, 1);
 
-  // ── DATE ROW ──
+  // Tanggal sudah ada di header — tidak perlu drawDateRow
   let curY = HEADER_H + 16;
-  drawDateRow(c, t, fmtDate(selectedDate), curY);
-  curY += DATE_ROW_H + 6;
-
   const anim = $("#sel-anim").value;
   const rowW = W - PAD_X*2;
   const rowH = rowHeightForCount(allMatches.length);
