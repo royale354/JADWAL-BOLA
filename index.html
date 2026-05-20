@@ -105,6 +105,7 @@ input[type=date]{color-scheme:dark}
 .mteams{font-weight:700;font-size:0.78rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mmeta{font-size:0.64rem;color:var(--muted);margin-top:1px}
 .mtv{color:var(--gold)}
+.mtv.free{color:#4ade80}
 
 /* ── VIDEO PROGRESS ── */
 .vprog{background:var(--sb2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;display:none;flex-direction:column;gap:5px}
@@ -250,7 +251,33 @@ input[type=date]{color-scheme:dark}
 const W=1080,H=1920;
 const BULAN=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const HARI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-const FREE_KW=["sctv","indosiar","rcti","mnctv","gtv","antv","tvone","tv one","kompas tv","inews","tvri","trans tv","trans7","trans 7","metro tv","net tv","net."];
+const FREE_KW=["sctv","indosiar","rcti","mnctv","gtv","antv","tvone","tv one","kompas tv","inews","inews tv","tvri","trans tv","trans7","trans 7","metro tv","net tv","net."];
+const PAID_KW=["vidio","bein","bein sports","vision+","vision plus","mola","spotv","apple tv","disney","netflix","prime video","hbo","espn","dazn"];
+
+function classifyTv(stations){
+  if(!stations||stations==="-"||stations==="TBC")return{tvFree:[],tvPaid:[],tv:stations||""};
+  const parts=stations.split("/").map(p=>p.trim()).filter(Boolean);
+  const tvFree=[],tvPaid=[];
+  for(const part of parts){
+    const lower=part.toLowerCase();
+    if(PAID_KW.some(k=>lower.includes(k)))tvPaid.push(part);
+    else if(FREE_KW.some(k=>lower.includes(k)||k===lower))tvFree.push(part);
+    else if(/sport/i.test(lower)||/\d/.test(lower))tvPaid.push(part);
+    else tvFree.push(part);
+  }
+  return{tvFree,tvPaid,tv:stations};
+}
+
+function getTvDisplay(m){
+  const raw=(m.tv||"").trim();
+  if(raw&&raw!=="-"&&raw!=="TBC"){
+    const c=classifyTv(raw);
+    return{...c,tv:raw};
+  }
+  const free=m.tvFree||[],paid=m.tvPaid||[];
+  const tv=[...free,...paid].join(" / ")||"-";
+  return{tvFree:free,tvPaid:paid,tv};
+}
 
 // ── THEMES ──
 // Semua berbasis purple/dark seperti referensi, dengan variasi warna aksen
@@ -364,8 +391,8 @@ function isRemote(p){return/^https?:\/\//i.test(p||"")}
 function getBase(){const p=location.pathname;if(p.endsWith("/"))return p;const i=p.lastIndexOf("/");return i>0?p.slice(0,i+1):"/"}
 const BASE=getBase();
 function asset(p){return BASE+p.replace(/^\//,"")}
-function shortTv(m){const r=(m.tv||"").trim();if(r&&r!=="-"&&r!=="TBC")return r;return[...(m.tvFree||[]),...(m.tvPaid||[])].join(" · ")||"-"}
-function isFreeTV(m){if((m.tvFree||[]).length)return true;return FREE_KW.some(k=>shortTv(m).toLowerCase().includes(k))}
+function shortTv(m){return getTvDisplay(m).tv}
+function isFreeTV(m){const d=getTvDisplay(m);return d.tvFree.length>0||FREE_KW.some(k=>d.tv.toLowerCase().includes(k))}
 function getT(){return THEMES[currentTheme]||THEMES.purple}
 function perPage(){return parseInt($("#sel-perpage").value)||7}
 function setStatus(msg,cls=""){statusEl.className="sbar"+(cls?" "+cls:"");statusEl.textContent=msg}
@@ -489,12 +516,44 @@ function drawBg(c,t){
 // PNG LAYOUT — referensi style
 // Row layout: [liga logo] [tim home + logo] [WAKTU] [logo tim away + nama] [TV logo]
 // ═══════════════════════════════════════════
-const ROW_H = 124;       // tinggi tiap baris pertandingan
-const ROW_GAP = 10;       // jarak antar baris
-const PAD_X = 32;        // padding kiri-kanan
-const HEADER_H = 220;    // tinggi header
-const DATE_ROW_H = 60;   // tinggi baris tanggal
-const FOOTER_H = 90;     // tinggi footer
+const ROW_GAP = 12;
+const PAD_X = 28;
+const HEADER_H = 220;
+const DATE_ROW_H = 58;
+const FOOTER_H = 92;
+
+function rowAreaHeight(matchCount){
+  return H-HEADER_H-16-DATE_ROW_H-6-FOOTER_H;
+}
+
+function rowHeightForCount(n){
+  if(!n)return 120;
+  const avail=rowAreaHeight(n);
+  return Math.max(100,Math.min(138,Math.floor((avail-ROW_GAP*(n-1))/n)));
+}
+
+function getPages(){
+  const pp=perPage();
+  const pages=[];
+  for(let i=0;i<allMatches.length;i+=pp)pages.push(allMatches.slice(i,i+pp));
+  return pages.length?pages:[[]];
+}
+
+async function showPNGPreview(){
+  const pages=getPages();
+  const tp=Math.max(1,pages.length);
+  previewPage=Math.max(0,Math.min(previewPage,tp-1));
+  navPrev.disabled=previewPage<=0;
+  navNext.disabled=previewPage>=tp-1;
+  plbl.textContent=`${previewPage+1} / ${tp}`;
+  const chunk=pages[previewPage]||[];
+  if(!chunk.length){
+    ctx.clearRect(0,0,W,H);
+    drawBg(ctx,getT());
+    return;
+  }
+  await renderPNGPage(ctx,chunk,previewPage+1,tp);
+}
 
 async function renderPNGPage(c,matches,pageNum,totalPages){
   const t=getT();
@@ -502,25 +561,20 @@ async function renderPNGPage(c,matches,pageNum,totalPages){
   drawBg(c,t);
 
   const brand=await loadBrand();
+  const rowH=rowHeightForCount(matches.length);
+  const rowW=W-PAD_X*2;
 
-  // ── HEADER ──
   await drawHeader(c,t,brand,pageNum,totalPages);
 
-  // ── ROWS ──
   let curY=HEADER_H+16;
+  drawDateRow(c,t,fmtDate(selectedDate),curY);
+  curY+=DATE_ROW_H+8;
+
   for(let i=0;i<matches.length;i++){
-    const m=matches[i];
-    // Date separator — show if first row or date changed (for multi-date schedules)
-    // For single-date pages, show once at top
-    if(i===0){
-      drawDateRow(c,t,fmtDate(selectedDate),curY);
-      curY+=DATE_ROW_H+6;
-    }
-    await drawMatchRow(c,t,m,PAD_X,curY,W-PAD_X*2,ROW_H);
-    curY+=ROW_H+ROW_GAP;
+    await drawMatchRow(c,t,matches[i],PAD_X,curY,rowW,rowH);
+    curY+=rowH+ROW_GAP;
   }
 
-  // ── FOOTER ──
   drawFooter(c,t,brand);
 }
 
@@ -589,22 +643,20 @@ function drawDateRow(c,t,dateStr,y){
 }
 
 async function drawMatchRow(c,t,m,x,y,rowW,rowH){
-  // ── Layout kolom fixed (tidak overlap) ──
-  // [LIGA 80px] [NAMA HOME + LOGO 60px | max 260px] [TIME 120px] [LOGO 60px + NAMA AWAY max 260px] [TV 120px]
-  const cy = y + rowH/2;
-  const LIGA_W  = 80;
-  const TIME_W  = 120;
-  const TV_W    = 120;
-  const LOGO_SZ = 60;   // ukuran logo tim
-  const LIGA_SZ = 56;   // ukuran logo liga
-  const TEAM_W  = (rowW - LIGA_W - TIME_W - TV_W) / 2; // lebar kolom tiap tim
+  const cy=y+rowH/2;
+  const LIGA_W=72;
+  const TIME_W=108;
+  const TV_W=156;
+  const LOGO_SZ=Math.min(58,Math.max(48,rowH-28));
+  const LIGA_SZ=52;
+  const TEAM_W=(rowW-LIGA_W-TIME_W-TV_W)/2;
 
-  // Posisi awal tiap kolom
-  const xLiga  = x;
-  const xHome  = x + LIGA_W;
-  const xTime  = xHome + TEAM_W;
-  const xAway  = xTime + TIME_W;
-  const xTV    = xAway + TEAM_W;
+  const xLiga=x;
+  const xHome=x+LIGA_W;
+  const xTime=xHome+TEAM_W;
+  const xAway=xTime+TIME_W;
+  const xTV=xAway+TEAM_W;
+  const tvInfo=getTvDisplay(m);
 
   // ── ROW BACKGROUND ──
   rr(c, x, y, rowW, rowH, rowH/2, t.rowBg, t.rowBorder, 1);
@@ -619,98 +671,83 @@ async function drawMatchRow(c,t,m,x,y,rowW,rowH){
     c.textAlign="center"; c.textBaseline="middle"; c.fillText("⚽",lcx,cy); c.textBaseline="alphabetic";
   }
 
-  // ── HOME TEAM ──
-  // Layout dalam kolom home: [nama teks kiri] [logo kanan, fixed di tepi kanan kolom]
-  const hImg = getCached(teamBase(m.home));
-  const hLogoX = xTime - LOGO_SZ - 8;          // logo menempel di kiri kotak waktu
-  const hNameMaxW = TEAM_W - LOGO_SZ - 20;      // lebar teks nama (sisakan ruang logo)
-  const hNameCX = xHome + hNameMaxW/2 + 4;      // center teks nama
+  const hImg=getCached(teamBase(m.home));
+  const hLogoX=xTime-LOGO_SZ-10;
+  const hNameMaxW=TEAM_W-LOGO_SZ-16;
+  const hNameCX=xHome+(TEAM_W-LOGO_SZ)/2;
 
-  if(hImg){ drawImg(c, hImg, hLogoX, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 6); }
+  if(hImg)drawImg(c,hImg,hLogoX,cy-LOGO_SZ/2,LOGO_SZ,LOGO_SZ,6);
 
-  c.fillStyle = t.teamText;
-  c.font = "700 26px 'Inter','Segoe UI',sans-serif";
-  c.textAlign = "center";
-  const hLines = wrapTxt(c, m.home, hNameMaxW, 2);
-  const hTotalH = hLines.length * 30;
-  hLines.forEach((ln,i) => c.fillText(ln, hNameCX, cy - hTotalH/2 + 22 + i*30));
+  c.fillStyle=t.teamText;
+  c.font="700 24px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";
+  const hLines=wrapTxt(c,m.home,hNameMaxW,2);
+  const hLineH=26;
+  const hStart=cy-((hLines.length*hLineH)-8)/2+20;
+  hLines.forEach((ln,i)=>c.fillText(ln,hNameCX,hStart+i*hLineH));
 
-  // ── TIME BOX ──
-  const tcx = xTime + TIME_W/2;
-  const tbW=108, tbH=58;
-  rr(c, tcx-tbW/2, cy-tbH/2, tbW, tbH, 12, t.timeBg, t.timeBorder, 2);
-  c.fillStyle = t.timeText;
-  c.font = "900 36px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign = "center"; c.textBaseline = "middle";
-  c.fillText(m.kickoff, tcx, cy-6);
-  c.font = "600 17px 'Inter','Segoe UI',sans-serif";
-  c.fillText("WIB", tcx, cy+18);
-  c.textBaseline = "alphabetic";
+  const tcx=xTime+TIME_W/2;
+  const tbW=100,tbH=54;
+  rr(c,tcx-tbW/2,cy-tbH/2,tbW,tbH,12,t.timeBg,t.timeBorder,2);
+  c.fillStyle=t.timeText;
+  c.font="900 34px 'Bebas Neue','Arial Black',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";
+  c.fillText(m.kickoff,tcx,cy-5);
+  c.font="600 16px 'Inter','Segoe UI',sans-serif";
+  c.fillText("WIB",tcx,cy+16);
+  c.textBaseline="alphabetic";
 
-  // ── AWAY TEAM ──
-  // Layout dalam kolom away: [logo kiri, fixed di tepi kiri kolom] [nama teks kanan]
-  const aImg = getCached(teamBase(m.away));
-  const aLogoX = xAway + 8;                     // logo menempel di kanan kotak waktu
-  const aNameMaxW = TEAM_W - LOGO_SZ - 20;
-  const aNameCX = xAway + LOGO_SZ + 16 + aNameMaxW/2; // center teks nama
+  const aImg=getCached(teamBase(m.away));
+  const aLogoX=xAway+8;
+  const aNameMaxW=TEAM_W-LOGO_SZ-16;
+  const aNameCX=xAway+LOGO_SZ+(TEAM_W-LOGO_SZ)/2;
 
-  if(aImg){ drawImg(c, aImg, aLogoX, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 6); }
+  if(aImg)drawImg(c,aImg,aLogoX,cy-LOGO_SZ/2,LOGO_SZ,LOGO_SZ,6);
 
-  c.fillStyle = t.teamText;
-  c.font = "700 26px 'Inter','Segoe UI',sans-serif";
-  c.textAlign = "center";
-  const aLines = wrapTxt(c, m.away, aNameMaxW, 2);
-  const aTotalH = aLines.length * 30;
-  aLines.forEach((ln,i) => c.fillText(ln, aNameCX, cy - aTotalH/2 + 22 + i*30));
+  c.fillStyle=t.teamText;
+  c.font="700 24px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";
+  const aLines=wrapTxt(c,m.away,aNameMaxW,2);
+  const aLineH=26;
+  const aStart=cy-((aLines.length*aLineH)-8)/2+20;
+  aLines.forEach((ln,i)=>c.fillText(ln,aNameCX,aStart+i*aLineH));
 
-  // ── TV KOLOM (kanan) ──
-  // Tampilkan berbeda: TV lokal gratis = badge hijau "GRATIS" + nama
-  //                    TV berbayar     = nama TV warna kuning
-  const tvFreeList = (m.tvFree || []).filter(Boolean);
-  const tvPaidList = (m.tvPaid || []).filter(Boolean);
-  const hasFree    = tvFreeList.length > 0 || isFreeTV(m);
-  const tvcx       = xTV + TV_W/2;
+  const tvcx=xTV+TV_W/2;
+  const boxH=Math.min(rowH-12,78);
+  const boxY=cy-boxH/2;
+  const hasFree=tvInfo.tvFree.length>0;
 
-  if (hasFree) {
-    // ── TV LOKAL GRATIS — tampilan khusus ──
-    // Background hijau transparan
-    rr(c, xTV+4, cy-34, TV_W-8, 68, 10, "rgba(34,197,94,0.15)", "#22c55e", 1.5);
-
-    // Badge "GRATIS" kecil di atas
-    const badgeW = 68, badgeH = 20;
-    rr(c, tvcx-badgeW/2, cy-32, badgeW, badgeH, 10, "#22c55e", null);
-    c.fillStyle = "#fff";
-    c.font = "800 13px 'Inter','Segoe UI',sans-serif";
-    c.textAlign = "center"; c.textBaseline = "middle";
-    c.fillText("✓ GRATIS", tvcx, cy-32+badgeH/2);
-
-    // Nama TV lokal
-    const freeNames = tvFreeList.length > 0 ? tvFreeList : [shortTv(m)];
-    const displayFree = freeNames.join(" · ");
-    c.fillStyle = "#4ade80";
-    c.font = "700 17px 'Inter','Segoe UI',sans-serif";
-    c.textBaseline = "middle";
-    const fLines = wrapTxt(c, displayFree, TV_W-12, 2);
-    fLines.forEach((ln,i) => c.fillText(ln, tvcx, cy - 4 + i*20));
-
-    // Jika ada juga TV berbayar, tampilkan kecil di bawah
-    if (tvPaidList.length > 0) {
-      c.fillStyle = "rgba(251,191,36,0.7)";
-      c.font = "600 13px 'Inter','Segoe UI',sans-serif";
-      c.fillText(tvPaidList[0], tvcx, cy + 26);
+  if(hasFree){
+    rr(c,xTV+6,boxY,TV_W-12,boxH,12,"rgba(34,197,94,0.18)","#22c55e",1.5);
+    rr(c,tvcx-36,boxY+4,72,22,11,"#22c55e",null);
+    c.fillStyle="#fff";
+    c.font="800 12px 'Inter',sans-serif";
+    c.textAlign="center";c.textBaseline="middle";
+    c.fillText("GRATIS",tvcx,boxY+15);
+    c.textBaseline="alphabetic";
+    c.fillStyle="#4ade80";
+    c.font="700 16px 'Inter',sans-serif";
+    c.textAlign="center";
+    const freeTxt=tvInfo.tvFree.join(" · ");
+    wrapTxt(c,freeTxt,TV_W-16,3).forEach((ln,i)=>{
+      c.fillText(ln,tvcx,boxY+28+i*18);
+    });
+    if(tvInfo.tvPaid.length){
+      c.fillStyle="#fbbf24";
+      c.font="600 14px 'Inter',sans-serif";
+      const paidTxt=tvInfo.tvPaid.join(" · ");
+      wrapTxt(c,paidTxt,TV_W-14,2).forEach((ln,i)=>{
+        c.fillText(ln,tvcx,boxY+boxH-22+i*16);
+      });
     }
-    c.textBaseline = "alphabetic";
-
-  } else {
-    // ── TV BERBAYAR saja ──
-    rr(c, xTV+4, cy-30, TV_W-8, 60, 10, t.tvBg, null);
-    const tvStr = shortTv(m);
-    c.fillStyle = "#f59e0b";
-    c.font = "700 18px 'Inter','Segoe UI',sans-serif";
-    c.textAlign = "center"; c.textBaseline = "middle";
-    const tvLines = wrapTxt(c, tvStr, TV_W-14, 2);
-    tvLines.forEach((ln,i) => c.fillText(ln, tvcx, cy + (i - tvLines.length/2 + 0.5)*21));
-    c.textBaseline = "alphabetic";
+  }else{
+    rr(c,xTV+6,boxY,TV_W-12,boxH,12,t.tvBg,null);
+    c.fillStyle="#fbbf24";
+    c.font="700 17px 'Inter',sans-serif";
+    c.textAlign="center";c.textBaseline="middle";
+    const tvLines=wrapTxt(c,tvInfo.tv||"-",TV_W-16,3);
+    tvLines.forEach((ln,i)=>c.fillText(ln,tvcx,boxY+boxH/2-((tvLines.length-1)*18)/2+i*18));
+    c.textBaseline="alphabetic";
   }
 }
 
@@ -891,7 +928,7 @@ function renderMatchList(){
       ${hImg?`<img class="mlogo" src="${hImg.src}" alt=""/>`:""}
       <span class="minfo">
         <div class="mteams">${esc(m.home)} vs ${esc(m.away)}</div>
-        <div class="mmeta">${esc(m.competition||"")} · <span class="mtv">${esc(shortTv(m))}</span></div>
+        <div class="mmeta">${esc(m.competition||"")} · <span class="mtv${isFreeTV(m)?" free":""}">${esc(shortTv(m))}</span></div>
       </span>
       ${aImg?`<img class="mlogo" src="${aImg.src}" alt=""/>`:""}
     </div>`;
@@ -958,7 +995,16 @@ function importHtmlFile(file){
         const[kickoff,matchup,competition,tv]=cells;
         if(/kick-off/i.test(kickoff)||!/vs/i.test(matchup))return;
         const parts=matchup.split(/\s+vs\s+/i);
-        allSchedules[selectedDate].push({kickoff,matchup,home:(parts[0]||"").trim(),away:(parts[1]||"").trim(),competition,tv,tvFree:[],tvPaid:[]});
+        const tvData=classifyTv(tv);
+        allSchedules[selectedDate].push({
+          kickoff,matchup,
+          home:(parts[0]||"").trim(),
+          away:(parts[1]||"").trim(),
+          competition,
+          tv:tvData.tv,
+          tvFree:tvData.tvFree,
+          tvPaid:tvData.tvPaid,
+        });
         count++;
       });
       setStatus(`✓ Import ${count} pertandingan`,"ok");
