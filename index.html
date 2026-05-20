@@ -1059,59 +1059,63 @@ async function downloadVideo(){
 
   try{
     const t=getT(), brand=await loadBrand();
-    const FPS=30;
-    const holdDur=parseInt($("#sel-dur").value)||3;  // detik tiap baris ditahan
+    // Gunakan FPS rendah agar MediaRecorder punya waktu cukup capture tiap frame
+    // FPS=15 → interval 67ms per frame, cukup untuk browser
+    const FPS=15;
+    const MS_PER_FRAME = Math.ceil(1000/FPS); // ~67ms
+    const holdDur=parseInt($("#sel-dur").value)||3;
     const animFrames=Math.round(ANIM_DUR*FPS);
     const holdFrames=Math.round(holdDur*FPS);
-    const holdEndFrames=Math.round(2.5*FPS);  // hold semua baris di akhir
+    const holdEndFrames=Math.round(2.5*FPS);
     const n=allMatches.length;
-
-    // Total frame: setiap baris = animFrames + holdFrames, lalu hold akhir
     const totalFrames = n*(animFrames+holdFrames) + holdEndFrames;
 
     const vc=document.createElement("canvas"); vc.width=W; vc.height=H;
     const vctx=vc.getContext("2d");
+    // captureStream dengan FPS yang sama
     const stream=vc.captureStream(FPS);
-    const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:10_000_000});
+    const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:8_000_000});
     const chunks=[];
     rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
-    rec.start(100);
+    rec.start();
+
+    // Helper: render 1 frame lalu tunggu interval agar recorder sempat capture
+    async function renderFrame(visCount, animIdx, animProg){
+      await renderBuildUp(vctx, t, brand, visCount, animIdx, animProg);
+      // Tunggu tepat 1 frame duration agar MediaRecorder capture frame ini
+      await new Promise(r=>setTimeout(r, MS_PER_FRAME));
+    }
 
     let frame=0;
 
-    // Render setiap baris: animasi masuk + hold
     for(let i=0; i<n; i++){
-      // Fase animasi masuk baris ke-i
+      // Animasi masuk baris ke-i
       for(let f=0; f<animFrames; f++){
-        const prog=f/animFrames;
-        await renderBuildUp(vctx, t, brand, i, i, prog);
+        await renderFrame(i, i, f/animFrames);
         frame++;
-        if(frame%6===0){
+        if(frame%3===0){
           const pct=Math.round(frame/totalFrames*100);
           vpbar.style.width=pct+"%";
           vplbl.textContent=`Baris ${i+1}/${n} masuk · ${pct}%`;
           setStatus(`Merender... ${pct}%`,"loading");
         }
-        await new Promise(r=>setTimeout(r,0));
       }
-      // Fase hold — baris ke-i sudah fully visible
+      // Hold — baris ke-i fully visible
       for(let f=0; f<holdFrames; f++){
-        await renderBuildUp(vctx, t, brand, i+1, i+1, 0);
+        await renderFrame(i+1, i+1, 0);
         frame++;
-        if(frame%6===0){
+        if(frame%3===0){
           const pct=Math.round(frame/totalFrames*100);
           vpbar.style.width=pct+"%";
           vplbl.textContent=`Baris ${i+1}/${n} · ${pct}%`;
         }
-        await new Promise(r=>setTimeout(r,0));
       }
     }
 
-    // Hold akhir — semua baris visible
+    // Hold akhir semua baris
     for(let f=0; f<holdEndFrames; f++){
-      await renderBuildUp(vctx, t, brand, n, n, 0);
+      await renderFrame(n, n, 0);
       frame++;
-      await new Promise(r=>setTimeout(r,0));
     }
 
     rec.stop();
