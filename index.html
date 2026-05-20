@@ -9,136 +9,144 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --sb:#0a0c10;--sb2:#111318;--border:#1e2330;
-  --acc:#e8b84b;--acc2:#4caf7d;--txt:#f0f2f5;--muted:#6b7280;
-  --danger:#e05252;--info:#5b9cf6;
+  --sb:#0d0f14;--sb2:#13161e;--border:#1e2230;
+  --acc:#a855f7;--acc2:#7c3aed;--gold:#f59e0b;
+  --txt:#f1f5f9;--muted:#64748b;--danger:#ef4444;--ok:#22c55e;
 }
-body{font-family:'Inter',system-ui,sans-serif;background:#070810;color:var(--txt);min-height:100vh;display:flex;flex-direction:column}
+body{font-family:'Inter',system-ui,sans-serif;background:#080a10;color:var(--txt);min-height:100vh;display:flex;flex-direction:column}
 input[type=file]{display:none}
+
 /* ── TOPBAR ── */
-.topbar{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--sb);border-bottom:1px solid var(--border);flex-shrink:0}
-.topbar-logo{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--acc)}
-.topbar-brand{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--acc)}
-.topbar-brand span{color:#fff}
-.topbar-sep{flex:1}
-.topbar-date{font-size:0.78rem;font-weight:600;color:var(--muted)}
-/* ── LAYOUT ── */
-.workspace{display:grid;grid-template-columns:300px 1fr;flex:1;min-height:0;overflow:hidden}
-@media(max-width:860px){.workspace{grid-template-columns:1fr;overflow:visible}}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--sb);border-bottom:1px solid var(--border);flex-shrink:0}
+.tb-logo{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--acc)}
+.tb-brand{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;color:var(--acc)}
+.tb-brand b{color:#fff;font-family:'Bebas Neue',sans-serif}
+.tb-sep{flex:1}
+.tb-date{font-size:0.75rem;font-weight:600;color:var(--muted)}
+
+/* ── WORKSPACE ── */
+.workspace{display:grid;grid-template-columns:290px 1fr;flex:1;min-height:0;overflow:hidden}
+@media(max-width:820px){.workspace{grid-template-columns:1fr;overflow:visible}}
+
 /* ── SIDEBAR ── */
-.sidebar{background:var(--sb);border-right:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;max-height:calc(100vh - 58px)}
-.sec-label{font-size:0.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.sidebar{background:var(--sb);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(100vh - 52px)}
+.slabel{font-size:0.62rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
 .field{display:flex;flex-direction:column;gap:3px}
-.field label{font-size:0.7rem;color:var(--muted);font-weight:600}
-.field input,.field select{background:var(--sb2);border:1px solid var(--border);color:var(--txt);padding:7px 10px;border-radius:7px;font-size:0.82rem;font-family:inherit;outline:none;transition:border-color .2s}
+.field label{font-size:0.68rem;color:var(--muted);font-weight:600}
+.field input,.field select{background:var(--sb2);border:1px solid var(--border);color:var(--txt);padding:7px 9px;border-radius:7px;font-size:0.8rem;font-family:inherit;outline:none;transition:border-color .2s}
 .field input:focus,.field select:focus{border-color:var(--acc)}
 input[type=date]{color-scheme:dark}
+
 /* ── THEME GRID ── */
-.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.t-card{cursor:pointer;border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s,transform .15s}
-.t-card:hover{transform:translateY(-2px);border-color:#2e3545}
-.t-card.on{border-color:var(--acc)}
-.t-swatch{height:36px}
-.t-name{font-size:0.68rem;font-weight:700;color:var(--muted);padding:5px 7px;background:var(--sb2)}
+.tgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.tcard{cursor:pointer;border:2px solid var(--border);border-radius:9px;overflow:hidden;transition:border-color .2s,transform .15s}
+.tcard:hover{transform:translateY(-2px)}
+.tcard.on{border-color:var(--acc)}
+.tswatch{height:32px}
+.tname{font-size:0.64rem;font-weight:700;color:var(--muted);padding:4px 6px;background:var(--sb2)}
+
 /* ── BUTTONS ── */
-.btn{cursor:pointer;border:none;border-radius:8px;padding:9px 14px;font-size:0.82rem;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s,transform .15s}
+.btn{cursor:pointer;border:none;border-radius:7px;padding:8px 12px;font-size:0.8rem;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:opacity .2s,transform .15s;white-space:nowrap}
 .btn:hover{opacity:.88;transform:translateY(-1px)}
 .btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
-.btn-gold{background:linear-gradient(135deg,#c8922a,#e8b84b);color:#0a0800}
-.btn-green{background:linear-gradient(135deg,#2d7a4f,#4caf7d);color:#fff}
-.btn-blue{background:linear-gradient(135deg,#2a4a8a,#5b9cf6);color:#fff}
+.btn-purple{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.btn-green{background:linear-gradient(135deg,#15803d,#22c55e);color:#fff}
+.btn-blue{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff}
 .btn-ghost{background:var(--sb2);color:var(--txt);border:1px solid var(--border)}
-.btn-sm{padding:7px 12px;font-size:0.78rem}
+.btn-sm{padding:6px 10px;font-size:0.75rem}
 .btn-full{width:100%}
-.btn-row{display:flex;gap:7px}
-.btn-row .btn{flex:1}
+.brow{display:flex;gap:6px}
+.brow .btn{flex:1}
+
 /* ── EXPORT TABS ── */
-.exp-tabs{display:flex;background:var(--sb2);border:1px solid var(--border);border-radius:9px;padding:3px;gap:3px}
-.exp-tab{flex:1;cursor:pointer;border:none;border-radius:7px;padding:8px 6px;font-size:0.75rem;font-weight:700;font-family:inherit;background:transparent;color:var(--muted);transition:background .2s,color .2s}
-.exp-tab.on{background:var(--acc);color:#0a0800}
+.etabs{display:flex;background:var(--sb2);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px}
+.etab{flex:1;cursor:pointer;border:none;border-radius:6px;padding:7px 5px;font-size:0.72rem;font-weight:700;font-family:inherit;background:transparent;color:var(--muted);transition:background .2s,color .2s}
+.etab.on{background:var(--acc);color:#fff}
+
 /* ── STATUS ── */
-.status{font-size:0.75rem;font-weight:600;padding:8px 10px;border-radius:7px;background:var(--sb2);border:1px solid var(--border);color:var(--muted);line-height:1.5;min-height:34px}
-.status.ok{color:var(--acc2);border-color:#2d7a4f44}
-.status.err{color:var(--danger);border-color:#e0525244}
-.status.loading{color:var(--acc);border-color:#c8922a44}
-/* ── MAIN AREA ── */
-.main{display:flex;flex-direction:column;overflow:hidden;background:#070810}
+.sbar{font-size:0.72rem;font-weight:600;padding:7px 9px;border-radius:7px;background:var(--sb2);border:1px solid var(--border);color:var(--muted);line-height:1.5;min-height:32px}
+.sbar.ok{color:var(--ok);border-color:#15803d44}
+.sbar.err{color:var(--danger);border-color:#ef444444}
+.sbar.loading{color:var(--gold);border-color:#f59e0b44}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;overflow:hidden;background:#080a10}
+
 /* ── PREVIEW TABS ── */
-.prev-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--sb);flex-shrink:0}
-.prev-tab{cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:0.8rem;font-weight:700;padding:11px 20px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
-.prev-tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.ptabs{display:flex;border-bottom:1px solid var(--border);background:var(--sb);flex-shrink:0}
+.ptab{cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:0.78rem;font-weight:700;padding:10px 18px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.ptab.on{color:var(--acc);border-bottom-color:var(--acc)}
+
 /* ── PREVIEW BODY ── */
-.prev-body{flex:1;display:flex;gap:20px;padding:20px;overflow:auto;align-items:flex-start;justify-content:center}
-/* ── CANVAS WRAPPER ── */
-.canvas-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
-.canvas-shell{position:relative;width:240px;border-radius:16px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.7)}
-.canvas-shell canvas{display:block;width:100%}
-.canvas-nav{display:flex;align-items:center;gap:8px}
-.nav-btn{cursor:pointer;background:var(--sb2);border:1px solid var(--border);color:var(--txt);border-radius:7px;padding:5px 14px;font-size:0.82rem;font-weight:700;font-family:inherit;transition:background .2s}
-.nav-btn:hover{background:#1e2330}
-.nav-btn:disabled{opacity:.3;cursor:not-allowed}
-.page-lbl{font-size:0.75rem;color:var(--muted);font-weight:600;min-width:52px;text-align:center}
-/* ── VIDEO PREVIEW OVERLAY ── */
-.vid-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);border-radius:16px;cursor:pointer;transition:opacity .2s}
-.vid-overlay:hover{background:rgba(0,0,0,.4)}
-.vid-play{width:52px;height:52px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.vid-play svg{width:22px;height:22px;fill:#0a0800;margin-left:3px}
-/* ── MATCH LIST PANEL ── */
-.match-panel{flex:1;min-width:260px;max-width:440px;display:flex;flex-direction:column;gap:6px}
-.mp-title{font-size:0.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
-.mi{background:var(--sb2);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:border-color .2s}
-.mi:hover{border-color:#2e3545}
-.mi.on{border-color:var(--acc);background:#e8b84b0d}
-.mi-time{font-weight:800;color:var(--acc);font-size:0.8rem;min-width:36px;text-align:center}
-.mi-logo{width:20px;height:20px;object-fit:contain;flex-shrink:0}
-.mi-info{flex:1;min-width:0}
-.mi-teams{font-weight:700;font-size:0.8rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mi-meta{font-size:0.67rem;color:var(--muted);margin-top:1px}
-.mi-tv{color:#e8b84b}
+.pbody{flex:1;display:flex;gap:18px;padding:18px;overflow:auto;align-items:flex-start;justify-content:center}
+
+/* ── PHONE FRAME ── */
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.phone-shell{position:relative;width:230px;border-radius:20px;overflow:hidden;box-shadow:0 0 0 2px #1e2230,0 20px 60px rgba(0,0,0,.8)}
+.phone-shell canvas{display:block;width:100%}
+.vid-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);cursor:pointer;transition:background .2s}
+.vid-overlay:hover{background:rgba(0,0,0,.35)}
+.play-btn{width:48px;height:48px;background:var(--acc);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px var(--acc)}
+.play-btn svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.cnav{display:flex;align-items:center;gap:7px}
+.cnav-btn{cursor:pointer;background:var(--sb2);border:1px solid var(--border);color:var(--txt);border-radius:6px;padding:4px 12px;font-size:0.8rem;font-weight:700;font-family:inherit}
+.cnav-btn:disabled{opacity:.3;cursor:not-allowed}
+.plbl{font-size:0.72rem;color:var(--muted);font-weight:600;min-width:48px;text-align:center}
+
+/* ── MATCH LIST ── */
+.mpanel{flex:1;min-width:240px;max-width:420px;display:flex;flex-direction:column;gap:5px}
+.mptitle{font-size:0.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.mitem{background:var(--sb2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color .2s}
+.mitem:hover{border-color:#2e3545}
+.mitem.on{border-color:var(--acc);background:#a855f70d}
+.mtime{font-weight:800;color:var(--acc);font-size:0.78rem;min-width:34px;text-align:center}
+.mlogo{width:18px;height:18px;object-fit:contain;flex-shrink:0}
+.minfo{flex:1;min-width:0}
+.mteams{font-weight:700;font-size:0.78rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mmeta{font-size:0.64rem;color:var(--muted);margin-top:1px}
+.mtv{color:var(--gold)}
+
 /* ── VIDEO PROGRESS ── */
-.vid-progress{width:100%;background:var(--sb2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;display:none;flex-direction:column;gap:6px}
-.vid-progress.show{display:flex}
-.vp-bar-wrap{background:#1e2330;border-radius:99px;height:6px;overflow:hidden}
-.vp-bar{height:100%;background:linear-gradient(90deg,#c8922a,#e8b84b);border-radius:99px;width:0%;transition:width .1s}
-.vp-label{font-size:0.72rem;color:var(--muted);font-weight:600}
+.vprog{background:var(--sb2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;display:none;flex-direction:column;gap:5px}
+.vprog.show{display:flex}
+.vpbar-wrap{background:#1e2230;border-radius:99px;height:5px;overflow:hidden}
+.vpbar{height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;width:0%;transition:width .1s}
+.vplbl{font-size:0.7rem;color:var(--muted);font-weight:600}
 </style>
 </head>
 <body>
 
 <!-- TOPBAR -->
 <header class="topbar">
-  <img class="topbar-logo" id="brand-img" src="assets/branding/CORNERKIICK.png" onerror="this.src='CORNERKIICK.png'" alt="logo"/>
-  <div class="topbar-brand">CORNER<span>KIICK</span></div>
-  <div class="topbar-sep"></div>
-  <span class="topbar-date" id="topbar-date">—</span>
+  <img class="tb-logo" id="brand-img" src="assets/branding/CORNERKIICK.png" onerror="this.src='CORNERKIICK.png'" alt="logo"/>
+  <div class="tb-brand">CORNER<b>KIICK</b></div>
+  <div class="tb-sep"></div>
+  <span class="tb-date" id="tb-date">—</span>
 </header>
 
 <div class="workspace">
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
 
-  <!-- Branding -->
   <div>
-    <div class="sec-label">Branding</div>
-    <div style="display:flex;flex-direction:column;gap:7px">
-      <div class="field"><label>Judul Header</label><input id="inp-header" value="JADWAL BOLA HARI INI"/></div>
+    <div class="slabel">Branding</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="field"><label>Judul Header</label><input id="inp-header" value="TODAY MATCH"/></div>
       <div class="field"><label>Username TikTok</label><input id="inp-tiktok" value="@CORNERKIICK" placeholder="@username"/></div>
-      <div class="field"><label>Footer Sosmed</label><input id="inp-footer" value="🎵 CORNERKIICK  |  📸 CORNERKIICK"/></div>
+      <div class="field"><label>Footer / Follow IG</label><input id="inp-footer" value="Follow IG: @cornerkiick"/></div>
     </div>
   </div>
 
-  <!-- Tema -->
   <div>
-    <div class="sec-label">Tema</div>
-    <div class="theme-grid" id="theme-grid"></div>
+    <div class="slabel">Tema</div>
+    <div class="tgrid" id="theme-grid"></div>
   </div>
 
-  <!-- Jadwal -->
   <div>
-    <div class="sec-label">Jadwal</div>
-    <div style="display:flex;flex-direction:column;gap:7px">
+    <div class="slabel">Jadwal</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
       <div class="field"><label>Tanggal</label><input type="date" id="date-picker"/></div>
-      <div class="btn-row">
+      <div class="brow">
         <button class="btn btn-ghost btn-sm" id="btn-today">Hari Ini</button>
         <button class="btn btn-blue btn-sm" id="btn-refresh">↻ Muat</button>
       </div>
@@ -147,32 +155,31 @@ input[type=date]{color-scheme:dark}
     </div>
   </div>
 
-  <!-- Export -->
   <div>
-    <div class="sec-label">Export</div>
-    <div class="exp-tabs" id="exp-tabs">
-      <button class="exp-tab on" data-t="png">🖼 PNG</button>
-      <button class="exp-tab" data-t="video">🎬 Video</button>
+    <div class="slabel">Export</div>
+    <div class="etabs" id="etabs">
+      <button class="etab on" data-t="png">🖼 PNG</button>
+      <button class="etab" data-t="video">🎬 Video</button>
     </div>
 
-    <div id="opt-png" style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+    <div id="opt-png" style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
       <div class="field"><label>Pertandingan per halaman</label>
         <select id="sel-perpage">
-          <option value="4">4 per halaman</option>
-          <option value="5" selected>5 per halaman</option>
-          <option value="6">6 per halaman</option>
+          <option value="5">5 per halaman</option>
+          <option value="7" selected>7 per halaman</option>
+          <option value="9">9 per halaman</option>
+          <option value="11">11 per halaman</option>
         </select>
       </div>
-      <button class="btn btn-gold btn-full" id="btn-dl-png" disabled>⚡ Download PNG</button>
+      <button class="btn btn-purple btn-full" id="btn-dl-png" disabled>⚡ Download PNG</button>
     </div>
 
-    <div id="opt-video" style="margin-top:9px;display:none;flex-direction:column;gap:7px">
+    <div id="opt-video" style="margin-top:8px;display:none;flex-direction:column;gap:6px">
       <div class="field"><label>Durasi per slide (detik)</label>
         <select id="sel-dur">
           <option value="3">3 detik</option>
           <option value="4" selected>4 detik</option>
           <option value="5">5 detik</option>
-          <option value="6">6 detik</option>
         </select>
       </div>
       <div class="field"><label>Animasi masuk</label>
@@ -180,52 +187,46 @@ input[type=date]{color-scheme:dark}
           <option value="slide">Slide dari kanan</option>
           <option value="fade">Fade in</option>
           <option value="zoom">Zoom in</option>
-          <option value="wipe">Wipe bawah ke atas</option>
+          <option value="wipe">Wipe atas ke bawah</option>
         </select>
       </div>
-      <button class="btn btn-gold btn-full" id="btn-preview-vid">▶ Preview Video</button>
+      <button class="btn btn-purple btn-full" id="btn-prev-vid">▶ Preview Video</button>
       <button class="btn btn-green btn-full" id="btn-dl-video" disabled>🎬 Render & Download</button>
-      <div class="vid-progress" id="vid-progress">
-        <div class="vp-label" id="vp-label">Merender...</div>
-        <div class="vp-bar-wrap"><div class="vp-bar" id="vp-bar"></div></div>
+      <div class="vprog" id="vprog">
+        <div class="vplbl" id="vplbl">Merender...</div>
+        <div class="vpbar-wrap"><div class="vpbar" id="vpbar"></div></div>
       </div>
-      <div style="font-size:0.67rem;color:var(--muted);line-height:1.5">1 slide per pertandingan · 1080×1920 · TikTok/Reels ready</div>
+      <div style="font-size:0.64rem;color:var(--muted);line-height:1.5">1 slide per pertandingan · 1080×1920 · TikTok ready</div>
     </div>
   </div>
 
-  <div class="status" id="status">Memuat jadwal...</div>
+  <div class="sbar" id="status">Memuat jadwal...</div>
 </aside>
 
 <!-- ══ MAIN ══ -->
 <main class="main">
-  <!-- Preview mode tabs -->
-  <div class="prev-tabs">
-    <button class="prev-tab on" data-m="png">🖼 Preview PNG</button>
-    <button class="prev-tab" data-m="video">🎬 Preview Video</button>
+  <div class="ptabs">
+    <button class="ptab on" data-m="png">🖼 Preview PNG</button>
+    <button class="ptab" data-m="video">🎬 Preview Video</button>
   </div>
-
-  <div class="prev-body" id="prev-body">
-    <!-- Canvas -->
-    <div class="canvas-wrap">
-      <div class="canvas-shell" id="canvas-shell">
+  <div class="pbody">
+    <div class="phone-wrap">
+      <div class="phone-shell" id="phone-shell">
         <canvas id="cv" width="1080" height="1920"></canvas>
-        <!-- Video play overlay (hidden by default) -->
         <div class="vid-overlay" id="vid-overlay" style="display:none">
-          <div class="vid-play">
+          <div class="play-btn" id="play-btn">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </div>
         </div>
       </div>
-      <div class="canvas-nav" id="canvas-nav">
-        <button class="nav-btn" id="nav-prev" disabled>‹</button>
-        <span class="page-lbl" id="page-lbl">— / —</span>
-        <button class="nav-btn" id="nav-next" disabled>›</button>
+      <div class="cnav" id="cnav">
+        <button class="cnav-btn" id="nav-prev" disabled>‹</button>
+        <span class="plbl" id="plbl">— / —</span>
+        <button class="cnav-btn" id="nav-next" disabled>›</button>
       </div>
     </div>
-
-    <!-- Match list -->
-    <div class="match-panel">
-      <div class="mp-title">Daftar Pertandingan</div>
+    <div class="mpanel">
+      <div class="mptitle">Daftar Pertandingan</div>
       <div id="match-list"></div>
     </div>
   </div>
@@ -233,64 +234,103 @@ input[type=date]{color-scheme:dark}
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════
 const W=1080,H=1920;
 const BULAN=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const HARI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
 const FREE_KW=["sctv","indosiar","rcti","mnctv","gtv","antv","tvone","tv one","kompas tv","inews","tvri","trans tv","trans7","trans 7","metro tv","net tv","net."];
 
-// ═══════════════════════════════════════════════════
-// THEMES — elegan, tidak neon
-// ═══════════════════════════════════════════════════
+// ── THEMES ──
+// Semua berbasis purple/dark seperti referensi, dengan variasi warna aksen
 const THEMES = {
-  classic: {
-    name:"⚽ Classic Dark",
-    swatch:"linear-gradient(135deg,#0a0c10 50%,#e8b84b)",
-    bg:"#0a0c10", bg2:"#111318", card:"#14181f", cardBorder:"#1e2a3a",
-    accent:"#e8b84b", accentDim:"rgba(232,184,75,.15)",
-    text:"#f0f2f5", sub:"#8892a0", tv:"#e8b84b", tvFree:"#4caf7d",
-    timeBg:"#0a0c10", footer:"#060709",
-    stripe:["#e8b84b","#4caf7d","#5b9cf6","#e05252","#a78bfa"],
+  purple: {
+    name:"💜 Purple",
+    swatch:"linear-gradient(135deg,#2d1b69,#7c3aed,#a855f7)",
+    // background gradient
+    bgTop:"#1a0a3d", bgMid:"#2d1b69", bgBot:"#1a0a3d",
+    // header
+    headerBg1:"#3b1f8a", headerBg2:"#5b2fc0",
+    headerText:"#ffffff", headerSub:"#d4b8ff",
+    // row
+    rowBg:"rgba(255,255,255,0.08)", rowBorder:"rgba(255,255,255,0.12)",
+    rowHover:"rgba(255,255,255,0.13)",
+    // time box
+    timeBg:"#ffffff", timeText:"#2d1b69", timeBorder:"#ffffff",
+    // team text
+    teamText:"#ffffff",
+    // league logo bg
+    leagueBg:"rgba(255,255,255,0.15)",
+    // tv logo bg
+    tvBg:"rgba(255,255,255,0.12)",
+    // date separator
+    dateBg:"rgba(255,255,255,0.12)", dateBorder:"rgba(255,255,255,0.3)", dateText:"#ffffff",
+    // footer
+    footerBg:"rgba(0,0,0,0.3)", footerText:"#d4b8ff",
+    // accent
+    accent:"#a855f7", accentGlow:"rgba(168,85,247,0.4)",
+    // watermark
+    wmColor:"rgba(255,255,255,0.04)",
   },
-  slate: {
-    name:"🌙 Midnight Slate",
-    swatch:"linear-gradient(135deg,#0f1117 50%,#5b9cf6)",
-    bg:"#0f1117", bg2:"#161b26", card:"#1a2030", cardBorder:"#243050",
-    accent:"#5b9cf6", accentDim:"rgba(91,156,246,.15)",
-    text:"#e8edf5", sub:"#7a8899", tv:"#f0c060", tvFree:"#56c87a",
-    timeBg:"#0f1117", footer:"#080a10",
-    stripe:["#5b9cf6","#56c87a","#f0c060","#e07070","#c084fc"],
+  royal: {
+    name:"👑 Royal Blue",
+    swatch:"linear-gradient(135deg,#0a1628,#1e3a8a,#3b82f6)",
+    bgTop:"#060e1f", bgMid:"#0f2044", bgBot:"#060e1f",
+    headerBg1:"#0f2044", headerBg2:"#1e3a8a",
+    headerText:"#ffffff", headerSub:"#93c5fd",
+    rowBg:"rgba(255,255,255,0.07)", rowBorder:"rgba(59,130,246,0.2)",
+    rowHover:"rgba(59,130,246,0.15)",
+    timeBg:"#3b82f6", timeText:"#ffffff", timeBorder:"#60a5fa",
+    teamText:"#f0f9ff",
+    leagueBg:"rgba(59,130,246,0.2)",
+    tvBg:"rgba(59,130,246,0.15)",
+    dateBg:"rgba(59,130,246,0.15)", dateBorder:"rgba(96,165,250,0.4)", dateText:"#bfdbfe",
+    footerBg:"rgba(0,0,0,0.35)", footerText:"#93c5fd",
+    accent:"#3b82f6", accentGlow:"rgba(59,130,246,0.4)",
+    wmColor:"rgba(255,255,255,0.035)",
   },
-  carbon: {
-    name:"🖤 Carbon",
-    swatch:"linear-gradient(135deg,#111 50%,#888)",
-    bg:"#111111", bg2:"#1a1a1a", card:"#1e1e1e", cardBorder:"#2e2e2e",
-    accent:"#d4d4d4", accentDim:"rgba(212,212,212,.12)",
-    text:"#f5f5f5", sub:"#888", tv:"#d4d4d4", tvFree:"#6dbf8a",
-    timeBg:"#111", footer:"#0a0a0a",
-    stripe:["#d4d4d4","#6dbf8a","#f0c060","#e07070","#a0a0ff"],
+  emerald: {
+    name:"💚 Emerald",
+    swatch:"linear-gradient(135deg,#052e16,#065f46,#10b981)",
+    bgTop:"#021a0e", bgMid:"#052e16", bgBot:"#021a0e",
+    headerBg1:"#052e16", headerBg2:"#065f46",
+    headerText:"#ffffff", headerSub:"#6ee7b7",
+    rowBg:"rgba(255,255,255,0.07)", rowBorder:"rgba(16,185,129,0.2)",
+    rowHover:"rgba(16,185,129,0.15)",
+    timeBg:"#10b981", timeText:"#ffffff", timeBorder:"#34d399",
+    teamText:"#f0fdf4",
+    leagueBg:"rgba(16,185,129,0.2)",
+    tvBg:"rgba(16,185,129,0.15)",
+    dateBg:"rgba(16,185,129,0.15)", dateBorder:"rgba(52,211,153,0.4)", dateText:"#a7f3d0",
+    footerBg:"rgba(0,0,0,0.35)", footerText:"#6ee7b7",
+    accent:"#10b981", accentGlow:"rgba(16,185,129,0.4)",
+    wmColor:"rgba(255,255,255,0.035)",
   },
-  maroon: {
-    name:"🏆 Maroon Gold",
-    swatch:"linear-gradient(135deg,#1a0808 50%,#c8922a)",
-    bg:"#100808", bg2:"#1a0e0e", card:"#1e1010", cardBorder:"#3a1818",
-    accent:"#c8922a", accentDim:"rgba(200,146,42,.15)",
-    text:"#f5ede0", sub:"#9a7a60", tv:"#f0c060", tvFree:"#6dbf8a",
-    timeBg:"#100808", footer:"#080404",
-    stripe:["#c8922a","#e05252","#f0c060","#6dbf8a","#c084fc"],
+  crimson: {
+    name:"❤️ Crimson",
+    swatch:"linear-gradient(135deg,#1c0505,#7f1d1d,#dc2626)",
+    bgTop:"#100303", bgMid:"#1c0505", bgBot:"#100303",
+    headerBg1:"#1c0505", headerBg2:"#7f1d1d",
+    headerText:"#ffffff", headerSub:"#fca5a5",
+    rowBg:"rgba(255,255,255,0.07)", rowBorder:"rgba(220,38,38,0.2)",
+    rowHover:"rgba(220,38,38,0.15)",
+    timeBg:"#dc2626", timeText:"#ffffff", timeBorder:"#f87171",
+    teamText:"#fff5f5",
+    leagueBg:"rgba(220,38,38,0.2)",
+    tvBg:"rgba(220,38,38,0.15)",
+    dateBg:"rgba(220,38,38,0.15)", dateBorder:"rgba(248,113,113,0.4)", dateText:"#fecaca",
+    footerBg:"rgba(0,0,0,0.35)", footerText:"#fca5a5",
+    accent:"#dc2626", accentGlow:"rgba(220,38,38,0.4)",
+    wmColor:"rgba(255,255,255,0.035)",
   },
 };
 
-// ═══════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════
 let allSchedules={}, allMatches=[], selectedDate=todayISO();
 let staticLogos=null, logoCache={};
-let currentTheme="classic", exportMode="png", previewMode="png";
+let currentTheme="purple", exportMode="png", previewMode="png";
 let previewPage=0;
-let vidAnimFrame=null, vidPlaying=false;
+let vidAF=null, vidPlaying=false, vidSlideIdx=0, vidFrameStart=null, vidBrand=null;
 
 const $=s=>document.querySelector(s);
 const cv=$("#cv"), ctx=cv.getContext("2d");
@@ -298,13 +338,13 @@ const inpHeader=$("#inp-header"), inpTiktok=$("#inp-tiktok"), inpFooter=$("#inp-
 const datePicker=$("#date-picker"), statusEl=$("#status");
 const matchList=$("#match-list");
 const btnDlPng=$("#btn-dl-png"), btnDlVideo=$("#btn-dl-video");
-const navPrev=$("#nav-prev"), navNext=$("#nav-next"), pageLbl=$("#page-lbl");
-const vidOverlay=$("#vid-overlay"), canvasNav=$("#canvas-nav");
-const vidProgress=$("#vid-progress"), vpBar=$("#vp-bar"), vpLabel=$("#vp-label");
+const navPrev=$("#nav-prev"), navNext=$("#nav-next"), plbl=$("#plbl");
+const vidOverlay=$("#vid-overlay"), cnav=$("#cnav");
+const vprog=$("#vprog"), vpbar=$("#vpbar"), vplbl=$("#vplbl");
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function todayISO(){return new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Jakarta"})}
 function fmtDate(iso){if(!iso)return"—";const[y,m,d]=iso.split("-").map(Number);return`${HARI[new Date(y,m-1,d).getDay()]}, ${d} ${BULAN[m]} ${y}`}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
@@ -316,13 +356,14 @@ const BASE=getBase();
 function asset(p){return BASE+p.replace(/^\//,"")}
 function shortTv(m){const r=(m.tv||"").trim();if(r&&r!=="-"&&r!=="TBC")return r;return[...(m.tvFree||[]),...(m.tvPaid||[])].join(" · ")||"-"}
 function isFreeTV(m){if((m.tvFree||[]).length)return true;return FREE_KW.some(k=>shortTv(m).toLowerCase().includes(k))}
-function getT(){return THEMES[currentTheme]||THEMES.classic}
-function perPage(){return parseInt($("#sel-perpage").value)||5}
-function setStatus(msg,cls=""){statusEl.className="status"+(cls?" "+cls:"");statusEl.textContent=msg}
+function getT(){return THEMES[currentTheme]||THEMES.purple}
+function perPage(){return parseInt($("#sel-perpage").value)||7}
+function setStatus(msg,cls=""){statusEl.className="sbar"+(cls?" "+cls:"");statusEl.textContent=msg}
+function easeOut(t){return 1-Math.pow(1-t,3)}
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // LOGO LOADING
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function loadStaticLogos(){
   if(staticLogos)return staticLogos;
   try{const r=await fetch(asset("logos.json?v=5"));if(!r.ok)throw 0;staticLogos=await r.json();}
@@ -333,11 +374,15 @@ function findBadge(map,name){
   if(!map||!name)return null;
   if(map[name]&&!isRemote(map[name]))return map[name];
   const norm=normN(name);let best=null,bl=0;
-  for(const[k,v]of Object.entries(map)){if(isRemote(v))continue;const kn=normN(k);if(norm===kn)return v;if((norm.includes(kn)||kn.includes(norm))&&k.length>bl){best=v;bl=k.length;}}
+  for(const[k,v]of Object.entries(map)){
+    if(isRemote(v))continue;const kn=normN(k);
+    if(norm===kn)return v;
+    if((norm.includes(kn)||kn.includes(norm))&&k.length>bl){best=v;bl=k.length;}
+  }
   return best;
 }
-function teamLogoBase(name){const m=staticLogos?findBadge(staticLogos.teams,name):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/teams/${slug(name)}`}
-function leagueLogoBase(comp){const m=staticLogos?findBadge(staticLogos.leagues,comp):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/leagues/${slug(comp)}`}
+function teamBase(name){const m=staticLogos?findBadge(staticLogos.teams,name):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/teams/${slug(name)}`}
+function leagueBase(comp){const m=staticLogos?findBadge(staticLogos.leagues,comp):null;return(m&&!isRemote(m))?m.replace(/\.(png|svg|jpg|webp)$/i,""):`assets/logos/leagues/${slug(comp)}`}
 function tryLoad(path){
   const src=asset(path);if(logoCache[src])return Promise.resolve(logoCache[src]);
   return new Promise(res=>{const img=new Image();img.onload=()=>{logoCache[src]=img;res(img);};img.onerror=()=>res(null);img.src=src;});
@@ -353,7 +398,7 @@ function getCached(base){
   return null;
 }
 async function preloadAll(matches){
-  const paths=[...new Set(matches.flatMap(m=>[teamLogoBase(m.home),teamLogoBase(m.away),leagueLogoBase(m.competition)]).filter(Boolean))];
+  const paths=[...new Set(matches.flatMap(m=>[teamBase(m.home),teamBase(m.away),leagueBase(m.competition)]).filter(Boolean))];
   await Promise.all(paths.map(loadLogo));
 }
 async function loadBrand(){
@@ -361,306 +406,414 @@ async function loadBrand(){
   return null;
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // CANVAS UTILS
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function rr(c,x,y,w,h,r,fill,stroke,sw){
+  if(w<=0||h<=0)return;
   const rad=Math.min(r,w/2,h/2);
   c.beginPath();c.moveTo(x+rad,y);c.lineTo(x+w-rad,y);c.quadraticCurveTo(x+w,y,x+w,y+rad);
   c.lineTo(x+w,y+h-rad);c.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
   c.lineTo(x+rad,y+h);c.quadraticCurveTo(x,y+h,x,y+h-rad);c.lineTo(x,y+rad);c.quadraticCurveTo(x,y,x+rad,y);c.closePath();
-  if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=sw||2;c.stroke();}
+  if(fill){c.fillStyle=fill;c.fill();}
+  if(stroke){c.strokeStyle=stroke;c.lineWidth=sw||2;c.stroke();}
 }
 function wrapTxt(c,text,maxW,maxL){
-  const words=text.split(/\s+/);const lines=[];let line="";
+  const words=String(text||"").split(/\s+/);const lines=[];let line="";
   for(const w of words){const t=line?line+" "+w:w;if(c.measureText(t).width<=maxW){line=t;}else{if(line)lines.push(line);line=w;}}
   if(line)lines.push(line);return lines.slice(0,maxL);
 }
-function circleImg(c,img,cx,cy,r,border){
-  c.save();c.shadowColor="rgba(0,0,0,.6)";c.shadowBlur=20;
-  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.clip();c.drawImage(img,cx-r,cy-r,r*2,r*2);c.restore();
-  c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle=border;c.lineWidth=3;c.stroke();
+function drawImg(c,img,x,y,w,h,radius=0){
+  if(!img)return;
+  if(radius>0){c.save();rr(c,x,y,w,h,radius,null);c.clip();}
+  c.drawImage(img,x,y,w,h);
+  if(radius>0)c.restore();
+}
+function circleImg(c,img,cx,cy,r,border,borderW=3){
+  if(!img)return;
+  c.save();c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.clip();c.drawImage(img,cx-r,cy-r,r*2,r*2);c.restore();
+  if(border){c.beginPath();c.arc(cx,cy,r,0,Math.PI*2);c.strokeStyle=border;c.lineWidth=borderW;c.stroke();}
 }
 
-// ═══════════════════════════════════════════════════
-// DRAW BACKGROUND (shared)
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// DRAW BACKGROUND
+// ═══════════════════════════════════════════
 function drawBg(c,t){
+  // Main gradient
   const g=c.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,t.bg2);g.addColorStop(.5,t.bg);g.addColorStop(1,t.bg2);
+  g.addColorStop(0,t.bgTop);g.addColorStop(0.5,t.bgMid);g.addColorStop(1,t.bgBot);
   c.fillStyle=g;c.fillRect(0,0,W,H);
-  // subtle dot grid
-  c.fillStyle=t.accent+"12";
-  for(let x=60;x<W;x+=90)for(let y=60;y<H;y+=90){c.beginPath();c.arc(x,y,1.5,0,Math.PI*2);c.fill();}
-  // glow top
-  const gt=c.createRadialGradient(W/2,0,0,W/2,0,550);
-  gt.addColorStop(0,t.accent+"22");gt.addColorStop(1,"transparent");
-  c.fillStyle=gt;c.fillRect(0,0,W,600);
-  // watermark
+
+  // Diagonal light sweep (like the reference image)
+  c.save();
+  const sweep=c.createLinearGradient(0,0,W,H*0.6);
+  sweep.addColorStop(0,"rgba(255,255,255,0)");
+  sweep.addColorStop(0.4,"rgba(255,255,255,0.04)");
+  sweep.addColorStop(0.6,"rgba(255,255,255,0.07)");
+  sweep.addColorStop(1,"rgba(255,255,255,0)");
+  c.fillStyle=sweep;c.fillRect(0,0,W,H);
+  c.restore();
+
+  // Radial glow top-right (like reference)
+  const gr=c.createRadialGradient(W*0.85,H*0.08,0,W*0.85,H*0.08,W*0.7);
+  gr.addColorStop(0,t.accentGlow);gr.addColorStop(1,"transparent");
+  c.fillStyle=gr;c.fillRect(0,0,W,H);
+
+  // Radial glow bottom-left
+  const gl=c.createRadialGradient(W*0.15,H*0.92,0,W*0.15,H*0.92,W*0.6);
+  gl.addColorStop(0,t.accentGlow.replace("0.4","0.25"));gl.addColorStop(1,"transparent");
+  c.fillStyle=gl;c.fillRect(0,0,W,H);
+
+  // Watermark
   const wm=(inpTiktok.value||"").trim().replace(/^@+/,"");
   if(wm){
-    c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/7);
-    c.font="900 80px 'Bebas Neue','Segoe UI',sans-serif";
-    c.fillStyle=t.accent+"09";c.textAlign="center";
-    for(let dy=-600;dy<=600;dy+=220)c.fillText("@"+wm.toUpperCase(),0,dy);
+    c.save();c.translate(W/2,H/2);c.rotate(-Math.PI/8);
+    c.font="900 90px 'Bebas Neue','Arial Black',sans-serif";
+    c.fillStyle=t.wmColor;c.textAlign="center";
+    for(let dy=-700;dy<=700;dy+=240)c.fillText("@"+wm.toUpperCase(),0,dy);
     c.restore();
   }
 }
 
-// ═══════════════════════════════════════════════════
-// PNG LAYOUT — multi-match per page
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// PNG LAYOUT — referensi style
+// Row layout: [liga logo] [tim home + logo] [WAKTU] [logo tim away + nama] [TV logo]
+// ═══════════════════════════════════════════
+const ROW_H = 118;       // tinggi tiap baris pertandingan
+const ROW_GAP = 8;       // jarak antar baris
+const PAD_X = 32;        // padding kiri-kanan
+const HEADER_H = 220;    // tinggi header
+const DATE_ROW_H = 60;   // tinggi baris tanggal
+const FOOTER_H = 90;     // tinggi footer
+
 async function renderPNGPage(c,matches,pageNum,totalPages){
   const t=getT();
-  const pad=30,gap=12,footH=100;
   c.clearRect(0,0,W,H);
   drawBg(c,t);
 
   const brand=await loadBrand();
+
   // ── HEADER ──
-  const hh=brand?200:140;
-  c.save();c.shadowColor="rgba(0,0,0,.5)";c.shadowBlur=30;c.shadowOffsetY=8;
-  const hg=c.createLinearGradient(pad,24,pad+W-pad*2,24+hh);
-  hg.addColorStop(0,t.card+"f0");hg.addColorStop(1,t.bg2+"d0");
-  rr(c,pad,24,W-pad*2,hh,26,hg,t.accent,2.5);c.restore();
-  // top accent line
-  const al=c.createLinearGradient(pad,24,pad+W-pad*2,24);
-  al.addColorStop(0,"transparent");al.addColorStop(.5,t.accent);al.addColorStop(1,"transparent");
-  c.fillStyle=al;c.fillRect(pad+30,24,W-pad*2-60,3);
+  await drawHeader(c,t,brand,pageNum,totalPages);
 
-  let hy=42;
-  if(brand){circleImg(c,brand,W/2,hy+40,40,t.accent);hy+=92;}else{hy+=16;}
-  c.save();c.shadowColor=t.accent+"88";c.shadowBlur=20;
-  c.fillStyle=t.text;c.font="900 54px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
-  c.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(),W/2,hy);c.restore();
-  hy+=10;
-  const ds=fmtDate(selectedDate).toUpperCase();
-  c.font="700 28px 'Inter','Segoe UI',sans-serif";
-  const dw=c.measureText(ds).width;
-  rr(c,W/2-dw/2-20,hy,dw+40,42,21,t.timeBg+"cc",t.accent+"66",1.5);
-  c.fillStyle=t.sub;c.textAlign="center";c.fillText(ds,W/2,hy+29);hy+=42;
-  if(totalPages>1){hy+=6;c.font="600 22px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.fillText(`HALAMAN ${pageNum} / ${totalPages}`,W/2,hy+18);hy+=26;}
-
-  const listTop=24+hh+14;
-  const listBot=H-footH;
-  const n=matches.length;
-  let cardH=Math.floor((listBot-listTop-gap*(n-1))/n);
-  cardH=Math.min(300,Math.max(155,cardH));
-  while(n>0&&listTop+n*cardH+(n-1)*gap>listBot)cardH--;
-
-  for(let i=0;i<n;i++){
-    const cy=listTop+i*(cardH+gap);
-    await drawPNGCard(c,matches[i],pad,cy,W-pad*2,cardH,t,i);
+  // ── ROWS ──
+  let curY=HEADER_H+16;
+  for(let i=0;i<matches.length;i++){
+    const m=matches[i];
+    // Date separator — show if first row or date changed (for multi-date schedules)
+    // For single-date pages, show once at top
+    if(i===0){
+      drawDateRow(c,t,fmtDate(selectedDate),curY);
+      curY+=DATE_ROW_H+6;
+    }
+    await drawMatchRow(c,t,m,PAD_X,curY,W-PAD_X*2,ROW_H);
+    curY+=ROW_H+ROW_GAP;
   }
 
   // ── FOOTER ──
-  const fg=c.createLinearGradient(0,listBot,0,H);
-  fg.addColorStop(0,t.footer+"f0");fg.addColorStop(1,"#000");
-  c.fillStyle=fg;c.fillRect(0,listBot,W,H-listBot);
-  const fl=c.createLinearGradient(0,listBot,W,listBot);
-  fl.addColorStop(0,"transparent");fl.addColorStop(.5,t.accent);fl.addColorStop(1,"transparent");
-  c.strokeStyle=fl;c.lineWidth=2;c.beginPath();c.moveTo(40,listBot);c.lineTo(W-40,listBot);c.stroke();
-  if(brand){circleImg(c,brand,W/2,listBot+34,28,t.accent);}
-  c.fillStyle=t.sub;c.font="600 24px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
-  const fl2=wrapTxt(c,inpFooter.value||"",W-80,2);
-  fl2.forEach((ln,i)=>c.fillText(ln,W/2,listBot+(brand?72:40)+i*30));
+  drawFooter(c,t,brand);
 }
 
-async function drawPNGCard(c,m,x,y,cw,ch,t,idx){
-  const stripe=t.stripe[idx%t.stripe.length];
-  const pad=18;
-  c.save();c.shadowColor="rgba(0,0,0,.55)";c.shadowBlur=22;c.shadowOffsetY=8;
-  const cg=c.createLinearGradient(x,y,x+cw,y+ch);
-  cg.addColorStop(0,t.card+"f5");cg.addColorStop(1,t.bg2+"e0");
-  rr(c,x,y,cw,ch,20,cg,t.cardBorder,1.5);c.restore();
-  // left stripe
-  rr(c,x,y+14,6,ch-28,3,stripe);
+async function drawHeader(c,t,brand,pageNum,totalPages){
+  const cx=W/2;
+  // Header background card
+  c.save();
+  c.shadowColor="rgba(0,0,0,0.5)";c.shadowBlur=30;c.shadowOffsetY=10;
+  const hg=c.createLinearGradient(PAD_X,20,W-PAD_X,HEADER_H);
+  hg.addColorStop(0,t.headerBg1);hg.addColorStop(1,t.headerBg2);
+  rr(c,PAD_X,20,W-PAD_X*2,HEADER_H-20,24,hg,t.accent+"66",2);
+  c.restore();
 
-  let iy=y+14;
-  // league
-  if(m.competition){
-    const ll=getCached(leagueLogoBase(m.competition));
-    if(ll){c.drawImage(ll,x+pad+8,iy,24,24);c.font="700 19px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.textAlign="left";c.fillText(m.competition.toUpperCase(),x+pad+38,iy+17);}
-    else{c.font="700 19px 'Inter','Segoe UI',sans-serif";c.fillStyle=t.sub;c.textAlign="center";c.fillText(m.competition.toUpperCase(),x+cw/2,iy+17);}
-    iy+=30;
+  // Shine line on top of header card
+  const shine=c.createLinearGradient(PAD_X,20,W-PAD_X,20);
+  shine.addColorStop(0,"transparent");shine.addColorStop(0.5,"rgba(255,255,255,0.35)");shine.addColorStop(1,"transparent");
+  c.strokeStyle=shine;c.lineWidth=2;
+  c.beginPath();c.moveTo(PAD_X+24,22);c.lineTo(W-PAD_X-24,22);c.stroke();
+
+  // Brand logo LEFT
+  if(brand){
+    circleImg(c,brand,PAD_X+70,20+HEADER_H/2-10,52,t.accent,3);
   }
 
-  // time box
-  const tw=96,th=Math.min(86,ch-(m.competition?50:30)-52);
-  const tx=x+pad+8,ty=iy+(ch-(m.competition?30:0)-th-48)/2;
-  rr(c,tx,ty,tw,th,14,t.timeBg+"cc",stripe,2);
-  c.save();c.shadowColor=stripe;c.shadowBlur=12;
-  c.fillStyle=stripe;c.font=`900 ${Math.min(34,th*.42)}px 'Bebas Neue','Segoe UI',sans-serif`;
-  c.textAlign="center";c.fillText(m.kickoff,tx+tw/2,ty+th*.52);c.restore();
-  c.fillStyle=t.sub;c.font="700 15px 'Inter','Segoe UI',sans-serif";c.fillText("WIB",tx+tw/2,ty+th*.76);
+  // Brand logo RIGHT (second logo or same)
+  if(brand){
+    circleImg(c,brand,W-PAD_X-70,20+HEADER_H/2-10,52,t.accent,3);
+  }
 
-  // teams
-  const teamsX=x+pad+tw+16,teamsW=cw-pad-tw-26;
-  const vsSlot=58,colW=(teamsW-vsSlot)/2;
-  const hcx=teamsX+colW/2,acx=teamsX+teamsW-colW/2,midX=teamsX+teamsW/2;
-  const lsz=Math.min(62,Math.max(46,Math.floor((ch-(m.competition?40:20)-56)*.52)));
-  const topy=iy+(ch-(m.competition?30:0)-lsz-48)/2;
-
-  const hImg=getCached(teamLogoBase(m.home));
-  const aImg=getCached(teamLogoBase(m.away));
-  if(hImg)c.drawImage(hImg,hcx-lsz/2,topy,lsz,lsz);
-  else{rr(c,hcx-lsz/2,topy,lsz,lsz,8,t.card,t.cardBorder,1);c.fillStyle=t.sub;c.font="700 16px sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("?",hcx,topy+lsz/2);c.textBaseline="alphabetic";}
-  if(aImg)c.drawImage(aImg,acx-lsz/2,topy,lsz,lsz);
-  else{rr(c,acx-lsz/2,topy,lsz,lsz,8,t.card,t.cardBorder,1);c.fillStyle=t.sub;c.font="700 16px sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("?",acx,topy+lsz/2);c.textBaseline="alphabetic";}
-
-  const fs=Math.max(17,Math.min(23,Math.floor(colW/5.5)));
-  c.fillStyle=t.text;c.font=`700 ${fs}px 'Inter','Segoe UI',sans-serif`;c.textAlign="center";
-  wrapTxt(c,m.home,colW-6,2).forEach((ln,i)=>c.fillText(ln,hcx,topy+lsz+18+i*22));
-  wrapTxt(c,m.away,colW-6,2).forEach((ln,i)=>c.fillText(ln,acx,topy+lsz+18+i*22));
-
-  // VS
-  const vcy=topy+lsz/2;
-  c.save();c.shadowColor=stripe;c.shadowBlur=16;
-  c.beginPath();c.arc(midX,vcy,26,0,Math.PI*2);c.fillStyle=stripe;c.fill();c.restore();
-  c.fillStyle=t.bg;c.font="900 18px 'Bebas Neue','Segoe UI',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText("VS",midX,vcy+1);c.textBaseline="alphabetic";
-
-  // TV bar
-  const tvy=y+ch-44,tvx=x+pad+tw+12,tvw=cw-pad-tw-22;
-  const tvc=isFreeTV(m)?t.tvFree:t.tv;
-  rr(c,tvx,tvy,tvw,34,17,"rgba(0,0,0,.4)",tvc+"66",1);
-  c.fillStyle=tvc;c.font="700 21px 'Inter','Segoe UI',sans-serif";
+  // Title — BIG center
+  c.save();
+  c.shadowColor=t.accentGlow;c.shadowBlur=30;
+  c.fillStyle=t.headerText;
+  c.font="900 96px 'Bebas Neue','Arial Black',sans-serif";
   c.textAlign="center";c.textBaseline="middle";
-  c.fillText("📺  "+shortTv(m),tvx+tvw/2,tvy+17);c.textBaseline="alphabetic";
+  c.fillText((inpHeader.value||"TODAY MATCH").toUpperCase(),cx,20+HEADER_H/2-28);
+  c.restore();
+
+  // Date pill below title
+  const ds=fmtDate(selectedDate);
+  c.font="700 34px 'Inter','Segoe UI',sans-serif";
+  const dw=c.measureText(ds).width;
+  const pillW=dw+60,pillH=52,pillX=cx-pillW/2,pillY=20+HEADER_H/2+14;
+  rr(c,pillX,pillY,pillW,pillH,pillH/2,"rgba(255,255,255,0.12)","rgba(255,255,255,0.3)",1.5);
+  c.fillStyle=t.headerText;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(ds,cx,pillY+pillH/2);
+  c.textBaseline="alphabetic";
+
+  // Page indicator
+  if(totalPages>1){
+    c.font="600 24px 'Inter','Segoe UI',sans-serif";
+    c.fillStyle=t.headerSub;c.textAlign="center";
+    c.fillText(`Halaman ${pageNum} / ${totalPages}`,cx,20+HEADER_H-8);
+  }
 }
 
-// ═══════════════════════════════════════════════════
-// VIDEO SLIDE — 1 pertandingan, full screen, animasi
-// ═══════════════════════════════════════════════════
+function drawDateRow(c,t,dateStr,y){
+  const cx=W/2;
+  const tw=c.measureText(dateStr).width;
+  c.font="700 30px 'Inter','Segoe UI',sans-serif";
+  const pillW=Math.min(tw+80,W-PAD_X*2),pillH=DATE_ROW_H-10;
+  rr(c,cx-pillW/2,y,pillW,pillH,pillH/2,t.dateBg,t.dateBorder,1.5);
+  c.fillStyle=t.dateText;c.textAlign="center";c.textBaseline="middle";
+  c.fillText(dateStr,cx,y+pillH/2);
+  c.textBaseline="alphabetic";
+}
+
+async function drawMatchRow(c,t,m,x,y,rowW,rowH){
+  // Row background — pill shape
+  rr(c,x,y,rowW,rowH,rowH/2,t.rowBg,t.rowBorder,1);
+
+  const LEAGUE_W=90;   // kolom logo liga (kiri)
+  const TV_W=110;      // kolom logo TV (kanan)
+  const TIME_W=130;    // kolom waktu (tengah)
+  const INNER=rowW-LEAGUE_W-TV_W;
+  const TEAM_W=(INNER-TIME_W)/2;
+
+  const leagueX=x;
+  const homeX=x+LEAGUE_W;
+  const timeX=x+LEAGUE_W+TEAM_W;
+  const awayX=x+LEAGUE_W+TEAM_W+TIME_W;
+  const tvX=x+rowW-TV_W;
+  const cy=y+rowH/2;
+  const logoSz=64;
+
+  // ── LEAGUE LOGO (kiri, dalam lingkaran) ──
+  const lImg=getCached(leagueBase(m.competition));
+  const lcx=leagueX+LEAGUE_W/2;
+  rr(c,lcx-34,cy-34,68,68,34,t.leagueBg,null);
+  if(lImg){drawImg(c,lImg,lcx-28,cy-28,56,56,4);}
+  else{
+    c.fillStyle="rgba(255,255,255,0.4)";c.font="700 18px sans-serif";
+    c.textAlign="center";c.textBaseline="middle";c.fillText("⚽",lcx,cy);c.textBaseline="alphabetic";
+  }
+
+  // ── HOME TEAM ──
+  const hImg=getCached(teamBase(m.home));
+  const hcx=homeX+TEAM_W/2;
+  // Team name
+  c.fillStyle=t.teamText;
+  c.font="700 28px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";
+  const hLines=wrapTxt(c,m.home,TEAM_W-10,2);
+  const hNameY=cy+(hImg?18:0);
+  hLines.forEach((ln,i)=>c.fillText(ln,hcx,hNameY+i*30));
+  // Team logo (kecil, di sebelah kanan nama)
+  if(hImg){
+    const lx=hcx+c.measureText(hLines[0]||"").width/2+8;
+    drawImg(c,hImg,lx,cy-logoSz/2,logoSz,logoSz,6);
+  }
+
+  // ── TIME BOX (tengah) ──
+  const tcx=timeX+TIME_W/2;
+  const tbW=110,tbH=56;
+  rr(c,tcx-tbW/2,cy-tbH/2,tbW,tbH,12,t.timeBg,t.timeBorder,2);
+  c.fillStyle=t.timeText;
+  c.font="900 38px 'Bebas Neue','Arial Black',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";
+  c.fillText(m.kickoff,tcx,cy-4);
+  c.font="600 18px 'Inter','Segoe UI',sans-serif";
+  c.fillText("WIB",tcx,cy+20);
+  c.textBaseline="alphabetic";
+
+  // ── AWAY TEAM ──
+  const aImg=getCached(teamBase(m.away));
+  const acx=awayX+TEAM_W/2;
+  // Away logo (kecil, di sebelah kiri nama)
+  if(aImg){
+    const lx=acx-c.measureText(m.away.split(" ")[0]||"").width/2-logoSz-8;
+    drawImg(c,aImg,lx,cy-logoSz/2,logoSz,logoSz,6);
+  }
+  // Away name
+  c.fillStyle=t.teamText;
+  c.font="700 28px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";
+  const aLines=wrapTxt(c,m.away,TEAM_W-10,2);
+  const aNameY=cy+(aImg?18:0);
+  aLines.forEach((ln,i)=>c.fillText(ln,acx,aNameY+i*30));
+
+  // ── TV LOGO / NAME (kanan) ──
+  const tvStr=shortTv(m);
+  const tvcx=tvX+TV_W/2;
+  rr(c,tvX+8,cy-28,TV_W-16,56,10,t.tvBg,null);
+  // Try to load TV logo
+  const tvLogoBase=`assets/logos/tv/${slug(tvStr)}`;
+  const tvImg=getCached(tvLogoBase);
+  if(tvImg){
+    drawImg(c,tvImg,tvcx-30,cy-24,60,48,4);
+  } else {
+    // Text fallback — colored by free/paid
+    const tvc=isFreeTV(m)?"#22c55e":"#f59e0b";
+    c.fillStyle=tvc;
+    c.font="700 20px 'Inter','Segoe UI',sans-serif";
+    c.textAlign="center";c.textBaseline="middle";
+    const tvLines=wrapTxt(c,tvStr,TV_W-20,2);
+    tvLines.forEach((ln,i)=>c.fillText(ln,tvcx,cy+(i-tvLines.length/2+0.5)*22));
+    c.textBaseline="alphabetic";
+  }
+}
+
+function drawFooter(c,t,brand){
+  const footY=H-FOOTER_H;
+  // Footer bg
+  const fg=c.createLinearGradient(0,footY,0,H);
+  fg.addColorStop(0,"transparent");fg.addColorStop(0.3,t.footerBg);fg.addColorStop(1,"rgba(0,0,0,0.6)");
+  c.fillStyle=fg;c.fillRect(0,footY,W,FOOTER_H);
+
+  // Separator line
+  const fl=c.createLinearGradient(0,footY,W,footY);
+  fl.addColorStop(0,"transparent");fl.addColorStop(0.5,"rgba(255,255,255,0.2)");fl.addColorStop(1,"transparent");
+  c.strokeStyle=fl;c.lineWidth=1;
+  c.beginPath();c.moveTo(PAD_X,footY);c.lineTo(W-PAD_X,footY);c.stroke();
+
+  // Footer text
+  const cx=W/2;
+  let fy=footY+20;
+  if(brand){circleImg(c,brand,cx,fy+22,22,t.accent,2);fy+=52;}
+  c.fillStyle=t.footerText;
+  c.font="600 26px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";
+  const fLines=wrapTxt(c,inpFooter.value||"",W-PAD_X*2,2);
+  fLines.forEach((ln,i)=>c.fillText(ln,cx,fy+i*32));
+
+  // "Waktu dalam WIB" note
+  c.fillStyle="rgba(255,255,255,0.3)";
+  c.font="500 22px 'Inter','Segoe UI',sans-serif";
+  c.fillText("*Waktu dalam WIB",cx,H-14);
+}
+
+// ═══════════════════════════════════════════
+// VIDEO SLIDE — 1 pertandingan full screen
+// ═══════════════════════════════════════════
 async function renderVideoSlide(c,m,t,brand,progress){
-  // progress 0..1 = animasi masuk
   const anim=$("#sel-anim").value;
   c.clearRect(0,0,W,H);
   c.save();
 
-  // Apply entrance animation transform
-  if(anim==="slide"){
-    const off=(1-easeOut(progress))*W;
-    c.translate(off,0);
-  } else if(anim==="fade"){
-    c.globalAlpha=easeOut(progress);
-  } else if(anim==="zoom"){
-    const s=0.88+0.12*easeOut(progress);
-    c.translate(W/2,H/2);c.scale(s,s);c.translate(-W/2,-H/2);
-    c.globalAlpha=Math.min(1,progress*1.5);
-  } else if(anim==="wipe"){
-    // clip from bottom to top
-    const clipH=H*easeOut(progress);
-    c.beginPath();c.rect(0,H-clipH,W,clipH);c.clip();
-  }
+  if(anim==="slide"){c.translate((1-easeOut(progress))*W,0);}
+  else if(anim==="fade"){c.globalAlpha=easeOut(progress);}
+  else if(anim==="zoom"){const s=0.9+0.1*easeOut(progress);c.translate(W/2,H/2);c.scale(s,s);c.translate(-W/2,-H/2);c.globalAlpha=Math.min(1,progress*2);}
+  else if(anim==="wipe"){const ch=H*easeOut(progress);c.beginPath();c.rect(0,0,W,ch);c.clip();}
 
   drawBg(c,t);
 
-  const stripe=t.stripe[allMatches.indexOf(m)%t.stripe.length]||t.accent;
-  const pad=36,cx=W/2;
+  const cx=W/2;
+  const stripe=t.accent;
 
-  // ── HEADER COMPACT ──
-  const hh=brand?170:120;
+  // ── HEADER compact ──
+  const hh=180;
   c.save();c.shadowColor="rgba(0,0,0,.5)";c.shadowBlur=30;c.shadowOffsetY=8;
-  const hg=c.createLinearGradient(pad,28,pad+W-pad*2,28+hh);
-  hg.addColorStop(0,t.card+"f0");hg.addColorStop(1,t.bg2+"d0");
-  rr(c,pad,28,W-pad*2,hh,26,hg,t.accent,2.5);c.restore();
-  const al=c.createLinearGradient(pad,28,pad+W-pad*2,28);
-  al.addColorStop(0,"transparent");al.addColorStop(.5,t.accent);al.addColorStop(1,"transparent");
-  c.fillStyle=al;c.fillRect(pad+30,28,W-pad*2-60,3);
+  const hg=c.createLinearGradient(PAD_X,24,W-PAD_X,24+hh);
+  hg.addColorStop(0,t.headerBg1);hg.addColorStop(1,t.headerBg2);
+  rr(c,PAD_X,24,W-PAD_X*2,hh,24,hg,t.accent+"66",2);c.restore();
+  const shine=c.createLinearGradient(PAD_X,24,W-PAD_X,24);
+  shine.addColorStop(0,"transparent");shine.addColorStop(0.5,"rgba(255,255,255,0.3)");shine.addColorStop(1,"transparent");
+  c.strokeStyle=shine;c.lineWidth=2;c.beginPath();c.moveTo(PAD_X+24,26);c.lineTo(W-PAD_X-24,26);c.stroke();
 
-  let hy=46;
-  if(brand){circleImg(c,brand,cx,hy+32,32,t.accent);hy+=76;}else{hy+=12;}
-  c.save();c.shadowColor=t.accent+"88";c.shadowBlur=18;
-  c.fillStyle=t.text;c.font="900 50px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
-  c.fillText((inpHeader.value||"JADWAL BOLA").toUpperCase(),cx,hy);c.restore();
-  hy+=8;
-  c.fillStyle=t.sub;c.font="600 26px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
-  c.fillText(fmtDate(selectedDate).toUpperCase(),cx,hy+22);
+  if(brand){circleImg(c,brand,PAD_X+60,24+hh/2,44,t.accent,3);}
+  if(brand){circleImg(c,brand,W-PAD_X-60,24+hh/2,44,t.accent,3);}
 
-  const headerEnd=28+hh+20;
+  c.save();c.shadowColor=t.accentGlow;c.shadowBlur=24;
+  c.fillStyle=t.headerText;c.font="900 80px 'Bebas Neue','Arial Black',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";
+  c.fillText((inpHeader.value||"TODAY MATCH").toUpperCase(),cx,24+hh/2-16);c.restore();
+  c.fillStyle=t.headerSub;c.font="600 28px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";
+  c.fillText(fmtDate(selectedDate).toUpperCase(),cx,24+hh-22);
+  c.textBaseline="alphabetic";
+
+  const cardY=24+hh+30;
+  const cardH=H-cardY-FOOTER_H-20;
+  const cardW=W-PAD_X*2;
 
   // ── BIG MATCH CARD ──
-  const cardY=headerEnd,cardH=H-headerEnd-110;
-  const cardW=W-pad*2;
-
   c.save();c.shadowColor="rgba(0,0,0,.6)";c.shadowBlur=40;c.shadowOffsetY=16;
-  const cg=c.createLinearGradient(pad,cardY,pad+cardW,cardY+cardH);
-  cg.addColorStop(0,t.card+"f8");cg.addColorStop(1,t.bg2+"e8");
-  rr(c,pad,cardY,cardW,cardH,32,cg,stripe,3);c.restore();
-  rr(c,pad,cardY+18,8,cardH-36,4,stripe);
+  const cg=c.createLinearGradient(PAD_X,cardY,PAD_X+cardW,cardY+cardH);
+  cg.addColorStop(0,t.rowBg.replace("0.08","0.18"));cg.addColorStop(1,t.rowBg.replace("0.08","0.10"));
+  rr(c,PAD_X,cardY,cardW,cardH,28,cg,t.rowBorder.replace("0.12","0.3"),2);c.restore();
 
-  let cy=cardY+28;
+  // Top accent bar
+  const ab=c.createLinearGradient(PAD_X,cardY,PAD_X+cardW,cardY);
+  ab.addColorStop(0,"transparent");ab.addColorStop(0.5,t.accent);ab.addColorStop(1,"transparent");
+  c.fillStyle=ab;c.fillRect(PAD_X+30,cardY,cardW-60,4);
 
-  // League row
+  let cy2=cardY+40;
+
+  // League
   if(m.competition){
-    const ll=getCached(leagueLogoBase(m.competition));
-    if(ll){c.drawImage(ll,cx-16,cy,32,32);cy+=40;}
-    c.fillStyle=t.sub;c.font="700 28px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
-    c.fillText(m.competition.toUpperCase(),cx,cy+20);cy+=36;
+    const ll=getCached(leagueBase(m.competition));
+    if(ll){drawImg(c,ll,cx-20,cy2,40,40,4);cy2+=50;}
+    c.fillStyle=t.headerSub;c.font="700 30px 'Inter','Segoe UI',sans-serif";
+    c.textAlign="center";c.fillText(m.competition.toUpperCase(),cx,cy2+22);cy2+=38;
   }
-  // divider
-  c.strokeStyle=t.cardBorder;c.lineWidth=1;
-  c.beginPath();c.moveTo(pad+50,cy);c.lineTo(pad+cardW-50,cy);c.stroke();cy+=24;
+  // Divider
+  c.strokeStyle="rgba(255,255,255,0.12)";c.lineWidth=1;
+  c.beginPath();c.moveTo(PAD_X+60,cy2);c.lineTo(W-PAD_X-60,cy2);c.stroke();cy2+=28;
 
-  // Team logos — BIG
-  const lsz=Math.min(200,Math.floor((cardH-cy+cardY-200)*.65));
-  const hcx=pad+cardW*.26,acx=pad+cardW*.74;
-  const hImg=getCached(teamLogoBase(m.home));
-  const aImg=getCached(teamLogoBase(m.away));
-  if(hImg)c.drawImage(hImg,hcx-lsz/2,cy,lsz,lsz);
-  else{rr(c,hcx-lsz/2,cy,lsz,lsz,14,t.card,t.cardBorder,2);}
-  if(aImg)c.drawImage(aImg,acx-lsz/2,cy,lsz,lsz);
-  else{rr(c,acx-lsz/2,cy,lsz,lsz,14,t.card,t.cardBorder,2);}
+  // Team logos BIG
+  const lsz=Math.min(200,Math.floor((cardH-cy2+cardY-220)*0.6));
+  const hcx=PAD_X+cardW*0.25,acx=PAD_X+cardW*0.75;
+  const hImg=getCached(teamBase(m.home));
+  const aImg=getCached(teamBase(m.away));
+  if(hImg)drawImg(c,hImg,hcx-lsz/2,cy2,lsz,lsz,10);
+  else{rr(c,hcx-lsz/2,cy2,lsz,lsz,12,t.rowBg,t.rowBorder,1);}
+  if(aImg)drawImg(c,aImg,acx-lsz/2,cy2,lsz,lsz,10);
+  else{rr(c,acx-lsz/2,cy2,lsz,lsz,12,t.rowBg,t.rowBorder,1);}
 
   // VS badge
-  const vcy=cy+lsz/2;
-  c.save();c.shadowColor=stripe;c.shadowBlur=28;
-  c.beginPath();c.arc(cx,vcy,42,0,Math.PI*2);c.fillStyle=stripe;c.fill();c.restore();
-  c.fillStyle=t.bg;c.font="900 30px 'Bebas Neue','Segoe UI',sans-serif";
+  const vcy=cy2+lsz/2;
+  c.save();c.shadowColor=t.accentGlow;c.shadowBlur=30;
+  c.beginPath();c.arc(cx,vcy,44,0,Math.PI*2);c.fillStyle=t.timeBg;c.fill();c.restore();
+  c.fillStyle=t.timeText;c.font="900 32px 'Bebas Neue','Arial Black',sans-serif";
   c.textAlign="center";c.textBaseline="middle";c.fillText("VS",cx,vcy+1);c.textBaseline="alphabetic";
 
   // Team names
-  const ny=cy+lsz+22;
-  c.fillStyle=t.text;c.font="800 36px 'Bebas Neue','Segoe UI',sans-serif";c.textAlign="center";
-  wrapTxt(c,m.home,cardW*.38,2).forEach((ln,i)=>c.fillText(ln,hcx,ny+i*42));
-  wrapTxt(c,m.away,cardW*.38,2).forEach((ln,i)=>c.fillText(ln,acx,ny+i*42));
+  const ny=cy2+lsz+24;
+  c.fillStyle=t.teamText;c.font="800 40px 'Bebas Neue','Arial Black',sans-serif";c.textAlign="center";
+  wrapTxt(c,m.home,cardW*0.38,2).forEach((ln,i)=>c.fillText(ln,hcx,ny+i*46));
+  wrapTxt(c,m.away,cardW*0.38,2).forEach((ln,i)=>c.fillText(ln,acx,ny+i*46));
 
-  // Kickoff pill
-  const kpy=ny+100,kpw=220,kph=76;
-  rr(c,cx-kpw/2,kpy,kpw,kph,20,t.timeBg+"cc",stripe,2.5);
-  c.save();c.shadowColor=stripe;c.shadowBlur=14;
-  c.fillStyle=stripe;c.font="900 48px 'Bebas Neue','Segoe UI',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText(m.kickoff,cx,kpy+kph/2-8);c.restore();
-  c.fillStyle=t.sub;c.font="700 22px 'Inter','Segoe UI',sans-serif";c.textBaseline="middle";
-  c.fillText("WIB",cx,kpy+kph/2+18);c.textBaseline="alphabetic";
+  // Kickoff
+  const kpy=ny+110,kpw=240,kph=84;
+  rr(c,cx-kpw/2,kpy,kpw,kph,kph/2,t.timeBg,t.timeBorder,2.5);
+  c.fillStyle=t.timeText;c.font="900 56px 'Bebas Neue','Arial Black',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText(m.kickoff,cx,kpy+kph/2-8);
+  c.font="700 24px 'Inter','Segoe UI',sans-serif";c.fillText("WIB",cx,kpy+kph/2+20);
+  c.textBaseline="alphabetic";
 
-  // TV bar
-  const tvy=kpy+kph+18,tvw=cardW-60;
-  const tvc=isFreeTV(m)?t.tvFree:t.tv;
-  rr(c,pad+30,tvy,tvw,52,26,"rgba(0,0,0,.45)",tvc+"88",1.5);
-  c.fillStyle=tvc;c.font="700 28px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText("📺  "+shortTv(m),pad+30+tvw/2,tvy+26);c.textBaseline="alphabetic";
+  // TV
+  const tvy=kpy+kph+20,tvw=cardW-80;
+  const tvc=isFreeTV(m)?"#22c55e":"#f59e0b";
+  rr(c,PAD_X+40,tvy,tvw,56,28,"rgba(0,0,0,0.35)",tvc+"66",1.5);
+  c.fillStyle=tvc;c.font="700 30px 'Inter','Segoe UI',sans-serif";
+  c.textAlign="center";c.textBaseline="middle";c.fillText("📺  "+shortTv(m),PAD_X+40+tvw/2,tvy+28);
+  c.textBaseline="alphabetic";
 
-  // ── FOOTER ──
-  const footY=H-100;
-  const fg=c.createLinearGradient(0,footY,0,H);
-  fg.addColorStop(0,t.footer+"f0");fg.addColorStop(1,"#000");
-  c.fillStyle=fg;c.fillRect(0,footY,W,H-footY);
-  const fl=c.createLinearGradient(0,footY,W,footY);
-  fl.addColorStop(0,"transparent");fl.addColorStop(.5,t.accent);fl.addColorStop(1,"transparent");
-  c.strokeStyle=fl;c.lineWidth=2;c.beginPath();c.moveTo(40,footY);c.lineTo(W-40,footY);c.stroke();
-  c.fillStyle=t.sub;c.font="600 24px 'Inter','Segoe UI',sans-serif";c.textAlign="center";
-  c.fillText(inpFooter.value||"",cx,footY+52);
-
+  drawFooter(c,t,brand);
   c.restore();
 }
 
-function easeOut(t){return 1-Math.pow(1-t,3);}
-
-// ═══════════════════════════════════════════════════
-// PREVIEW — PNG mode
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// PREVIEW — PNG
+// ═══════════════════════════════════════════
 function getPages(){
   const pp=perPage(),pages=[];
   for(let i=0;i<allMatches.length;i+=pp)pages.push(allMatches.slice(i,i+pp));
@@ -670,29 +823,26 @@ function getPages(){
 async function showPNGPreview(){
   const pages=getPages();
   if(!pages.length){
-    ctx.clearRect(0,0,W,H);ctx.fillStyle=getT().bg;ctx.fillRect(0,0,W,H);
-    ctx.fillStyle=getT().sub;ctx.font="700 38px 'Inter',sans-serif";ctx.textAlign="center";
-    ctx.fillText("Tidak ada jadwal",W/2,H/2);
-    pageLbl.textContent="— / —";navPrev.disabled=navNext.disabled=true;return;
+    const t=getT();ctx.clearRect(0,0,W,H);drawBg(ctx,t);
+    ctx.fillStyle="rgba(255,255,255,0.3)";ctx.font="700 40px 'Inter',sans-serif";
+    ctx.textAlign="center";ctx.fillText("Tidak ada jadwal",W/2,H/2);
+    plbl.textContent="— / —";navPrev.disabled=navNext.disabled=true;return;
   }
   if(previewPage>=pages.length)previewPage=pages.length-1;
   if(previewPage<0)previewPage=0;
-  pageLbl.textContent=`${previewPage+1} / ${pages.length}`;
+  plbl.textContent=`${previewPage+1} / ${pages.length}`;
   navPrev.disabled=previewPage===0;navNext.disabled=previewPage===pages.length-1;
   await renderPNGPage(ctx,pages[previewPage],previewPage+1,pages.length);
 }
 
-// ═══════════════════════════════════════════════════
-// PREVIEW — VIDEO mode (live animation loop)
-// ═══════════════════════════════════════════════════
-let vidSlideIdx=0,vidFrameStart=null,vidBrand=null;
-const VID_ANIM_DUR=0.5; // detik animasi masuk
+// ═══════════════════════════════════════════
+// PREVIEW — VIDEO (live animation loop)
+// ═══════════════════════════════════════════
+const VID_ANIM=0.45;
 
 async function startVideoPreview(){
-  if(vidAnimFrame)cancelAnimationFrame(vidAnimFrame);
-  vidPlaying=true;
-  vidSlideIdx=0;
-  vidFrameStart=null;
+  if(vidAF)cancelAnimationFrame(vidAF);
+  vidPlaying=true;vidSlideIdx=0;vidFrameStart=null;
   vidBrand=await loadBrand();
   const t=getT();
   const slideDur=parseInt($("#sel-dur").value)||4;
@@ -700,84 +850,71 @@ async function startVideoPreview(){
   function frame(ts){
     if(!vidPlaying)return;
     if(!vidFrameStart)vidFrameStart=ts;
-    const elapsed=(ts-vidFrameStart)/1000; // detik
-    const totalDur=slideDur*allMatches.length;
-    const loopTime=elapsed%totalDur;
-    const slideTime=loopTime%slideDur;
-    const slideIdx=Math.floor(loopTime/slideDur)%allMatches.length;
-
-    if(slideIdx!==vidSlideIdx){vidSlideIdx=slideIdx;}
-    const progress=Math.min(1,slideTime/VID_ANIM_DUR);
-    const m=allMatches[vidSlideIdx];
-    renderVideoSlide(ctx,m,t,vidBrand,progress).then(()=>{
-      vidAnimFrame=requestAnimationFrame(frame);
+    const elapsed=(ts-vidFrameStart)/1000;
+    const total=slideDur*allMatches.length;
+    const loopT=elapsed%total;
+    const si=Math.floor(loopT/slideDur)%allMatches.length;
+    const st=loopT%slideDur;
+    vidSlideIdx=si;
+    const prog=Math.min(1,st/VID_ANIM);
+    renderVideoSlide(ctx,allMatches[si],t,vidBrand,prog).then(()=>{
+      vidAF=requestAnimationFrame(frame);
     });
   }
-  vidAnimFrame=requestAnimationFrame(frame);
+  vidAF=requestAnimationFrame(frame);
 }
 
 function stopVideoPreview(){
   vidPlaying=false;
-  if(vidAnimFrame){cancelAnimationFrame(vidAnimFrame);vidAnimFrame=null;}
+  if(vidAF){cancelAnimationFrame(vidAF);vidAF=null;}
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // MATCH LIST
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function renderMatchList(){
   if(!allMatches.length){
-    matchList.innerHTML=`<div style="color:var(--muted);font-size:.8rem;padding:10px 0">Tidak ada jadwal.</div>`;return;
+    matchList.innerHTML=`<div style="color:var(--muted);font-size:.78rem;padding:8px 0">Tidak ada jadwal.</div>`;return;
   }
   const pp=perPage();
   matchList.innerHTML=allMatches.map((m,i)=>{
     const pg=Math.floor(i/pp);
-    const hImg=getCached(teamLogoBase(m.home));
-    const aImg=getCached(teamLogoBase(m.away));
+    const hImg=getCached(teamBase(m.home));
+    const aImg=getCached(teamBase(m.away));
     const active=previewMode==="png"?pg===previewPage:i===vidSlideIdx;
-    return`<div class="mi${active?" on":""}" data-pg="${pg}" data-idx="${i}">
-      <span class="mi-time">${esc(m.kickoff)}</span>
-      ${hImg?`<img class="mi-logo" src="${hImg.src}" alt=""/>`:""}
-      <span class="mi-info">
-        <div class="mi-teams">${esc(m.home)} vs ${esc(m.away)}</div>
-        <div class="mi-meta">${esc(m.competition||"")} · <span class="mi-tv">${esc(shortTv(m))}</span></div>
+    return`<div class="mitem${active?" on":""}" data-pg="${pg}" data-idx="${i}">
+      <span class="mtime">${esc(m.kickoff)}</span>
+      ${hImg?`<img class="mlogo" src="${hImg.src}" alt=""/>`:""}
+      <span class="minfo">
+        <div class="mteams">${esc(m.home)} vs ${esc(m.away)}</div>
+        <div class="mmeta">${esc(m.competition||"")} · <span class="mtv">${esc(shortTv(m))}</span></div>
       </span>
-      ${aImg?`<img class="mi-logo" src="${aImg.src}" alt=""/>`:""}
+      ${aImg?`<img class="mlogo" src="${aImg.src}" alt=""/>`:""}
     </div>`;
   }).join("");
-
-  matchList.querySelectorAll(".mi").forEach(el=>{
+  matchList.querySelectorAll(".mitem").forEach(el=>{
     el.addEventListener("click",()=>{
-      if(previewMode==="png"){
-        previewPage=parseInt(el.dataset.pg);
-        showPNGPreview();renderMatchList();
-      } else {
-        // jump to slide in video preview
-        vidSlideIdx=parseInt(el.dataset.idx);
-        vidFrameStart=null;
-        renderMatchList();
-      }
+      if(previewMode==="png"){previewPage=parseInt(el.dataset.pg);showPNGPreview();renderMatchList();}
+      else{vidSlideIdx=parseInt(el.dataset.idx);vidFrameStart=null;renderMatchList();}
     });
   });
 }
 
-// ═══════════════════════════════════════════════════
-// SCHEDULE LOADING
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// SCHEDULE
+// ═══════════════════════════════════════════
 function getMatchesForDate(iso){
-  const r=allSchedules[iso];
-  if(Array.isArray(r))return r;if(r&&typeof r==="object")return[r];return[];
+  const r=allSchedules[iso];if(Array.isArray(r))return r;if(r&&typeof r==="object")return[r];return[];
 }
 
 async function applyDate(iso){
   selectedDate=iso;datePicker.value=iso;
-  $("#topbar-date").textContent=fmtDate(iso);
+  $("#tb-date").textContent=fmtDate(iso);
   allMatches=getMatchesForDate(iso);
-  const n=allMatches.length;
-  const pp=perPage(),tp=Math.ceil(n/pp);
+  const n=allMatches.length,pp=perPage(),tp=Math.ceil(n/pp);
   btnDlPng.textContent=tp>1?`⚡ Download ${tp} PNG`:"⚡ Download PNG";
   btnDlPng.disabled=!n;btnDlVideo.disabled=!n;
   previewPage=0;vidSlideIdx=0;
-
   if(n){
     setStatus("Memuat logo...","loading");
     await loadStaticLogos();await preloadAll(allMatches);
@@ -827,9 +964,9 @@ function importHtmlFile(file){
   reader.readAsText(file,"UTF-8");
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DOWNLOAD PNG
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function downloadPNG(){
   if(!allMatches.length)return;
   btnDlPng.disabled=true;
@@ -852,29 +989,25 @@ async function downloadPNG(){
   finally{btnDlPng.disabled=false;}
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DOWNLOAD VIDEO
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function downloadVideo(){
   if(!allMatches.length)return;
   if(!window.MediaRecorder){setStatus("Browser tidak support MediaRecorder. Gunakan Chrome/Edge.","err");return;}
   const mimes=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
   const mime=mimes.find(m=>MediaRecorder.isTypeSupported(m))||"video/webm";
-
   stopVideoPreview();
   btnDlVideo.disabled=true;btnDlPng.disabled=true;
-  vidProgress.classList.add("show");
+  vprog.classList.add("show");
   setStatus("Merender video...","loading");
-
   try{
-    const t=getT();
-    const brand=await loadBrand();
+    const t=getT(),brand=await loadBrand();
     const FPS=30,slideDur=parseInt($("#sel-dur").value)||4;
-    const animDur=Math.min(0.5,slideDur*0.2);
+    const animDur=Math.min(0.45,slideDur*0.18);
     const animFrames=Math.round(animDur*FPS);
     const slideFrames=Math.round(slideDur*FPS);
     const total=allMatches.length*slideFrames+Math.round(0.4*FPS);
-
     const vc=document.createElement("canvas");vc.width=W;vc.height=H;
     const vctx=vc.getContext("2d");
     const stream=vc.captureStream(FPS);
@@ -882,7 +1015,6 @@ async function downloadVideo(){
     const chunks=[];
     rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
     rec.start(100);
-
     let frame=0;
     for(let mi=0;mi<allMatches.length;mi++){
       const m=allMatches[mi];
@@ -892,22 +1024,19 @@ async function downloadVideo(){
         frame++;
         if(frame%8===0){
           const pct=Math.round(frame/total*100);
-          vpBar.style.width=pct+"%";
-          vpLabel.textContent=`Slide ${mi+1}/${allMatches.length} · ${pct}%`;
+          vpbar.style.width=pct+"%";
+          vplbl.textContent=`Slide ${mi+1}/${allMatches.length} · ${pct}%`;
           setStatus(`Merender video... ${pct}%`,"loading");
         }
         await new Promise(r=>setTimeout(r,0));
       }
     }
-    // fade out
     for(let f=0;f<Math.round(0.4*FPS);f++){
       await renderVideoSlide(vctx,allMatches[allMatches.length-1],t,brand,1);
       vctx.fillStyle=`rgba(0,0,0,${f/Math.round(0.4*FPS)})`;vctx.fillRect(0,0,W,H);
       await new Promise(r=>setTimeout(r,0));
     }
-
-    rec.stop();
-    await new Promise(r=>rec.onstop=r);
+    rec.stop();await new Promise(r=>rec.onstop=r);
     const blob=new Blob(chunks,{type:mime});
     const ext=mime.includes("mp4")?"mp4":"webm";
     const url=URL.createObjectURL(blob);
@@ -919,36 +1048,35 @@ async function downloadVideo(){
   }catch(e){setStatus(`Gagal render video: ${e.message}`,"err");console.error(e);}
   finally{
     btnDlVideo.disabled=false;btnDlPng.disabled=!allMatches.length;
-    vidProgress.classList.remove("show");vpBar.style.width="0%";
-    // restart preview
+    vprog.classList.remove("show");vpbar.style.width="0%";
     if(previewMode==="video")startVideoPreview();
   }
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // THEME PICKER
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function buildThemePicker(){
   const grid=$("#theme-grid");
   grid.innerHTML=Object.entries(THEMES).map(([id,t])=>`
-    <div class="t-card${id===currentTheme?" on":""}" data-id="${id}">
-      <div class="t-swatch" style="background:${t.swatch}"></div>
-      <div class="t-name">${t.name}</div>
+    <div class="tcard${id===currentTheme?" on":""}" data-id="${id}">
+      <div class="tswatch" style="background:${t.swatch}"></div>
+      <div class="tname">${t.name}</div>
     </div>`).join("");
-  grid.querySelectorAll(".t-card").forEach(c=>{
-    c.addEventListener("click",()=>{
-      currentTheme=c.dataset.id;
-      grid.querySelectorAll(".t-card").forEach(x=>x.classList.toggle("on",x.dataset.id===currentTheme));
+  grid.querySelectorAll(".tcard").forEach(card=>{
+    card.addEventListener("click",()=>{
+      currentTheme=card.dataset.id;
+      grid.querySelectorAll(".tcard").forEach(x=>x.classList.toggle("on",x.dataset.id===currentTheme));
       saveSettings();
       if(previewMode==="png")showPNGPreview();else startVideoPreview();
     });
   });
 }
 
-// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // SETTINGS
-// ═══════════════════════════════════════════════════
-const SK="ck-v3";
+// ═══════════════════════════════════════════
+const SK="ck-v4";
 function saveSettings(){
   localStorage.setItem(SK,JSON.stringify({header:inpHeader.value,tiktok:inpTiktok.value,footer:inpFooter.value,theme:currentTheme,date:selectedDate}));
 }
@@ -961,26 +1089,25 @@ function loadSettings(){
   }catch{}
 }
 
-// ═══════════════════════════════════════════════════
-// EVENT LISTENERS
-// ═══════════════════════════════════════════════════
-
-// Export type tabs
-$("#exp-tabs").querySelectorAll(".exp-tab").forEach(tab=>{
+// ═══════════════════════════════════════════
+// EVENTS & INIT
+// ═══════════════════════════════════════════
+// Export tabs
+$("#etabs").querySelectorAll(".etab").forEach(tab=>{
   tab.addEventListener("click",()=>{
     exportMode=tab.dataset.t;
-    $("#exp-tabs").querySelectorAll(".exp-tab").forEach(t=>t.classList.toggle("on",t.dataset.t===exportMode));
+    $("#etabs").querySelectorAll(".etab").forEach(t=>t.classList.toggle("on",t.dataset.t===exportMode));
     $("#opt-png").style.display=exportMode==="png"?"flex":"none";
     $("#opt-video").style.display=exportMode==="video"?"flex":"none";
   });
 });
 
-// Preview mode tabs
-$(".prev-tabs").querySelectorAll(".prev-tab").forEach(tab=>{
+// Preview tabs
+$(".ptabs").querySelectorAll(".ptab").forEach(tab=>{
   tab.addEventListener("click",async()=>{
     previewMode=tab.dataset.m;
-    $(".prev-tabs").querySelectorAll(".prev-tab").forEach(t=>t.classList.toggle("on",t.dataset.m===previewMode));
-    canvasNav.style.display=previewMode==="png"?"flex":"none";
+    $(".ptabs").querySelectorAll(".ptab").forEach(t=>t.classList.toggle("on",t.dataset.m===previewMode));
+    cnav.style.display=previewMode==="png"?"flex":"none";
     vidOverlay.style.display=previewMode==="video"?"flex":"none";
     if(previewMode==="png"){stopVideoPreview();await showPNGPreview();}
     else{await startVideoPreview();}
@@ -988,23 +1115,22 @@ $(".prev-tabs").querySelectorAll(".prev-tab").forEach(tab=>{
   });
 });
 
-// Video play/pause overlay
+// Video overlay play/pause
 vidOverlay.addEventListener("click",()=>{
-  if(vidPlaying){stopVideoPreview();vidOverlay.querySelector(".vid-play svg").innerHTML='<path d="M8 5v14l11-7z"/>';}
-  else{startVideoPreview();vidOverlay.querySelector(".vid-play svg").innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';}
+  const svg=$("#play-btn svg");
+  if(vidPlaying){stopVideoPreview();svg.innerHTML='<path d="M8 5v14l11-7z"/>';}
+  else{startVideoPreview();svg.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';}
 });
 
-// Branding inputs
+// Branding
 [inpHeader,inpTiktok,inpFooter].forEach(el=>{
   el.addEventListener("input",()=>{saveSettings();if(previewMode==="png")showPNGPreview();});
 });
 
-// Date
 datePicker.addEventListener("change",e=>{saveSettings();applyDate(e.target.value);});
 $("#btn-today").addEventListener("click",()=>applyDate(todayISO()));
 $("#btn-refresh").addEventListener("click",fetchSchedule);
 
-// Per-page
 $("#sel-perpage").addEventListener("change",()=>{
   previewPage=0;
   const tp=Math.ceil(allMatches.length/perPage());
@@ -1012,31 +1138,26 @@ $("#sel-perpage").addEventListener("change",()=>{
   renderMatchList();showPNGPreview();
 });
 
-// Nav
 navPrev.addEventListener("click",()=>{previewPage--;renderMatchList();showPNGPreview();});
 navNext.addEventListener("click",()=>{previewPage++;renderMatchList();showPNGPreview();});
 
-// Download
 btnDlPng.addEventListener("click",downloadPNG);
 btnDlVideo.addEventListener("click",downloadVideo);
 
-// Preview video button
-$("#btn-preview-vid").addEventListener("click",async()=>{
-  // Switch to video preview tab
+$("#btn-prev-vid").addEventListener("click",async()=>{
   previewMode="video";
-  $(".prev-tabs").querySelectorAll(".prev-tab").forEach(t=>t.classList.toggle("on",t.dataset.m==="video"));
-  canvasNav.style.display="none";vidOverlay.style.display="flex";
+  $(".ptabs").querySelectorAll(".ptab").forEach(t=>t.classList.toggle("on",t.dataset.m==="video"));
+  cnav.style.display="none";vidOverlay.style.display="flex";
   await startVideoPreview();renderMatchList();
 });
 
-// Import
 $("#file-import").addEventListener("change",e=>{const f=e.target.files[0];if(f)importHtmlFile(f);e.target.value="";});
 
 // ── INIT ──
 loadSettings();
 datePicker.value=selectedDate;
 buildThemePicker();
-canvasNav.style.display="flex";
+cnav.style.display="flex";
 vidOverlay.style.display="none";
 fetchSchedule();
 </script>
