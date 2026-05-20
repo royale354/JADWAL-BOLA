@@ -175,28 +175,38 @@ input[type=date]{color-scheme:dark}
     </div>
 
     <div id="opt-video" style="margin-top:8px;display:none;flex-direction:column;gap:6px">
-      <div class="field"><label>Durasi per slide (detik)</label>
+      <div class="field"><label>Durasi tiap pertandingan muncul (detik)</label>
         <select id="sel-dur">
-          <option value="3">3 detik</option>
-          <option value="4" selected>4 detik</option>
+          <option value="2">2 detik</option>
+          <option value="3" selected>3 detik</option>
+          <option value="4">4 detik</option>
           <option value="5">5 detik</option>
         </select>
       </div>
-      <div class="field"><label>Animasi masuk</label>
+      <div class="field"><label>Animasi masuk tiap baris</label>
         <select id="sel-anim">
           <option value="slide">Slide dari kanan</option>
           <option value="fade">Fade in</option>
-          <option value="zoom">Zoom in</option>
-          <option value="wipe">Wipe atas ke bawah</option>
+          <option value="wipe">Wipe kiri ke kanan</option>
+          <option value="drop">Drop dari atas</option>
         </select>
       </div>
-      <button class="btn btn-purple btn-full" id="btn-prev-vid">▶ Preview Video</button>
-      <button class="btn btn-green btn-full" id="btn-dl-video" disabled>🎬 Render & Download</button>
+      <div class="field"><label>Format output</label>
+        <select id="sel-fmt">
+          <option value="webm">WebM (Chrome/Edge)</option>
+          <option value="mp4try">MP4 (coba, fallback WebM)</option>
+        </select>
+      </div>
+      <button class="btn btn-purple btn-full" id="btn-prev-vid">▶ Preview Animasi</button>
+      <button class="btn btn-green btn-full" id="btn-dl-video" disabled>🎬 Render & Download Video</button>
       <div class="vprog" id="vprog">
         <div class="vplbl" id="vplbl">Merender...</div>
         <div class="vpbar-wrap"><div class="vpbar" id="vpbar"></div></div>
       </div>
-      <div style="font-size:0.64rem;color:var(--muted);line-height:1.5">1 slide per pertandingan · 1080×1920 · TikTok ready</div>
+      <div style="font-size:0.64rem;color:var(--muted);line-height:1.5">
+        Pertandingan muncul 1 per 1 dari atas · Build-up seperti PowerPoint · 1080×1920 · TikTok ready<br/>
+        <span style="color:#f59e0b">💡 WebM bisa langsung upload ke TikTok/Reels</span>
+      </div>
     </div>
   </div>
 
@@ -479,8 +489,8 @@ function drawBg(c,t){
 // PNG LAYOUT — referensi style
 // Row layout: [liga logo] [tim home + logo] [WAKTU] [logo tim away + nama] [TV logo]
 // ═══════════════════════════════════════════
-const ROW_H = 118;       // tinggi tiap baris pertandingan
-const ROW_GAP = 8;       // jarak antar baris
+const ROW_H = 124;       // tinggi tiap baris pertandingan
+const ROW_GAP = 10;       // jarak antar baris
 const PAD_X = 32;        // padding kiri-kanan
 const HEADER_H = 220;    // tinggi header
 const DATE_ROW_H = 60;   // tinggi baris tanggal
@@ -579,96 +589,91 @@ function drawDateRow(c,t,dateStr,y){
 }
 
 async function drawMatchRow(c,t,m,x,y,rowW,rowH){
-  // Row background — pill shape
-  rr(c,x,y,rowW,rowH,rowH/2,t.rowBg,t.rowBorder,1);
+  // ── Layout kolom fixed (tidak overlap) ──
+  // [LIGA 80px] [NAMA HOME + LOGO 60px | max 260px] [TIME 120px] [LOGO 60px + NAMA AWAY max 260px] [TV 120px]
+  const cy = y + rowH/2;
+  const LIGA_W  = 80;
+  const TIME_W  = 120;
+  const TV_W    = 120;
+  const LOGO_SZ = 60;   // ukuran logo tim
+  const LIGA_SZ = 56;   // ukuran logo liga
+  const TEAM_W  = (rowW - LIGA_W - TIME_W - TV_W) / 2; // lebar kolom tiap tim
 
-  const LEAGUE_W=90;   // kolom logo liga (kiri)
-  const TV_W=110;      // kolom logo TV (kanan)
-  const TIME_W=130;    // kolom waktu (tengah)
-  const INNER=rowW-LEAGUE_W-TV_W;
-  const TEAM_W=(INNER-TIME_W)/2;
+  // Posisi awal tiap kolom
+  const xLiga  = x;
+  const xHome  = x + LIGA_W;
+  const xTime  = xHome + TEAM_W;
+  const xAway  = xTime + TIME_W;
+  const xTV    = xAway + TEAM_W;
 
-  const leagueX=x;
-  const homeX=x+LEAGUE_W;
-  const timeX=x+LEAGUE_W+TEAM_W;
-  const awayX=x+LEAGUE_W+TEAM_W+TIME_W;
-  const tvX=x+rowW-TV_W;
-  const cy=y+rowH/2;
-  const logoSz=64;
+  // ── ROW BACKGROUND ──
+  rr(c, x, y, rowW, rowH, rowH/2, t.rowBg, t.rowBorder, 1);
 
-  // ── LEAGUE LOGO (kiri, dalam lingkaran) ──
-  const lImg=getCached(leagueBase(m.competition));
-  const lcx=leagueX+LEAGUE_W/2;
-  rr(c,lcx-34,cy-34,68,68,34,t.leagueBg,null);
-  if(lImg){drawImg(c,lImg,lcx-28,cy-28,56,56,4);}
+  // ── LIGA LOGO ──
+  const lcx = xLiga + LIGA_W/2;
+  rr(c, lcx-LIGA_SZ/2, cy-LIGA_SZ/2, LIGA_SZ, LIGA_SZ, LIGA_SZ/2, t.leagueBg, null);
+  const lImg = getCached(leagueBase(m.competition));
+  if(lImg){ drawImg(c, lImg, lcx-LIGA_SZ/2+4, cy-LIGA_SZ/2+4, LIGA_SZ-8, LIGA_SZ-8, 4); }
   else{
-    c.fillStyle="rgba(255,255,255,0.4)";c.font="700 18px sans-serif";
-    c.textAlign="center";c.textBaseline="middle";c.fillText("⚽",lcx,cy);c.textBaseline="alphabetic";
+    c.fillStyle="rgba(255,255,255,0.5)"; c.font="700 22px sans-serif";
+    c.textAlign="center"; c.textBaseline="middle"; c.fillText("⚽",lcx,cy); c.textBaseline="alphabetic";
   }
 
   // ── HOME TEAM ──
-  const hImg=getCached(teamBase(m.home));
-  const hcx=homeX+TEAM_W/2;
-  // Team name
-  c.fillStyle=t.teamText;
-  c.font="700 28px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";
-  const hLines=wrapTxt(c,m.home,TEAM_W-10,2);
-  const hNameY=cy+(hImg?18:0);
-  hLines.forEach((ln,i)=>c.fillText(ln,hcx,hNameY+i*30));
-  // Team logo (kecil, di sebelah kanan nama)
-  if(hImg){
-    const lx=hcx+c.measureText(hLines[0]||"").width/2+8;
-    drawImg(c,hImg,lx,cy-logoSz/2,logoSz,logoSz,6);
-  }
+  // Layout dalam kolom home: [nama teks kiri] [logo kanan, fixed di tepi kanan kolom]
+  const hImg = getCached(teamBase(m.home));
+  const hLogoX = xTime - LOGO_SZ - 8;          // logo menempel di kiri kotak waktu
+  const hNameMaxW = TEAM_W - LOGO_SZ - 20;      // lebar teks nama (sisakan ruang logo)
+  const hNameCX = xHome + hNameMaxW/2 + 4;      // center teks nama
 
-  // ── TIME BOX (tengah) ──
-  const tcx=timeX+TIME_W/2;
-  const tbW=110,tbH=56;
-  rr(c,tcx-tbW/2,cy-tbH/2,tbW,tbH,12,t.timeBg,t.timeBorder,2);
-  c.fillStyle=t.timeText;
-  c.font="900 38px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";
-  c.fillText(m.kickoff,tcx,cy-4);
-  c.font="600 18px 'Inter','Segoe UI',sans-serif";
-  c.fillText("WIB",tcx,cy+20);
-  c.textBaseline="alphabetic";
+  if(hImg){ drawImg(c, hImg, hLogoX, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 6); }
+
+  c.fillStyle = t.teamText;
+  c.font = "700 26px 'Inter','Segoe UI',sans-serif";
+  c.textAlign = "center";
+  const hLines = wrapTxt(c, m.home, hNameMaxW, 2);
+  const hTotalH = hLines.length * 30;
+  hLines.forEach((ln,i) => c.fillText(ln, hNameCX, cy - hTotalH/2 + 22 + i*30));
+
+  // ── TIME BOX ──
+  const tcx = xTime + TIME_W/2;
+  const tbW=108, tbH=58;
+  rr(c, tcx-tbW/2, cy-tbH/2, tbW, tbH, 12, t.timeBg, t.timeBorder, 2);
+  c.fillStyle = t.timeText;
+  c.font = "900 36px 'Bebas Neue','Arial Black',sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(m.kickoff, tcx, cy-6);
+  c.font = "600 17px 'Inter','Segoe UI',sans-serif";
+  c.fillText("WIB", tcx, cy+18);
+  c.textBaseline = "alphabetic";
 
   // ── AWAY TEAM ──
-  const aImg=getCached(teamBase(m.away));
-  const acx=awayX+TEAM_W/2;
-  // Away logo (kecil, di sebelah kiri nama)
-  if(aImg){
-    const lx=acx-c.measureText(m.away.split(" ")[0]||"").width/2-logoSz-8;
-    drawImg(c,aImg,lx,cy-logoSz/2,logoSz,logoSz,6);
-  }
-  // Away name
-  c.fillStyle=t.teamText;
-  c.font="700 28px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";
-  const aLines=wrapTxt(c,m.away,TEAM_W-10,2);
-  const aNameY=cy+(aImg?18:0);
-  aLines.forEach((ln,i)=>c.fillText(ln,acx,aNameY+i*30));
+  // Layout dalam kolom away: [logo kiri, fixed di tepi kiri kolom] [nama teks kanan]
+  const aImg = getCached(teamBase(m.away));
+  const aLogoX = xAway + 8;                     // logo menempel di kanan kotak waktu
+  const aNameMaxW = TEAM_W - LOGO_SZ - 20;
+  const aNameCX = xAway + LOGO_SZ + 16 + aNameMaxW/2; // center teks nama
 
-  // ── TV LOGO / NAME (kanan) ──
-  const tvStr=shortTv(m);
-  const tvcx=tvX+TV_W/2;
-  rr(c,tvX+8,cy-28,TV_W-16,56,10,t.tvBg,null);
-  // Try to load TV logo
-  const tvLogoBase=`assets/logos/tv/${slug(tvStr)}`;
-  const tvImg=getCached(tvLogoBase);
-  if(tvImg){
-    drawImg(c,tvImg,tvcx-30,cy-24,60,48,4);
-  } else {
-    // Text fallback — colored by free/paid
-    const tvc=isFreeTV(m)?"#22c55e":"#f59e0b";
-    c.fillStyle=tvc;
-    c.font="700 20px 'Inter','Segoe UI',sans-serif";
-    c.textAlign="center";c.textBaseline="middle";
-    const tvLines=wrapTxt(c,tvStr,TV_W-20,2);
-    tvLines.forEach((ln,i)=>c.fillText(ln,tvcx,cy+(i-tvLines.length/2+0.5)*22));
-    c.textBaseline="alphabetic";
-  }
+  if(aImg){ drawImg(c, aImg, aLogoX, cy-LOGO_SZ/2, LOGO_SZ, LOGO_SZ, 6); }
+
+  c.fillStyle = t.teamText;
+  c.font = "700 26px 'Inter','Segoe UI',sans-serif";
+  c.textAlign = "center";
+  const aLines = wrapTxt(c, m.away, aNameMaxW, 2);
+  const aTotalH = aLines.length * 30;
+  aLines.forEach((ln,i) => c.fillText(ln, aNameCX, cy - aTotalH/2 + 22 + i*30));
+
+  // ── TV NAME / LOGO ──
+  const tvStr = shortTv(m);
+  const tvcx = xTV + TV_W/2;
+  rr(c, xTV+6, cy-30, TV_W-12, 60, 10, t.tvBg, null);
+  const tvc = isFreeTV(m) ? "#22c55e" : "#f59e0b";
+  c.fillStyle = tvc;
+  c.font = "700 19px 'Inter','Segoe UI',sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  const tvLines = wrapTxt(c, tvStr, TV_W-16, 2);
+  tvLines.forEach((ln,i) => c.fillText(ln, tvcx, cy + (i - tvLines.length/2 + 0.5)*22));
+  c.textBaseline = "alphabetic";
 }
 
 function drawFooter(c,t,brand){
@@ -703,165 +708,126 @@ function drawFooter(c,t,brand){
 // ═══════════════════════════════════════════
 // VIDEO SLIDE — 1 pertandingan full screen
 // ═══════════════════════════════════════════
-async function renderVideoSlide(c,m,t,brand,progress){
-  const anim=$("#sel-anim").value;
+// VIDEO — BUILD-UP REVEAL
+// Pertandingan muncul 1 per 1 dari atas ke bawah.
+// Yang sudah muncul TETAP di layar.
+// ═══════════════════════════════════════════
+
+// Render frame video build-up.
+// visibleCount = berapa baris yang sudah fully visible
+// animIdx      = indeks baris yang sedang animasi masuk (visibleCount)
+// animProg     = 0..1 progress animasi baris animIdx
+async function renderBuildUp(c, t, brand, visibleCount, animIdx, animProg) {
   c.clearRect(0,0,W,H);
-  c.save();
-
-  if(anim==="slide"){c.translate((1-easeOut(progress))*W,0);}
-  else if(anim==="fade"){c.globalAlpha=easeOut(progress);}
-  else if(anim==="zoom"){const s=0.9+0.1*easeOut(progress);c.translate(W/2,H/2);c.scale(s,s);c.translate(-W/2,-H/2);c.globalAlpha=Math.min(1,progress*2);}
-  else if(anim==="wipe"){const ch=H*easeOut(progress);c.beginPath();c.rect(0,0,W,ch);c.clip();}
-
   drawBg(c,t);
 
-  const cx=W/2;
-  const stripe=t.accent;
+  // ── HEADER ──
+  await drawHeader(c, t, brand, 1, 1);
 
-  // ── HEADER compact ──
-  const hh=180;
-  c.save();c.shadowColor="rgba(0,0,0,.5)";c.shadowBlur=30;c.shadowOffsetY=8;
-  const hg=c.createLinearGradient(PAD_X,24,W-PAD_X,24+hh);
-  hg.addColorStop(0,t.headerBg1);hg.addColorStop(1,t.headerBg2);
-  rr(c,PAD_X,24,W-PAD_X*2,hh,24,hg,t.accent+"66",2);c.restore();
-  const shine=c.createLinearGradient(PAD_X,24,W-PAD_X,24);
-  shine.addColorStop(0,"transparent");shine.addColorStop(0.5,"rgba(255,255,255,0.3)");shine.addColorStop(1,"transparent");
-  c.strokeStyle=shine;c.lineWidth=2;c.beginPath();c.moveTo(PAD_X+24,26);c.lineTo(W-PAD_X-24,26);c.stroke();
+  // ── DATE ROW ──
+  let curY = HEADER_H + 16;
+  drawDateRow(c, t, fmtDate(selectedDate), curY);
+  curY += DATE_ROW_H + 6;
 
-  if(brand){circleImg(c,brand,PAD_X+60,24+hh/2,44,t.accent,3);}
-  if(brand){circleImg(c,brand,W-PAD_X-60,24+hh/2,44,t.accent,3);}
+  const anim = $("#sel-anim").value;
+  const rowW = W - PAD_X*2;
 
-  c.save();c.shadowColor=t.accentGlow;c.shadowBlur=24;
-  c.fillStyle=t.headerText;c.font="900 80px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";
-  c.fillText((inpHeader.value||"TODAY MATCH").toUpperCase(),cx,24+hh/2-16);c.restore();
-  c.fillStyle=t.headerSub;c.font="600 28px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";
-  c.fillText(fmtDate(selectedDate).toUpperCase(),cx,24+hh-22);
-  c.textBaseline="alphabetic";
-
-  const cardY=24+hh+30;
-  const cardH=H-cardY-FOOTER_H-20;
-  const cardW=W-PAD_X*2;
-
-  // ── BIG MATCH CARD ──
-  c.save();c.shadowColor="rgba(0,0,0,.6)";c.shadowBlur=40;c.shadowOffsetY=16;
-  const cg=c.createLinearGradient(PAD_X,cardY,PAD_X+cardW,cardY+cardH);
-  cg.addColorStop(0,t.rowBg.replace("0.08","0.18"));cg.addColorStop(1,t.rowBg.replace("0.08","0.10"));
-  rr(c,PAD_X,cardY,cardW,cardH,28,cg,t.rowBorder.replace("0.12","0.3"),2);c.restore();
-
-  // Top accent bar
-  const ab=c.createLinearGradient(PAD_X,cardY,PAD_X+cardW,cardY);
-  ab.addColorStop(0,"transparent");ab.addColorStop(0.5,t.accent);ab.addColorStop(1,"transparent");
-  c.fillStyle=ab;c.fillRect(PAD_X+30,cardY,cardW-60,4);
-
-  let cy2=cardY+40;
-
-  // League
-  if(m.competition){
-    const ll=getCached(leagueBase(m.competition));
-    if(ll){drawImg(c,ll,cx-20,cy2,40,40,4);cy2+=50;}
-    c.fillStyle=t.headerSub;c.font="700 30px 'Inter','Segoe UI',sans-serif";
-    c.textAlign="center";c.fillText(m.competition.toUpperCase(),cx,cy2+22);cy2+=38;
+  // Gambar semua baris yang sudah fully visible
+  for (let i = 0; i < visibleCount; i++) {
+    await drawMatchRow(c, t, allMatches[i], PAD_X, curY, rowW, ROW_H);
+    curY += ROW_H + ROW_GAP;
   }
-  // Divider
-  c.strokeStyle="rgba(255,255,255,0.12)";c.lineWidth=1;
-  c.beginPath();c.moveTo(PAD_X+60,cy2);c.lineTo(W-PAD_X-60,cy2);c.stroke();cy2+=28;
 
-  // Team logos BIG
-  const lsz=Math.min(200,Math.floor((cardH-cy2+cardY-220)*0.6));
-  const hcx=PAD_X+cardW*0.25,acx=PAD_X+cardW*0.75;
-  const hImg=getCached(teamBase(m.home));
-  const aImg=getCached(teamBase(m.away));
-  if(hImg)drawImg(c,hImg,hcx-lsz/2,cy2,lsz,lsz,10);
-  else{rr(c,hcx-lsz/2,cy2,lsz,lsz,12,t.rowBg,t.rowBorder,1);}
-  if(aImg)drawImg(c,aImg,acx-lsz/2,cy2,lsz,lsz,10);
-  else{rr(c,acx-lsz/2,cy2,lsz,lsz,12,t.rowBg,t.rowBorder,1);}
+  // Gambar baris yang sedang animasi masuk
+  if (animIdx < allMatches.length && animProg > 0) {
+    const p = easeOut(animProg);
+    c.save();
 
-  // VS badge
-  const vcy=cy2+lsz/2;
-  c.save();c.shadowColor=t.accentGlow;c.shadowBlur=30;
-  c.beginPath();c.arc(cx,vcy,44,0,Math.PI*2);c.fillStyle=t.timeBg;c.fill();c.restore();
-  c.fillStyle=t.timeText;c.font="900 32px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText("VS",cx,vcy+1);c.textBaseline="alphabetic";
+    if (anim === "slide") {
+      // Slide dari kanan
+      c.translate((1-p) * W, 0);
+    } else if (anim === "fade") {
+      c.globalAlpha = p;
+    } else if (anim === "wipe") {
+      // Wipe kiri ke kanan — clip
+      c.beginPath();
+      c.rect(PAD_X, curY, rowW * p, ROW_H);
+      c.clip();
+    } else if (anim === "drop") {
+      // Drop dari atas
+      c.translate(0, -(1-p) * (ROW_H + 40));
+      c.globalAlpha = Math.min(1, p * 1.5);
+    }
 
-  // Team names
-  const ny=cy2+lsz+24;
-  c.fillStyle=t.teamText;c.font="800 40px 'Bebas Neue','Arial Black',sans-serif";c.textAlign="center";
-  wrapTxt(c,m.home,cardW*0.38,2).forEach((ln,i)=>c.fillText(ln,hcx,ny+i*46));
-  wrapTxt(c,m.away,cardW*0.38,2).forEach((ln,i)=>c.fillText(ln,acx,ny+i*46));
-
-  // Kickoff
-  const kpy=ny+110,kpw=240,kph=84;
-  rr(c,cx-kpw/2,kpy,kpw,kph,kph/2,t.timeBg,t.timeBorder,2.5);
-  c.fillStyle=t.timeText;c.font="900 56px 'Bebas Neue','Arial Black',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText(m.kickoff,cx,kpy+kph/2-8);
-  c.font="700 24px 'Inter','Segoe UI',sans-serif";c.fillText("WIB",cx,kpy+kph/2+20);
-  c.textBaseline="alphabetic";
-
-  // TV
-  const tvy=kpy+kph+20,tvw=cardW-80;
-  const tvc=isFreeTV(m)?"#22c55e":"#f59e0b";
-  rr(c,PAD_X+40,tvy,tvw,56,28,"rgba(0,0,0,0.35)",tvc+"66",1.5);
-  c.fillStyle=tvc;c.font="700 30px 'Inter','Segoe UI',sans-serif";
-  c.textAlign="center";c.textBaseline="middle";c.fillText("📺  "+shortTv(m),PAD_X+40+tvw/2,tvy+28);
-  c.textBaseline="alphabetic";
-
-  drawFooter(c,t,brand);
-  c.restore();
-}
-
-// ═══════════════════════════════════════════
-// PREVIEW — PNG
-// ═══════════════════════════════════════════
-function getPages(){
-  const pp=perPage(),pages=[];
-  for(let i=0;i<allMatches.length;i+=pp)pages.push(allMatches.slice(i,i+pp));
-  return pages;
-}
-
-async function showPNGPreview(){
-  const pages=getPages();
-  if(!pages.length){
-    const t=getT();ctx.clearRect(0,0,W,H);drawBg(ctx,t);
-    ctx.fillStyle="rgba(255,255,255,0.3)";ctx.font="700 40px 'Inter',sans-serif";
-    ctx.textAlign="center";ctx.fillText("Tidak ada jadwal",W/2,H/2);
-    plbl.textContent="— / —";navPrev.disabled=navNext.disabled=true;return;
+    await drawMatchRow(c, t, allMatches[animIdx], PAD_X, curY, rowW, ROW_H);
+    c.restore();
   }
-  if(previewPage>=pages.length)previewPage=pages.length-1;
-  if(previewPage<0)previewPage=0;
-  plbl.textContent=`${previewPage+1} / ${pages.length}`;
-  navPrev.disabled=previewPage===0;navNext.disabled=previewPage===pages.length-1;
-  await renderPNGPage(ctx,pages[previewPage],previewPage+1,pages.length);
+
+  drawFooter(c, t, brand);
 }
 
 // ═══════════════════════════════════════════
-// PREVIEW — VIDEO (live animation loop)
+// PREVIEW — VIDEO (live build-up loop)
 // ═══════════════════════════════════════════
-const VID_ANIM=0.45;
+const ANIM_DUR = 0.4; // detik animasi masuk per baris
 
-async function startVideoPreview(){
-  if(vidAF)cancelAnimationFrame(vidAF);
-  vidPlaying=true;vidSlideIdx=0;vidFrameStart=null;
-  vidBrand=await loadBrand();
-  const t=getT();
-  const slideDur=parseInt($("#sel-dur").value)||4;
+async function startVideoPreview() {
+  if (vidAF) cancelAnimationFrame(vidAF);
+  vidPlaying = true;
+  vidFrameStart = null;
+  vidBrand = await loadBrand();
+  const t = getT();
+  const holdDur = parseInt($("#sel-dur").value) || 3; // detik tiap baris ditahan
+  const n = allMatches.length;
+  if (!n) return;
 
-  function frame(ts){
-    if(!vidPlaying)return;
-    if(!vidFrameStart)vidFrameStart=ts;
-    const elapsed=(ts-vidFrameStart)/1000;
-    const total=slideDur*allMatches.length;
-    const loopT=elapsed%total;
-    const si=Math.floor(loopT/slideDur)%allMatches.length;
-    const st=loopT%slideDur;
-    vidSlideIdx=si;
-    const prog=Math.min(1,st/VID_ANIM);
-    renderVideoSlide(ctx,allMatches[si],t,vidBrand,prog).then(()=>{
-      vidAF=requestAnimationFrame(frame);
+  // Total durasi: setiap baris = ANIM_DUR + holdDur, lalu hold akhir 2 detik, lalu loop
+  const totalDur = n * (ANIM_DUR + holdDur) + 2.0;
+
+  function frame(ts) {
+    if (!vidPlaying) return;
+    if (!vidFrameStart) vidFrameStart = ts;
+    const elapsed = ((ts - vidFrameStart) / 1000) % totalDur;
+
+    // Hitung state: berapa baris visible, baris mana animasi, progress
+    let t2 = elapsed;
+    let visibleCount = 0;
+    let animIdx = 0;
+    let animProg = 0;
+
+    for (let i = 0; i < n; i++) {
+      const slotDur = ANIM_DUR + holdDur;
+      if (t2 <= 0) break;
+      if (t2 < ANIM_DUR) {
+        // Baris i sedang animasi masuk
+        animIdx = i;
+        animProg = t2 / ANIM_DUR;
+        break;
+      }
+      t2 -= ANIM_DUR;
+      if (t2 < holdDur) {
+        // Baris i sudah visible, hold
+        visibleCount = i + 1;
+        animIdx = i + 1;
+        animProg = 0;
+        break;
+      }
+      t2 -= holdDur;
+      visibleCount = i + 1;
+      animIdx = i + 1;
+      animProg = 0;
+    }
+
+    // Jika semua sudah muncul, hold semua
+    if (visibleCount >= n) { visibleCount = n; animIdx = n; animProg = 0; }
+
+    vidSlideIdx = Math.max(0, visibleCount - 1);
+
+    renderBuildUp(ctx, t, vidBrand, visibleCount, animIdx, animProg).then(() => {
+      vidAF = requestAnimationFrame(frame);
     });
   }
-  vidAF=requestAnimationFrame(frame);
+  vidAF = requestAnimationFrame(frame);
 }
 
 function stopVideoPreview(){
@@ -990,66 +956,103 @@ async function downloadPNG(){
 }
 
 // ═══════════════════════════════════════════
-// DOWNLOAD VIDEO
+// DOWNLOAD VIDEO — build-up reveal
 // ═══════════════════════════════════════════
 async function downloadVideo(){
   if(!allMatches.length)return;
   if(!window.MediaRecorder){setStatus("Browser tidak support MediaRecorder. Gunakan Chrome/Edge.","err");return;}
-  const mimes=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"];
-  const mime=mimes.find(m=>MediaRecorder.isTypeSupported(m))||"video/webm";
+
+  // Pilih mime type terbaik yang tersedia
+  const fmtPref = $("#sel-fmt").value;
+  let mimes;
+  if(fmtPref==="mp4try"){
+    mimes=["video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+  } else {
+    mimes=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+  }
+  const mime = mimes.find(m=>MediaRecorder.isTypeSupported(m)) || "video/webm";
+
   stopVideoPreview();
-  btnDlVideo.disabled=true;btnDlPng.disabled=true;
+  btnDlVideo.disabled=true; btnDlPng.disabled=true;
   vprog.classList.add("show");
-  setStatus("Merender video...","loading");
+  setStatus("Merender video build-up...","loading");
+
   try{
-    const t=getT(),brand=await loadBrand();
-    const FPS=30,slideDur=parseInt($("#sel-dur").value)||4;
-    const animDur=Math.min(0.45,slideDur*0.18);
-    const animFrames=Math.round(animDur*FPS);
-    const slideFrames=Math.round(slideDur*FPS);
-    const total=allMatches.length*slideFrames+Math.round(0.4*FPS);
-    const vc=document.createElement("canvas");vc.width=W;vc.height=H;
+    const t=getT(), brand=await loadBrand();
+    const FPS=30;
+    const holdDur=parseInt($("#sel-dur").value)||3;  // detik tiap baris ditahan
+    const animFrames=Math.round(ANIM_DUR*FPS);
+    const holdFrames=Math.round(holdDur*FPS);
+    const holdEndFrames=Math.round(2.5*FPS);  // hold semua baris di akhir
+    const n=allMatches.length;
+
+    // Total frame: setiap baris = animFrames + holdFrames, lalu hold akhir
+    const totalFrames = n*(animFrames+holdFrames) + holdEndFrames;
+
+    const vc=document.createElement("canvas"); vc.width=W; vc.height=H;
     const vctx=vc.getContext("2d");
     const stream=vc.captureStream(FPS);
-    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8_000_000});
+    const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:10_000_000});
     const chunks=[];
     rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
     rec.start(100);
+
     let frame=0;
-    for(let mi=0;mi<allMatches.length;mi++){
-      const m=allMatches[mi];
-      for(let f=0;f<slideFrames;f++){
-        const prog=f<animFrames?f/animFrames:1;
-        await renderVideoSlide(vctx,m,t,brand,prog);
+
+    // Render setiap baris: animasi masuk + hold
+    for(let i=0; i<n; i++){
+      // Fase animasi masuk baris ke-i
+      for(let f=0; f<animFrames; f++){
+        const prog=f/animFrames;
+        await renderBuildUp(vctx, t, brand, i, i, prog);
         frame++;
-        if(frame%8===0){
-          const pct=Math.round(frame/total*100);
+        if(frame%6===0){
+          const pct=Math.round(frame/totalFrames*100);
           vpbar.style.width=pct+"%";
-          vplbl.textContent=`Slide ${mi+1}/${allMatches.length} · ${pct}%`;
-          setStatus(`Merender video... ${pct}%`,"loading");
+          vplbl.textContent=`Baris ${i+1}/${n} masuk · ${pct}%`;
+          setStatus(`Merender... ${pct}%`,"loading");
+        }
+        await new Promise(r=>setTimeout(r,0));
+      }
+      // Fase hold — baris ke-i sudah fully visible
+      for(let f=0; f<holdFrames; f++){
+        await renderBuildUp(vctx, t, brand, i+1, i+1, 0);
+        frame++;
+        if(frame%6===0){
+          const pct=Math.round(frame/totalFrames*100);
+          vpbar.style.width=pct+"%";
+          vplbl.textContent=`Baris ${i+1}/${n} · ${pct}%`;
         }
         await new Promise(r=>setTimeout(r,0));
       }
     }
-    for(let f=0;f<Math.round(0.4*FPS);f++){
-      await renderVideoSlide(vctx,allMatches[allMatches.length-1],t,brand,1);
-      vctx.fillStyle=`rgba(0,0,0,${f/Math.round(0.4*FPS)})`;vctx.fillRect(0,0,W,H);
+
+    // Hold akhir — semua baris visible
+    for(let f=0; f<holdEndFrames; f++){
+      await renderBuildUp(vctx, t, brand, n, n, 0);
+      frame++;
       await new Promise(r=>setTimeout(r,0));
     }
-    rec.stop();await new Promise(r=>rec.onstop=r);
+
+    rec.stop();
+    await new Promise(r=>rec.onstop=r);
+
     const blob=new Blob(chunks,{type:mime});
-    const ext=mime.includes("mp4")?"mp4":"webm";
+    const ext=mime.startsWith("video/mp4")?"mp4":"webm";
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
-    a.download=`jadwal-${currentTheme}-${selectedDate}.${ext}`;
-    a.href=url;a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),5000);
-    setStatus(`✓ Video ${ext.toUpperCase()} (${allMatches.length} slide) didownload`,"ok");
-  }catch(e){setStatus(`Gagal render video: ${e.message}`,"err");console.error(e);}
-  finally{
-    btnDlVideo.disabled=false;btnDlPng.disabled=!allMatches.length;
-    vprog.classList.remove("show");vpbar.style.width="0%";
-    if(previewMode==="video")startVideoPreview();
+    a.download=`jadwal-buildup-${currentTheme}-${selectedDate}.${ext}`;
+    a.href=url; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),8000);
+
+    const durSec=((n*(ANIM_DUR+holdDur)+2.5)).toFixed(1);
+    setStatus(`✓ Video ${ext.toUpperCase()} · ${n} pertandingan · ~${durSec}s didownload`,"ok");
+  }catch(e){
+    setStatus(`Gagal render video: ${e.message}`,"err"); console.error(e);
+  }finally{
+    btnDlVideo.disabled=false; btnDlPng.disabled=!allMatches.length;
+    vprog.classList.remove("show"); vpbar.style.width="0%";
+    if(previewMode==="video") startVideoPreview();
   }
 }
 
