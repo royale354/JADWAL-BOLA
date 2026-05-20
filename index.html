@@ -403,7 +403,7 @@ function easeOut(t){return 1-Math.pow(1-t,3)}
 // ═══════════════════════════════════════════
 async function loadStaticLogos(){
   if(staticLogos)return staticLogos;
-  try{const r=await fetch(asset("logos.json?v=5"));if(!r.ok)throw 0;staticLogos=await r.json();}
+  try{const r=await fetch(asset("logos.json?v=6"));if(!r.ok)throw 0;staticLogos=await r.json();}
   catch{staticLogos={teams:{},leagues:{}};}
   return staticLogos;
 }
@@ -806,35 +806,31 @@ async function renderBuildUp(c, t, brand, visibleCount, animIdx, animProg) {
 
   const anim = $("#sel-anim").value;
   const rowW = W - PAD_X*2;
+  const rowH = rowHeightForCount(allMatches.length);
 
-  // Gambar semua baris yang sudah fully visible
   for (let i = 0; i < visibleCount; i++) {
-    await drawMatchRow(c, t, allMatches[i], PAD_X, curY, rowW, ROW_H);
-    curY += ROW_H + ROW_GAP;
+    await drawMatchRow(c, t, allMatches[i], PAD_X, curY, rowW, rowH);
+    curY += rowH + ROW_GAP;
   }
 
-  // Gambar baris yang sedang animasi masuk
   if (animIdx < allMatches.length && animProg > 0) {
     const p = easeOut(animProg);
     c.save();
 
     if (anim === "slide") {
-      // Slide dari kanan
       c.translate((1-p) * W, 0);
     } else if (anim === "fade") {
       c.globalAlpha = p;
     } else if (anim === "wipe") {
-      // Wipe kiri ke kanan — clip
       c.beginPath();
-      c.rect(PAD_X, curY, rowW * p, ROW_H);
+      c.rect(PAD_X, curY, rowW * p, rowH);
       c.clip();
     } else if (anim === "drop") {
-      // Drop dari atas
-      c.translate(0, -(1-p) * (ROW_H + 40));
+      c.translate(0, -(1-p) * (rowH + 40));
       c.globalAlpha = Math.min(1, p * 1.5);
     }
 
-    await drawMatchRow(c, t, allMatches[animIdx], PAD_X, curY, rowW, ROW_H);
+    await drawMatchRow(c, t, allMatches[animIdx], PAD_X, curY, rowW, rowH);
     c.restore();
   }
 
