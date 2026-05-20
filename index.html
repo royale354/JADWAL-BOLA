@@ -114,6 +114,8 @@ input[type=date]{color-scheme:dark}
 .vpbar{height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;width:0%;transition:width .1s}
 .vplbl{font-size:0.7rem;color:var(--muted);font-weight:600}
 </style>
+  <script src="https://unpkg.com/fix-webm-duration@1.0.6/fix-webm-duration.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 </head>
 <body>
 
@@ -226,8 +228,9 @@ input[type=date]{color-scheme:dark}
       </div>
       <div class="field"><label>Format output</label>
         <select id="sel-fmt">
-          <option value="webm">WebM (Chrome/Edge)</option>
-          <option value="mp4try">MP4 (coba, fallback WebM)</option>
+          <option value="webm" selected>WebM VP8 (lebih kompatibel)</option>
+          <option value="mp4try">MP4 (jika browser dukung, tanpa fallback)</option>
+          <option value="tiktoksafe">TikTok Safe MP4 (transcode, paling aman)</option>
         </select>
       </div>
       <button class="btn btn-purple btn-full" id="btn-prev-vid">▶ Preview Animasi</button>
@@ -238,7 +241,7 @@ input[type=date]{color-scheme:dark}
       </div>
       <div style="font-size:0.64rem;color:var(--muted);line-height:1.5">
         Pertandingan muncul 1 per 1 · Sound efek tiap baris muncul · 1080×1920 · TikTok ready<br/>
-        <span style="color:#f59e0b">💡 WebM bisa langsung upload ke TikTok/Reels</span>
+        <span style="color:#f59e0b">💡 TikTok Safe MP4 paling kompatibel, tapi proses export lebih lama</span>
       </div>
     </div>
   </div>
@@ -1281,37 +1284,121 @@ async function renderBgmLoopBuffer(type, volume=35, sampleRate=44100){
   const offCtx=new OfflineAudioContext(2,frames,sampleRate);
   const vol=Math.max(0,Math.min(1,volume/100));
 
-  function addTone(freq,start,len,gainMul=1,wave="sine"){
+  const mix=offCtx.createGain();
+  const comp=offCtx.createDynamicsCompressor();
+  comp.threshold.value=-18;
+  comp.knee.value=18;
+  comp.ratio.value=3;
+  comp.attack.value=0.01;
+  comp.release.value=0.2;
+  mix.gain.value=1.0;
+  mix.connect(comp);
+  comp.connect(offCtx.destination);
+
+  const delay=offCtx.createDelay(0.45);
+  delay.delayTime.value=0.22;
+  const dGain=offCtx.createGain();
+  dGain.gain.value=0.24;
+  delay.connect(dGain);
+  dGain.connect(delay);
+  dGain.connect(mix);
+
+  function addNote(freq,start,len,gainMul=1,wave="sine",useDelay=true){
     const osc=offCtx.createOscillator();
+    const vcf=offCtx.createBiquadFilter();
     const g=offCtx.createGain();
-    osc.type=wave; osc.frequency.value=freq;
+    osc.type=wave;
+    osc.frequency.value=freq;
+    vcf.type="lowpass";
+    vcf.frequency.value=Math.min(3600,freq*12);
     g.gain.setValueAtTime(0.0001,start);
-    g.gain.linearRampToValueAtTime(vol*gainMul,start+0.03);
+    g.gain.linearRampToValueAtTime(vol*gainMul,start+Math.min(0.05,len*0.35));
     g.gain.exponentialRampToValueAtTime(0.0001,start+len);
-    osc.connect(g); g.connect(offCtx.destination);
+    osc.connect(vcf); vcf.connect(g); g.connect(mix);
+    if(useDelay) g.connect(delay);
     osc.start(start); osc.stop(start+len+0.02);
   }
 
+  function addKick(start){
+    const o=offCtx.createOscillator();
+    const g=offCtx.createGain();
+    o.type="sine";
+    o.frequency.setValueAtTime(160,start);
+    o.frequency.exponentialRampToValueAtTime(44,start+0.13);
+    g.gain.setValueAtTime(vol*0.24,start);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+0.18);
+    o.connect(g); g.connect(mix);
+    o.start(start); o.stop(start+0.2);
+  }
+
+  function addHat(start,len=0.06){
+    const nbuf=offCtx.createBuffer(1,Math.ceil(sampleRate*len),sampleRate);
+    const nd=nbuf.getChannelData(0);
+    for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1)*(1-i/nd.length);
+    const src=offCtx.createBufferSource(); src.buffer=nbuf;
+    const hp=offCtx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=5200;
+    const g=offCtx.createGain();
+    g.gain.setValueAtTime(vol*0.08,start);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+len);
+    src.connect(hp); hp.connect(g); g.connect(mix);
+    src.start(start);
+  }
+
+  function addSnare(start){
+    const len=0.14;
+    const nbuf=offCtx.createBuffer(1,Math.ceil(sampleRate*len),sampleRate);
+    const nd=nbuf.getChannelData(0);
+    for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1);
+    const src=offCtx.createBufferSource(); src.buffer=nbuf;
+    const bp=offCtx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1800; bp.Q.value=0.9;
+    const g=offCtx.createGain();
+    g.gain.setValueAtTime(vol*0.12,start);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+len);
+    src.connect(bp); bp.connect(g); g.connect(mix);
+    src.start(start);
+  }
+
   if(type==="anthem"){
-    const chords=[[220,277,330],[247,311,370],[196,247,294],[220,277,330]];
+    const chords=[[220,277,330],[196,247,294],[247,311,370],[220,277,330]];
     for(let bar=0;bar<4;bar++){
       const t0=bar*2.0;
-      for(const f of chords[bar]) addTone(f,t0,1.8,0.07,"triangle");
-      addTone(chords[bar][0]/2,t0,0.9,0.055,"sine");
-      addTone(chords[bar][0]/2,t0+1.0,0.9,0.055,"sine");
+      addKick(t0); addKick(t0+1.0);
+      addSnare(t0+0.5); addSnare(t0+1.5);
+      for(let k=0;k<8;k++) addHat(t0+k*0.25,0.045);
+      for(const f of chords[bar]) addNote(f,t0,1.85,0.09,"triangle");
+      addNote(chords[bar][0]/2,t0,0.95,0.1,"sine",false);
+      addNote(chords[bar][0]/2,t0+1.0,0.95,0.1,"sine",false);
+      const arp=[chords[bar][0],chords[bar][1],chords[bar][2],chords[bar][1]];
+      for(let i=0;i<8;i++) addNote(arp[i%4]*2,t0+i*0.25,0.18,0.038,"sawtooth");
     }
   }else if(type==="trap"){
+    const bass=[55,55,62,49,55,55,73,62];
     for(let i=0;i<32;i++){
       const t0=i*0.25;
-      if(i%4===0) addTone(55,t0,0.2,0.17,"sine");
-      if(i%2===1) addTone(180+(i%8)*12,t0,0.12,0.055,"square");
+      if(i%4===0) addKick(t0);
+      if(i%8===4) addKick(t0+0.06);
+      if(i%4===2) addSnare(t0);
+      addHat(t0+0.125,(i%2===0)?0.03:0.05);
+      if(i%2===0){
+        const b=bass[Math.floor(i/4)%bass.length];
+        addNote(b,t0,0.22,0.16,"sine",false);
+        addNote(b*2,t0+0.02,0.12,0.03,"square");
+      }
+      if(i%2===1){
+        const top=[220,247,262,294][Math.floor(i/4)%4];
+        addNote(top,t0,0.11,0.03,"square");
+      }
     }
   }else if(type==="ambient"){
-    const pads=[196,220,247,262];
-    for(let i=0;i<pads.length;i++){
-      const t0=i*2.0;
-      addTone(pads[i],t0,1.95,0.06,"sine");
-      addTone(pads[i]*1.5,t0+0.05,1.85,0.04,"triangle");
+    const pads=[[196,247,294],[174,220,262],[185,233,277],[165,208,247]];
+    for(let bar=0;bar<4;bar++){
+      const t0=bar*2.0;
+      for(const f of pads[bar]){
+        addNote(f,t0,1.95,0.06,"sine");
+        addNote(f*2,t0+0.06,1.8,0.024,"triangle");
+      }
+      addNote(pads[bar][0]/2,t0,1.95,0.07,"sine",false);
+      for(let i=0;i<4;i++) addHat(t0+i*0.5+0.18,0.08);
     }
   }
 
@@ -1382,6 +1469,78 @@ function playSoundOnce(actx, buf, bus, when=0){
   } catch(e){}
 }
 
+async function fixWebmBlobDuration(blob, durationMs){
+  if(!blob || !/webm/i.test(blob.type||"")) return blob;
+  if(typeof window.ysFixWebmDuration!=="function") return blob;
+  try{
+    return await new Promise(resolve=>{
+      window.ysFixWebmDuration(blob, durationMs, fixedBlob=>{
+        resolve(fixedBlob||blob);
+      });
+    });
+  }catch(e){
+    console.warn("Fix WebM duration gagal:", e);
+    return blob;
+  }
+}
+
+let _ffmpeg=null;
+let _ffmpegFetchFile=null;
+async function ensureFFmpegReady(){
+  if(_ffmpeg) return _ffmpeg;
+  if(!window.FFmpeg || typeof window.FFmpeg.createFFmpeg!=="function"){
+    throw new Error("FFmpeg belum termuat. Refresh halaman lalu coba lagi.");
+  }
+  const { createFFmpeg, fetchFile } = window.FFmpeg;
+  _ffmpegFetchFile=fetchFile;
+  _ffmpeg=createFFmpeg({
+    log:false,
+    corePath:"https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js"
+  });
+  await _ffmpeg.load();
+  return _ffmpeg;
+}
+
+async function transcodeWebmToTikTokMp4(webmBlob){
+  const ffmpeg=await ensureFFmpegReady();
+  const inName="input.webm";
+  const outName="output.mp4";
+  ffmpeg.FS("writeFile",inName,await _ffmpegFetchFile(webmBlob));
+  try{
+    await ffmpeg.run(
+      "-i", inName,
+      "-c:v", "libx264",
+      "-pix_fmt", "yuv420p",
+      "-profile:v", "baseline",
+      "-level", "3.1",
+      "-preset", "veryfast",
+      "-movflags", "+faststart",
+      "-c:a", "aac",
+      "-b:a", "128k",
+      "-ar", "44100",
+      "-ac", "2",
+      outName
+    );
+  }catch(err){
+    // Fallback jika AAC gagal: hasil tanpa audio masih lebih baik daripada gagal total
+    await ffmpeg.run(
+      "-i", inName,
+      "-c:v", "libx264",
+      "-pix_fmt", "yuv420p",
+      "-profile:v", "baseline",
+      "-level", "3.1",
+      "-preset", "veryfast",
+      "-movflags", "+faststart",
+      "-an",
+      outName
+    );
+  }
+  const data=ffmpeg.FS("readFile",outName);
+  try{ffmpeg.FS("unlink",inName);}catch(e){}
+  try{ffmpeg.FS("unlink",outName);}catch(e){}
+  return new Blob([data.buffer],{type:"video/mp4"});
+}
+
 // ═══════════════════════════════════════════
 // DOWNLOAD VIDEO — build-up reveal
 // ═══════════════════════════════════════════
@@ -1393,11 +1552,38 @@ async function downloadVideo(){
   const fmtPref = $("#sel-fmt").value;
   let mimes;
   if(fmtPref==="mp4try"){
-    mimes=["video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+    // TikTok paling aman di H.264/AAC; jangan fallback otomatis ke WebM agar jelas hasilnya
+    mimes=[
+      "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+      "video/mp4;codecs=avc1.4D401E,mp4a.40.2",
+      "video/mp4"
+    ];
+  } else if(fmtPref==="tiktoksafe"){
+    // Rekam dulu sebagai WebM VP8 lalu transcode ke MP4 via ffmpeg.wasm
+    mimes=[
+      "video/webm;codecs=vp8,opus",
+      "video/webm;codecs=vp8",
+      "video/webm"
+    ];
   } else {
-    mimes=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+    // Prioritaskan VP8 dibanding VP9 untuk kompatibilitas decode lebih luas
+    mimes=[
+      "video/webm;codecs=vp8,opus",
+      "video/webm;codecs=vp8",
+      "video/webm"
+    ];
   }
-  const mime = mimes.find(m=>MediaRecorder.isTypeSupported(m)) || "video/webm";
+  const mime = mimes.find(m=>MediaRecorder.isTypeSupported(m));
+  if(!mime){
+    if(fmtPref==="mp4try"){
+      setStatus("MP4 native tidak didukung browser ini. Pilih WebM VP8 atau pakai Chrome/Edge terbaru.","err");
+    }else if(fmtPref==="tiktoksafe"){
+      setStatus("Codec WebM untuk mode TikTok Safe tidak didukung browser ini.","err");
+    }else{
+      setStatus("Codec WebM tidak didukung browser ini.","err");
+    }
+    return;
+  }
 
   stopVideoPreview();
   btnDlVideo.disabled=true; btnDlPng.disabled=true;
@@ -1438,10 +1624,19 @@ async function downloadVideo(){
       combinedStream = new MediaStream(allTracks);
     }
 
-    const rec=new MediaRecorder(combinedStream,{mimeType:mime, videoBitsPerSecond:8_000_000});
+    const rec=new MediaRecorder(combinedStream,{
+      mimeType:mime,
+      videoBitsPerSecond:4_500_000,
+      audioBitsPerSecond:128_000
+    });
     const chunks=[];
-    rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
-    rec.start();
+    rec.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+    const recDone = new Promise((resolve,reject)=>{
+      rec.onstop=resolve;
+      rec.onerror=e=>reject(e?.error||new Error("MediaRecorder gagal"));
+    });
+    // Pakai timeslice agar chunk keluar periodik (menghindari file 00:00 pada beberapa browser)
+    rec.start(250);
 
     // Helper: render 1 frame lalu tunggu interval agar recorder sempat capture
     async function renderFrame(visCount, animIdx, animProg){
@@ -1485,15 +1680,31 @@ async function downloadVideo(){
       frame++;
     }
 
+    // Flush data terakhir sebelum stop
+    if(rec.state==="recording") rec.requestData();
+    await new Promise(r=>setTimeout(r,220));
     rec.stop();
-    await new Promise(r=>rec.onstop=r);
+    await recDone;
     if(audioInfo){
       try{if(audioInfo.bgmSrc)audioInfo.bgmSrc.stop();}catch(e){}
       audioInfo.actx.close();
     }
 
-    const blob=new Blob(chunks,{type:mime});
-    const ext=mime.startsWith("video/mp4")?"mp4":"webm";
+    const blobRaw=new Blob(chunks,{type:mime});
+    let blob=blobRaw;
+    const expectedMs=Math.round((n*(ANIM_DUR+holdDur)+2.5)*1000);
+    if(/webm/i.test(mime)){
+      setStatus("Memperbaiki metadata durasi video...","loading");
+      blob = await fixWebmBlobDuration(blobRaw, expectedMs);
+    }
+    if(fmtPref==="tiktoksafe"){
+      setStatus("Transcode ke MP4 TikTok-safe... (butuh waktu lebih lama)","loading");
+      blob = await transcodeWebmToTikTokMp4(blob);
+    }
+    if(!blob.size){
+      throw new Error("Recorder tidak menghasilkan data video (blob kosong). Coba ulangi render.");
+    }
+    const ext=(fmtPref==="tiktoksafe"||mime.startsWith("video/mp4"))?"mp4":"webm";
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
     a.download=`jadwal-buildup-${currentTheme}-${selectedDate}.${ext}`;
@@ -1538,7 +1749,20 @@ function buildThemePicker(){
 // ═══════════════════════════════════════════
 const SK="ck-v4";
 function saveSettings(){
-  localStorage.setItem(SK,JSON.stringify({header:inpHeader.value,tiktok:inpTiktok.value,footer:inpFooter.value,theme:currentTheme,date:selectedDate}));
+  localStorage.setItem(SK,JSON.stringify({
+    header:inpHeader.value,
+    tiktok:inpTiktok.value,
+    footer:inpFooter.value,
+    theme:currentTheme,
+    date:selectedDate,
+    videoPreset:$("#sel-preset").value,
+    videoDur:$("#sel-dur").value,
+    videoAnim:$("#sel-anim").value,
+    videoSound:$("#sel-sound").value,
+    videoVolume:$("#sel-volume").value,
+    videoBgm:$("#sel-bgm").value,
+    videoBgmVolume:$("#sel-bgm-volume").value,
+  }));
 }
 function loadSettings(){
   try{
@@ -1546,6 +1770,16 @@ function loadSettings(){
     if(s.header)inpHeader.value=s.header;if(s.tiktok)inpTiktok.value=s.tiktok;
     if(s.footer)inpFooter.value=s.footer;if(s.theme&&THEMES[s.theme])currentTheme=s.theme;
     if(s.date&&/^\d{4}-\d{2}-\d{2}$/.test(s.date))selectedDate=s.date;
+    if(s.videoDur) $("#sel-dur").value=s.videoDur;
+    if(s.videoAnim) $("#sel-anim").value=s.videoAnim;
+    if(s.videoSound) $("#sel-sound").value=s.videoSound;
+    if(s.videoVolume) $("#sel-volume").value=s.videoVolume;
+    if(s.videoBgm) $("#sel-bgm").value=s.videoBgm;
+    if(s.videoBgmVolume) $("#sel-bgm-volume").value=s.videoBgmVolume;
+    if(s.videoPreset&&($("#sel-preset").querySelector(`option[value="${s.videoPreset}"]`))){
+      $("#sel-preset").value=s.videoPreset;
+      if(s.videoPreset!=="custom") applyVideoPreset(s.videoPreset);
+    }
   }catch{}
 }
 
@@ -1615,6 +1849,20 @@ $("#file-import").addEventListener("change",e=>{const f=e.target.files[0];if(f)i
 ["#sel-bgm","#sel-bgm-volume"].forEach(sel=>{
   $(sel).addEventListener("input",()=>{
     if(previewMode==="video"&&vidPlaying) startVideoPreview();
+  });
+});
+$("#sel-preset").addEventListener("change",()=>{
+  const id=$("#sel-preset").value;
+  if(id!=="custom"){
+    applyVideoPreset(id);
+    if(previewMode==="video"&&vidPlaying) startVideoPreview();
+  }
+  saveSettings();
+});
+["#sel-dur","#sel-anim","#sel-sound","#sel-volume","#sel-bgm","#sel-bgm-volume"].forEach(sel=>{
+  $(sel).addEventListener("input",()=>{
+    if($("#sel-preset").value!=="custom") $("#sel-preset").value="custom";
+    saveSettings();
   });
 });
 
