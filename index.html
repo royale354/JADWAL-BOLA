@@ -104,7 +104,7 @@ input[type=date]{color-scheme:dark}
 .minfo{flex:1;min-width:0}
 .mteams{font-weight:700;font-size:0.78rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mmeta{font-size:0.64rem;color:var(--muted);margin-top:1px}
-.mtv{color:var(--gold)}
+.mtv{color:var(--gold);font-size:0.76rem;font-weight:700}
 
 /* ── VIDEO PROGRESS ── */
 .vprog{background:var(--sb2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;display:none;flex-direction:column;gap:5px}
@@ -838,10 +838,12 @@ async function drawMatchRow(c,t,m,x,y,rowW,rowH){
   const boxY  = cy - boxH/2;
 
   rr(c, xTV+6, boxY, TV_W-12, boxH, 12, t.tvBg, null);
-  c.fillStyle="#fbbf24"; c.font="700 16px 'Inter',sans-serif";
+  const tvFs = Math.min(24, Math.max(18, Math.floor(rowH * 0.24)));
+  const tvLh = tvFs + 5;
+  c.fillStyle="#fbbf24"; c.font=`800 ${tvFs}px 'Inter',sans-serif`;
   c.textAlign="center"; c.textBaseline="middle";
-  const tvLines = wrapTxt(c, tvInfo.tv||"-", TV_W-16, 3);
-  tvLines.forEach((ln,i)=>c.fillText(ln, tvcx, boxY+boxH/2 - ((tvLines.length-1)*18)/2 + i*18));
+  const tvLines = wrapTxt(c, tvInfo.tv||"-", TV_W-14, 2);
+  tvLines.forEach((ln,i)=>c.fillText(ln, tvcx, boxY+boxH/2 - ((tvLines.length-1)*tvLh)/2 + i*tvLh));
   c.textBaseline="alphabetic";
 }
 
